@@ -3,4 +3,6 @@
 	<!-- configuration item as sample -->
 	<value>sample value from config</value>
 	
+	<maxim>true</maxim>
+	
 </config_plugin>
