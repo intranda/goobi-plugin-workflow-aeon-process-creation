@@ -1,7 +1,7 @@
 <config_plugin>
 	
 	<!-- configuration item as sample -->
-	<value>sample value from config</value>
+	<value>1234</value>
 	
 	<maxim>true</maxim>
 	

@@ -1,0 +1,36 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+    xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:x="http://myfaces.apache.org/tomahawk" xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+    xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <composite:interface>
+    </composite:interface>
+
+    <composite:implementation>
+    	<!-- All Objects List (NO REQUEST) -->
+		<div jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false}" class="box thin-margin lightgrey box-bordered">
+			<div class="box-title" style="background-color: #eee;">
+				<h2 class="tableColumnMaxWidthExtraLong">Objects</h2>
+	
+			</div>
+			<div class="box-content nopadding">
+	
+				<div style="background-color: #eee; height: 500px;">
+					<div
+						style="font-size: 15px; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+						<p>-no AEON Object requested yet-</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<ui:repeat var="item" value="#{NavigationForm.workflowPlugin.transmission.items}">
+			<div class="box box-bordered">
+				<div class="box-title" style="border-color: #666;">
+					<h2  style="color: #333;">#{item.id}: #{item.title}</h2>
+				</div>
+				<div jsf:rendered="true" class="box-content nopadding" style="border-color: #666; height:100px">
+				</div>
+			</div>
+		</ui:repeat>
+    </composite:implementation>
+</ui:composition>
