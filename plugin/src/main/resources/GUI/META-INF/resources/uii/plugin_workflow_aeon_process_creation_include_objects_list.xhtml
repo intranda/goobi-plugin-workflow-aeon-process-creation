@@ -22,21 +22,22 @@
 				</div>
 			</div>
 		</div>
-		
-		<ui:repeat var="item" value="#{NavigationForm.workflowPlugin.transmission.items}">
-			<div class="box box-bordered">
-				<div class="box-title" style="border-color: #666;">
-					<h2  style="color: #333;">#{item.id}: #{item.title}</h2>
-					<div class="pull-right">
-						<button jsf:id="decline" class="btn #{item.accepted ? '' : 'btn-danger'} margin-right-5"
-										jsf:action="#{item.decline}"><i class="fa fa-times"></i></button>
-						<button jsf:id="accept" class="btn #{item.accepted ? 'btn-success' : ''} margin-right-5"
-										jsf:action="#{item.accept}"><i class="fa fa-check"></i></button>
+			<h:form id="itemForm">
+				<ui:repeat var="item" value="#{NavigationForm.workflowPlugin.transmission.items}">
+					<div class="box box-bordered">
+						<div class="box-title" style="border-color: #666;">
+							<h2  style="color: #333;">#{item.id}: #{item.title}</h2>
+							<div class="pull-right">
+								<button jsf:id="decline" class="btn #{item.accepted ? '' : 'btn-danger'} margin-right-5"
+												jsf:action="#{item.decline}"><i class="fa fa-times"></i></button>
+								<button jsf:id="accept" class="btn #{item.accepted ? 'btn-success' : ''} margin-right-5"
+												jsf:action="#{item.accept}"><i class="fa fa-check"></i></button>
+							</div>
+						</div>
+						<div jsf:rendered="true" class="box-content nopadding" style="border-color: #666; height:100px">
+						</div>
 					</div>
-				</div>
-				<div jsf:rendered="true" class="box-content nopadding" style="border-color: #666; height:100px">
-				</div>
-			</div>
-		</ui:repeat>
+				</ui:repeat>
+			</h:form>
     </composite:implementation>
 </ui:composition>
