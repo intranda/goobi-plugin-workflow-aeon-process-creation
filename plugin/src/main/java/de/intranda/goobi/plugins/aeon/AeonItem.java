@@ -8,4 +8,15 @@ public class AeonItem {
 	private String title;
 	private String publicationType;
 	private String shelfmark;
+	private boolean accepted = false;
+	
+	public void decline() {
+		System.out.println("declined");
+		setAccepted(false);
+	}
+	
+	public void accept() {
+		System.out.println("accepted");
+		setAccepted(true);
+	}
 }

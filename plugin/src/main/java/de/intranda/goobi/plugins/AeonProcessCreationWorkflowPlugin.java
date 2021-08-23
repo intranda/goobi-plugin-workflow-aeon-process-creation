@@ -76,6 +76,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     		setRequestSuccess(false);
     	}
     }
+    
+    public void resetRequest() {
+    	setTransmission(null);
+    	setRequestSuccess(false);
+    	input = "";
+    }
 
     /**
      * Constructor
