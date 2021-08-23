@@ -1,6 +1,6 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:composite="http://xmlns.jcp.org/jsf/composite"
     xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:x="http://myfaces.apache.org/tomahawk" xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-    xmlns:jsf="http://xmlns.jcp.org/jsf">
+    xmlns:jsf="http://xmlns.jcp.org/jsf" xmlns:c="http://java.sun.com/jstl/core">
 
     <composite:interface>
     </composite:interface>
@@ -32,9 +32,21 @@
 												jsf:action="#{item.decline}"><i class="fa fa-times"></i></button>
 								<button jsf:id="accept" class="btn #{item.accepted ? 'btn-success' : ''} margin-right-5"
 												jsf:action="#{item.accept}"><i class="fa fa-check"></i></button>
+								
+								<button type="button" class="btn" jsf:rendered="#{!item.showDetails}" title="display details"  jsf:id="displayDetails">
+									<i class="fa fa-angle-down margin-right-5"></i>
+									<f:setPropertyActionListener target="#{item.showDetails}" value="true"/>
+									<f:ajax render=":itemForm" />
+								</button>
+								
+								<button type="button" class="btn" jsf:rendered="#{item.showDetails}" title="hide details"  jsf:id="hideDetails">
+									<i class="fa fa-angle-up margin-right-5"></i>
+									<f:setPropertyActionListener target="#{item.showDetails}" value="false"/>
+									<f:ajax render=":itemForm" />
+								</button>
 							</div>
 						</div>
-						<div jsf:rendered="true" class="box-content nopadding" style="border-color: #666; height:100px">
+						<div jsf:rendered="#{item.showDetails}" class="box-content nopadding" style="border-color: #666; height:100px">
 						</div>
 					</div>
 				</ui:repeat>

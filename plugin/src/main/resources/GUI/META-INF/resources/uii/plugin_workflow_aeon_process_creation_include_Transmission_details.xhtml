@@ -1,71 +1,78 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:composite="http://xmlns.jcp.org/jsf/composite"
-    xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:x="http://myfaces.apache.org/tomahawk" xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-    xmlns:jsf="http://xmlns.jcp.org/jsf">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:x="http://myfaces.apache.org/tomahawk"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites">
 
-    <composite:interface>
-    </composite:interface>
+	<composite:interface>
+	</composite:interface>
 
-    <composite:implementation>
-    				<!-- Transmission Details Box (NO REQUEST)-->
-					<div jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false}" class="box  thin-margin  lightgrey box-bordered">
-						<div class="box-title" style="background-color: #eee;">
-							<h2 class="tableColumnMaxWidthExtraLong">AEON Transmission
-								Details</h2>
-							
-						</div>
-						<div class="box-content nopadding">
+	<composite:implementation>
+		<h:form id="myform" styleClass="form-horizontal form-bordered">
+			<!-- Transmission Details Box (NO REQUEST)-->
+			<div
+				jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false}"
+				class="box  thin-margin  lightgrey box-bordered">
+				<div class="box-title" style="background-color: #eee;">
+					<h2 class="tableColumnMaxWidthExtraLong">AEON Transmission
+						Details</h2>
 
-							<div style="background-color: #eee; height: 250px;">
-								<div
-									style="font-size: 15px; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
-									<p>-no AEON Object requested yet-</p>
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<!-- Transmission Details Box (REQUEST SENT)-->
-					<div jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess}" class="box box-color  lightgrey box-bordered">
-						<div class="box-title">
-							<h2>AEON Transmission
-								Details</h2>
-							
-						</div>
-						<div class="box-content nopadding">
+				</div>
+				<div class="box-content nopadding">
 
-							<div>
-								<h:form>
-									<table class="table table-hover responsive">
-										<tbody>
-											<tr>
-												<td class="tableColumnMaxWidthLong" title="id">Transmission identifier</td>
-												<td>#{NavigationForm.workflowPlugin.transmission.id}</td>
-											</tr>
-											<tr>
-												<td class="tableColumnMaxWidthLong" title="date">Creation date</td>
-												<td>#{NavigationForm.workflowPlugin.transmission.creationDate}</td>
-											</tr>
-											<tr>
-												<td class="tableColumnMaxWidthLong" title="title">Transmission title</td>
-												<td>#{NavigationForm.workflowPlugin.transmission.title}</td>
-											</tr>
-											<tr>
-												<td class="tableColumnMaxWidthLong" title="first name">User first name</td>
-												<td>#{NavigationForm.workflowPlugin.transmission.user.firstName}</td>
-											</tr>
-											<tr>
-												<td class="tableColumnMaxWidthLong" title="last name">User last name</td>
-												<td>#{NavigationForm.workflowPlugin.transmission.user.lastName}</td>
-											</tr>
-											<tr>
-												<td class="tableColumnMaxWidthLong" title="user mail">User mail address</td>
-												<td>#{NavigationForm.workflowPlugin.transmission.user.mailAddress}</td>
-											</tr>
-										</tbody>
-									</table>
-								</h:form>
-							</div>
+					<div style="background-color: #eee; height: 250px;">
+						<div
+							style="font-size: 15px; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+							<p>-no AEON Object requested yet-</p>
 						</div>
 					</div>
-    </composite:implementation>
+				</div>
+			</div>
+
+			<!-- Transmission Details Box (REQUEST SENT)-->
+			<div jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess}"
+				class="box box-color  lightgrey box-bordered">
+				<div class="box-title">
+					<h2>AEON Transmission Details</h2>
+
+				</div>
+				<div class="box-content nopadding">
+					<intranda:formInputText
+						classLeft="col-sm-3 control-label notFocusable" id="transId"
+						label="Transmission identifier"
+						field="#{NavigationForm.workflowPlugin.transmission.id}" help=""
+						name="id" fieldStyle="form-control" />
+					<intranda:formInputText
+						classLeft="col-sm-3 control-label notFocusable" id="transDate"
+						label="Creation Date"
+						field="#{NavigationForm.workflowPlugin.transmission.creationDate}"
+						help="" name="date" fieldStyle="form-control" />
+					<intranda:formInputText
+						classLeft="col-sm-3 control-label notFocusable" id="transTitle"
+						label="Transmission Title"
+						field="#{NavigationForm.workflowPlugin.transmission.title}"
+						help="" name="title" fieldStyle="form-control" />
+					<intranda:formInputText
+						classLeft="col-sm-3 control-label notFocusable"
+						id="transFirstName" label="User First Name"
+						field="#{NavigationForm.workflowPlugin.transmission.user.firstName}"
+						help="" name="firstName" fieldStyle="form-control" />
+					<intranda:formInputText
+						classLeft="col-sm-3 control-label notFocusable" id="transLastName"
+						label="User Last Name"
+						field="#{NavigationForm.workflowPlugin.transmission.user.lastName}"
+						help="" name="lastName" fieldStyle="form-control" />
+					<intranda:formInputText
+						classLeft="col-sm-3 control-label notFocusable" id="transUserMail"
+						label="User Mail Address"
+						field="#{NavigationForm.workflowPlugin.transmission.user.mailAddress}"
+						help="" name="mail" fieldStyle="form-control" />
+				</div>
+			</div>
+		</h:form>
+	</composite:implementation>
 </ui:composition>
