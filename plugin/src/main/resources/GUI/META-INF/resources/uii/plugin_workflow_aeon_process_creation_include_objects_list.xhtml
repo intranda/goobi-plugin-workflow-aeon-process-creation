@@ -28,22 +28,22 @@
 						<div class="box-title" style="border-color: #666;">
 							<h2  style="color: #333;">#{item.id}: #{item.title}</h2>
 							<div class="pull-right">
-								<button jsf:id="decline" class="btn #{item.accepted ? '' : 'btn-danger'} margin-right-5"
+								<button jsf:id="decline" class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5"
 												jsf:action="#{item.decline}"><i class="fa fa-times"></i></button>
-								<button jsf:id="accept" class="btn #{item.accepted ? 'btn-success' : ''} margin-right-5"
+								<button jsf:id="accept" class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5"
 												jsf:action="#{item.accept}"><i class="fa fa-check"></i></button>
 								
-								<button type="button" class="btn" jsf:rendered="#{!item.showDetails}" title="display details"  jsf:id="displayDetails">
-									<i class="fa fa-angle-down margin-right-5"></i>
-									<f:setPropertyActionListener target="#{item.showDetails}" value="true"/>
+								<button type="button" class="btn margin-right-5" style="background:transparent; padding: 1px 9px" title="#{(item.showDetails) ? 'hide details' : 'show details'}"  jsf:id="details">
+									<i style="font-size: 30px; -webkit-text-stroke: 2px #444444; color: #444444;" class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
+									<f:setPropertyActionListener target="#{item.showDetails}" value="#{!item.showDetails}"/>
 									<f:ajax render=":itemForm" />
 								</button>
 								
-								<button type="button" class="btn" jsf:rendered="#{item.showDetails}" title="hide details"  jsf:id="hideDetails">
-									<i class="fa fa-angle-up margin-right-5"></i>
+								<!-- <button type="button" class="btn btn-mini margin-right-5" style="background: transparent;" jsf:rendered="#{item.showDetails}" title="hide details"  jsf:id="hideDetails">
+									<i style="-webkit-text-stroke: 3px #444444; color: #444444" class="fa fa-angle-up"></i>
 									<f:setPropertyActionListener target="#{item.showDetails}" value="false"/>
 									<f:ajax render=":itemForm" />
-								</button>
+								</button> -->
 							</div>
 						</div>
 						<div jsf:rendered="#{item.showDetails}" class="box-content nopadding" style="border-color: #666; height:100px">
