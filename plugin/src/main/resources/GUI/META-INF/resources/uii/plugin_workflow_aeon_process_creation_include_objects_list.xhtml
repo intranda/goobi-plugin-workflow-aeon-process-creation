@@ -1,6 +1,6 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:composite="http://xmlns.jcp.org/jsf/composite"
     xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:x="http://myfaces.apache.org/tomahawk" xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-    xmlns:jsf="http://xmlns.jcp.org/jsf" xmlns:c="http://java.sun.com/jstl/core">
+    xmlns:jsf="http://xmlns.jcp.org/jsf" xmlns:c="http://java.sun.com/jstl/core" xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites">
 
     <composite:interface>
     </composite:interface>
@@ -22,34 +22,48 @@
 				</div>
 			</div>
 		</div>
-			<h:form id="itemForm">
-				<ui:repeat var="item" value="#{NavigationForm.workflowPlugin.transmission.items}">
+			<c:forEach var="item" items="#{NavigationForm.workflowPlugin.transmission.items}">
+				<h:form id="itemForm_#{item.id}" styleClass="form-horizontal form-bordered">
 					<div class="box box-bordered">
 						<div class="box-title" style="border-color: #666;">
-							<h2  style="color: #333;">#{item.id}: #{item.title}</h2>
+							<h2 style="color: #333;">#{item.id}: #{item.title}</h2>
 							<div class="pull-right">
-								<button jsf:id="decline" class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5"
-												jsf:action="#{item.decline}"><i class="fa fa-times"></i></button>
-								<button jsf:id="accept" class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5"
-												jsf:action="#{item.accept}"><i class="fa fa-check"></i></button>
-								
-								<button type="button" class="btn margin-right-5" style="background:transparent; padding: 1px 9px" title="#{(item.showDetails) ? 'hide details' : 'show details'}"  jsf:id="details">
-									<i style="font-size: 30px; -webkit-text-stroke: 2px #444444; color: #444444;" class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
-									<f:setPropertyActionListener target="#{item.showDetails}" value="#{!item.showDetails}"/>
-									<f:ajax render=":itemForm" />
+								<button jsf:id="decline"
+									class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5"
+									jsf:action="#{item.decline}">
+									<i class="fa fa-times"></i>
 								</button>
-								
-								<!-- <button type="button" class="btn btn-mini margin-right-5" style="background: transparent;" jsf:rendered="#{item.showDetails}" title="hide details"  jsf:id="hideDetails">
-									<i style="-webkit-text-stroke: 3px #444444; color: #444444" class="fa fa-angle-up"></i>
-									<f:setPropertyActionListener target="#{item.showDetails}" value="false"/>
-									<f:ajax render=":itemForm" />
-								</button> -->
+								<button jsf:id="accept"
+									class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5"
+									jsf:action="#{item.accept}">
+									<i class="fa fa-check"></i>
+								</button>
+	
+								<button type="button" class="btn margin-right-5"
+									style="background: transparent; padding: 1px 9px"
+									title="#{(item.showDetails) ? 'hide details' : 'show details'}"
+									jsf:id="details">
+									<i style="font-size: 30px; -webkit-text-stroke: 2px #444444; color: #444444;"
+										class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
+									<f:setPropertyActionListener target="#{item.showDetails}" value="#{!item.showDetails}" />
+									<f:ajax render=":itemForm_#{item.id}" />
+								</button>
 							</div>
 						</div>
-						<div jsf:rendered="#{item.showDetails}" class="box-content nopadding" style="border-color: #666; height:100px">
+						<div jsf:rendered="#{item.showDetails}" class="box-content nopadding" style="border-color: #666">
+							<intranda:formInputText
+								classLeft="col-sm-3 control-label notFocusable" id="type"
+								label="Publication Type"
+								field="#{item.publicationType}" help=""
+								name="type" fieldStyle="form-control" />
+							<intranda:formInputText
+								classLeft="col-sm-3 control-label notFocusable" id="shelfmark"
+								label="Shelfmark"
+								field="#{item.shelfmark}" help=""
+								name="shelfmark" fieldStyle="form-control" />
 						</div>
 					</div>
-				</ui:repeat>
-			</h:form>
+				</h:form>
+		</c:forEach>
     </composite:implementation>
 </ui:composition>
