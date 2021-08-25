@@ -6,7 +6,8 @@
 	xmlns:x="http://myfaces.apache.org/tomahawk"
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:jsf="http://xmlns.jcp.org/jsf"
-	xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites">
+	xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
+	xmlns:c="http://java.sun.com/jstl/core">
 
 	<composite:interface>
 	</composite:interface>
@@ -41,6 +42,31 @@
 
 				</div>
 				<div class="box-content nopadding">
+					<c:forEach var="field" items="#{NavigationForm.workflowPlugin.transmissionFields}">
+						<intranda:formInputText
+							classLeft="col-sm-3 control-label notFocusable"
+							label="#{field.getString('title')}"
+							field="#{field.getString('value')}" help="#{field.getString('help')}"
+							name="id" fieldStyle="form-control" />
+							
+						<intranda:formInputDropDown
+                                id="project"
+                                label="#{msgs.projekt}"
+                                field="#{ProzessverwaltungForm.projektAuswahl}"
+                                help="#{msgs.helpProcessProject}"
+                                name="prozess"
+                                selectItems="#{ProzessverwaltungForm.projektAuswahlListe}"
+                                fieldStyle="form-control"
+                                required="true" />
+                        
+                        <intranda:formInputCheckBox
+                                id="showSelection"
+                                label="#{msgs.inAuswahllisteAnzeigen}"
+                                field="#{ProzessverwaltungForm.myProzess.inAuswahllisteAnzeigen}"
+                                help="#{msgs.helpProcessSelectionList}"
+                                name="check"
+                                disabled="#{not ProzessverwaltungForm.myProzess.inAuswahllisteAnzeigen}" />
+					</c:forEach>
 					<intranda:formInputText
 						classLeft="col-sm-3 control-label notFocusable" id="transId"
 						label="Transmission identifier"

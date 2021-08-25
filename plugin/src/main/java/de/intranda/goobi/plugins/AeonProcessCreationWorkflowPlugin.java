@@ -1,9 +1,14 @@
 package de.intranda.goobi.plugins;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
@@ -21,6 +26,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     
     @Getter
     private String title = "intranda_workflow_aeon_process_creation";
+    
+    @Getter
+    @Setter
+    private List<HierarchicalConfiguration> transmissionFields;
     
     @Getter
     @Setter
@@ -88,6 +97,15 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
      */
     public AeonProcessCreationWorkflowPlugin() {
         log.info("AeonProcessCreation workflow plugin started");
-        value = ConfigPlugins.getPluginConfig(title).getString("value", "default value");
+        XMLConfiguration config = ConfigPlugins.getPluginConfig(title);        
+        value = config.getString("value", "default value");
+        
+        this.transmissionFields = config.configurationsAt("transmission.field");
+        
+//        System.out.println(this.transmissionFields);
+//        for(HierarchicalConfiguration sub : transmissionFields) {
+//        	System.out.println(sub.getString("[@aeon]"));
+//        }
+//        System.out.println("printed");
     }
 }
