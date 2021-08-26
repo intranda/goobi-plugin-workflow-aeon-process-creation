@@ -1,6 +1,9 @@
 package de.intranda.goobi.plugins;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.client.Client;
@@ -37,7 +40,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     
     @Getter
     @Setter
-    private AeonTransmission transmission;
+    private AeonTransmission transmission = new AeonTransmission();
     
     @Getter
     @Setter
@@ -91,16 +94,57 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     	setRequestSuccess(false);
     	input = "";
     }
+    
+    public void setDefaultTransmissionvalues() {
+    	XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
+    	List<HierarchicalConfiguration> transFields = config.configurationsAt("transmission.field");
+    	List<HierarchicalConfiguration> processFields = config.configurationsAt("processes.field");
+    }
+    
+    //********** Returns value of any object (nested or not: example -> user.firstname) ************
+    public Object getTransmissionFieldValue(String fieldName) {
+    	List<String> names = new LinkedList<String>(Arrays.asList(fieldName.split("\\.")));
+    	Object obj = new Object();
+    	//String str = "";
+    	try {
+	    	Field field = transmission.getClass().getDeclaredField(names.get(0));
+	    	
+	    	field.setAccessible(true);
+	    	obj = field.get(transmission);
+	    	field.setAccessible(false);
+	    	
+	    	names.remove(0);
+	    	
+	    	for(int i = 0; i < names.size(); i++) {
+	    		field = obj.getClass().getDeclaredField(names.get(i));
+	    		
+	    		field.setAccessible(true);
+	    		obj = field.get(obj);
+	    		field.setAccessible(false);
+	    	}
+    	} catch (Exception e){
+    		log.error(e + ": " + e.getMessage());
+    		e.printStackTrace();
+    	}
+    	return obj;
+    }
 
     /**
      * Constructor
+     * @throws SecurityException 
+     * @throws NoSuchFieldException 
+     * @throws IllegalAccessException 
+     * @throws IllegalArgumentException 
      */
-    public AeonProcessCreationWorkflowPlugin() {
+    public AeonProcessCreationWorkflowPlugin() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         log.info("AeonProcessCreation workflow plugin started");
         XMLConfiguration config = ConfigPlugins.getPluginConfig(title);        
         value = config.getString("value", "default value");
         
         this.transmissionFields = config.configurationsAt("transmission.field");
+        
+//        System.out.println(getTransmissionFieldValue("id"));
+//        System.out.println(getTransmissionFieldValue("user.firstName"));
         
 //        System.out.println(this.transmissionFields);
 //        for(HierarchicalConfiguration sub : transmissionFields) {

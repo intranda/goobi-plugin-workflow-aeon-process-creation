@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class AeonTransmission {
-	private int id;
+	private String id;
 	private String creationDate;	//maybe type Date instead
 	private String title;
 	private AeonUser user;

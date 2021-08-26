@@ -4,8 +4,18 @@
   the values here are stored for all created processes; -->
   <transmission>
 
-    <field aeon="aeon field a">
-      <title>A Textfield</title>
+    <field aeon="id">
+      <title>Transmission Identifier</title>
+      <type readonly="true">input</type>
+      <variable place="process">Text field</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+      <validation strict="true">xyz-regular-expression</validation>
+      <message>Your content does not follow our validation guidelines</message>
+    </field>
+
+    <field aeon="creationDate">
+      <title>Creation Date</title>
       <type readonly="false">input</type>
       <variable place="process">Text field</variable>
       <value></value>
@@ -14,31 +24,35 @@
       <message>Your content does not follow our validation guidelines</message>
     </field>
 
-    <field aeon="aeon field b">
-      <title>B Dropdown</title>
-      <type readonly="false">select</type>
-      <variable place="work">CoWorker</variable>
-      <value>Steffen</value>
-      <select>Steffen</select>
-      <select>Oliver</select>
-      <select>Robert</select>
+    <field aeon="title">
+      <title>Title</title>
+      <type readonly="false">input</type>
+      <variable place="process">Text field</variable>
+      <value>Transmission</value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-    <field aeon="aeon field c">
-      <title>C Vokabularwert</title>
-      <type readonly="false">vocabulary</type>
-      <variable place="work">DocLanguage</variable>
-      <vocabularyName>Languages</vocabularyName>
-      <vocabularyField>iso</vocabularyField>
+    <field aeon="user.firstName">
+      <title>User First Name</title>
+      <type readonly="false">input</type>
+      <variable place="process">Text field</variable>
+      <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-
-    <field aeon="aeon field d">
-      <title>D Boolean</title>
-      <type readonly="false">checkbox</type>
-      <variable place="process">Status ok</variable>
-      <value>true</value>
+    
+    <field aeon="user.lastName">
+      <title>User Last Name</title>
+      <type readonly="false">input</type>
+      <variable place="process">Text field</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    
+    <field aeon="user.mailAddress">
+      <title>User Mail Address</title>
+      <type readonly="false">input</type>
+      <variable place="process">Text field</variable>
+      <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
@@ -93,44 +107,41 @@
 
   <!-- the process fields are configured differently -->
   <processes>
-
-    <!-- each field per process is defined here;
-    the property aeon defines from which aeon the data shall be taken;
-    the parameter displayAlways allows to define if a metadata shall always be shown even in collapsed status-->
-    <field aeon="aeon object field name" displayAlways="true">
-      <!-- title of the field -->
-      <title>PublicationType</title>
-
-      <!-- type of the field, might be 'input', 'textarea', 'checkbox', 'select', 'multiselect', 'vocabulary' -->
-      <type readonly="false">select</type>
-
-      <!-- place where to store the content of the field,
-      either as process property ('process') or as metadata ('top', 'child', 'work');
-      the variable is either the process property name or the metataType from the ruleset (if it is stored in the mets file as top, child or work) -->
-      <variable place="work">DocLanguage</variable>
-
-      <!-- default content of a field if it is empty -->
-      <value>Default-Inhalt des Feldes</value>
-
-      <!-- select options as a list for select and multiselect types -->
-      <select>Auswahloption 1</select>
-      <select>Auswahloption 2</select>
-      <select>Auswahloption 3</select>
-
-      <!-- vocabulary details for vocabulary type; name of the vocabulary and field of the vocabulary to use -->
-      <vocabularyName>Language</vocabularyName>
-      <vocabularyField>short</vocabularyField>
-
-      <!-- help text to display if the help mode of Goobi is switched on -->
+    
+    <field aeon="id" displayAlways="true">
+      <title>Item Identifier</title>
+      <type readonly="true">input</type>
+      <variable place="process">Text field</variable>
+      <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
-
-      <!-- validation string as regular expression for the field; if empty no validation will be executed;
-      if strict=true then the validation can forbid the process creation and shows the validation message;
-      if strict=false then the validation message gets shown but allows the process creation;
-      validation shall only be executed the the processes that are selected -->
+    </field>
+    
+    <field aeon="title" displayAlways="true">
+      <title>Item Title</title>
+      <type readonly="false">input</type>
+      <variable place="process">Text field</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    
+    <field aeon="publicationType" displayAlways="false">
+      <title>Publication Type</title>
+      <type readonly="false">select</type>
+      <variable place="work">publication</variable>
+      <value>Something else</value>
+      <select>Monograph</select>
+      <select>Something else</select>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    
+    <field aeon="shelfmark" displayAlways="false">
+      <title>Shelfmark</title>
+      <type readonly="false">input</type>
+      <variable place="work">Text field</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
       <validation strict="true">xyz-regular-expression</validation>
       <message>Your content does not follow our validation guidelines</message>
-
     </field>
 
   </processes>
