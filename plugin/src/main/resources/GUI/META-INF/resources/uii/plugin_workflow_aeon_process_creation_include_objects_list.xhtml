@@ -31,23 +31,26 @@
 				</div>
 			</div>
 		</div>
-		<c:forEach var="item"
-			items="#{NavigationForm.workflowPlugin.transmission.items}">
-			<h:form id="itemForm_#{item.id}"
-				styleClass="form-horizontal form-bordered">
+		<h:form id="itemForm" styleClass="form-horizontal form-bordered">
+			<c:forEach var="item"
+				items="#{NavigationForm.workflowPlugin.transmission.items}">
 				<div class="box box-bordered">
 					<div class="box-title" style="border-color: #666;">
 						<h2 style="color: #333;">#{item.id}: #{item.title}</h2>
 						<div class="pull-right">
 							<button jsf:id="decline"
-								class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5"
-								jsf:action="#{item.decline}">
+								class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5">
 								<i class="fa fa-times"></i>
+								<f:setPropertyActionListener target="#{item.accepted}"
+									value="#{false}" />
+								<f:ajax render=":itemForm" />
 							</button>
 							<button jsf:id="accept"
-								class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5"
-								jsf:action="#{item.accept}">
+								class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5">
 								<i class="fa fa-check"></i>
+								<f:setPropertyActionListener target="#{item.accepted}"
+									value="#{true}" />
+								<f:ajax render=":itemForm" />
 							</button>
 
 							<button type="button" class="btn margin-right-5"
@@ -59,43 +62,42 @@
 									class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
 								<f:setPropertyActionListener target="#{item.showDetails}"
 									value="#{!item.showDetails}" />
-								<f:ajax render=":itemForm_#{item.id}" />
+								<f:ajax render=":itemForm" />
 							</button>
 						</div>
 					</div>
 					<div class="box-content nopadding" style="border-color: #666">
-						<c:forEach var="field" items="#{NavigationForm.workflowPlugin.processFields}">
+						<c:forEach var="field"
+							items="#{NavigationForm.workflowPlugin.processFields}">
 							<c:set var="fieldname" value="#{field.getString('[@aeon]')}" />
-							<c:set var="fieldValue" value="#{NavigationForm.workflowPlugin.getFieldValue(item, fieldname)}" />
+							<c:set var="fieldvalue" value="#{NavigationForm.workflowPlugin.getFieldValue(item, fieldname)}" />
 							<intranda:formInputText name="input"
 								rendered="#{(field.getString('type') eq 'input') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
 								classLeft="col-sm-3 control-label notFocusable"
-								label="#{field.getString('title')}" field="#{fieldValue}"
+								label="#{field.getString('title')}" field="#{fieldvalue}"
 								help="#{field.getString('help')}" fieldStyle="form-control"
 								disabled="#{field.getBoolean('type[@readonly]')}"
 								required="#{not empty field.getString('validation')}" />
 
 							<intranda:formInputDropDown name="dropdown"
 								rendered="#{(field.getString('type') eq 'select') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
-								label="#{field.getString('title')}" field="#{fieldValue}"
+								label="#{field.getString('title')}" field="#{fieldvalue}"
 								help="#{field.getString('help')}"
 								selectItems="#{field.getList('select')}"
 								fieldStyle="form-control"
 								disabled="#{field.getBoolean('type[@readonly]')}"
 								required="#{not empty field.getString('validation')}" />
-								
-							 <intranda:formInputCheckBox
-	                       		name="checkbox"
-	                       		rendered="#{(field.getString('type') eq 'checkbox') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
-	                            label="#{field.getString('title')}"
-	                            field="#{fieldValue}"
-	                            help="#{field.getString('help')}"
-	                            disabled="#{field.getBoolean('type[@readonly]')}" 
-	                            required="#{not empty field.getString('validation')}"/>
+
+							<intranda:formInputCheckBox name="checkbox"
+								rendered="#{(field.getString('type') eq 'checkbox') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
+								label="#{field.getString('title')}" field="#{fieldvalue}"
+								help="#{field.getString('help')}"
+								disabled="#{field.getBoolean('type[@readonly]')}"
+								required="#{not empty field.getString('validation')}" />
 						</c:forEach>
 					</div>
 				</div>
-			</h:form>
-		</c:forEach>
+			</c:forEach>
+		</h:form>
 	</composite:implementation>
 </ui:composition>

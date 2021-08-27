@@ -12,14 +12,4 @@ public class AeonItem {
 	private boolean accepted = false;
 	
 	private boolean showDetails = false;
-	
-	public void decline() {
-		System.out.println("declined");
-		setAccepted(false);
-	}
-	
-	public void accept() {
-		System.out.println("accepted");
-		setAccepted(true);
-	}
 }

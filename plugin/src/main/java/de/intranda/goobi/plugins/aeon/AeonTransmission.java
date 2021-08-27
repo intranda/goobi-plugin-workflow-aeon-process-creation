@@ -11,4 +11,10 @@ public class AeonTransmission {
 	private String title;
 	private AeonUser user;
 	ArrayList<AeonItem> items;
+	
+	public void setAllItemsAccepted(boolean status) {
+		for(AeonItem item : this.items) {
+			item.setAccepted(status);
+		}
+	}
 }

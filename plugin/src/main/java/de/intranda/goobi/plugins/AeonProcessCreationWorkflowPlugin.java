@@ -135,6 +135,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     		log.error(e + ": " + e.getMessage());
     		e.printStackTrace();
     	}
+    	//System.out.println("got value for: "+mainObject);
     	return obj;
     }
     
