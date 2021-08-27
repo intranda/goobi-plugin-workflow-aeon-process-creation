@@ -25,7 +25,7 @@
 
 				<div style="background-color: #eee; height: 500px;">
 					<div
-						style="font-size: 15px; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+						style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
 						<p>-no AEON Object requested yet-</p>
 					</div>
 				</div>
@@ -55,12 +55,10 @@
 								</button>
 
 								<button type="button" class="btn margin-right-5"
-									style="background: transparent; padding: 1px 9px"
+									style="background: transparent"
 									title="#{(item.showDetails) ? 'hide details' : 'show details'}"
 									jsf:id="details">
-									<i
-										style="font-size: 30px; -webkit-text-stroke: 2px #444444; color: #444444;"
-										class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
+									<i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
 									<f:setPropertyActionListener target="#{item.showDetails}"
 										value="#{!item.showDetails}" />
 									<f:ajax render=":itemForm" />

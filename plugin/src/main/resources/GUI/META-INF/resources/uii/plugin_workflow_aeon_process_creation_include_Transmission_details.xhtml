@@ -27,7 +27,7 @@
 
 					<div style="background-color: #eee; height: 250px;">
 						<div
-							style="font-size: 15px; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+							style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
 							<p>-no AEON Object requested yet-</p>
 						</div>
 					</div>
@@ -77,36 +77,6 @@
                             disabled="#{field.getBoolean('type[@readonly]')}" 
                             required="#{not empty field.getString('validation')}"/>
 					</c:forEach>
-					<!-- <intranda:formInputText
-						classLeft="col-sm-3 control-label notFocusable" id="transId"
-						label="Transmission identifier"
-						field="#{NavigationForm.workflowPlugin.transmission.id}" help=""
-						name="id" fieldStyle="form-control" />
-					<intranda:formInputText
-						classLeft="col-sm-3 control-label notFocusable" id="transDate"
-						label="Creation Date"
-						field="#{NavigationForm.workflowPlugin.transmission.creationDate}"
-						help="" name="date" fieldStyle="form-control" />
-					<intranda:formInputText
-						classLeft="col-sm-3 control-label notFocusable" id="transTitle"
-						label="Transmission Title"
-						field="#{NavigationForm.workflowPlugin.transmission.title}"
-						help="" name="title" fieldStyle="form-control" />
-					<intranda:formInputText
-						classLeft="col-sm-3 control-label notFocusable"
-						id="transFirstName" label="User First Name"
-						field="#{NavigationForm.workflowPlugin.transmission.user.firstName}"
-						help="" name="firstName" fieldStyle="form-control" />
-					<intranda:formInputText
-						classLeft="col-sm-3 control-label notFocusable" id="transLastName"
-						label="User Last Name"
-						field="#{NavigationForm.workflowPlugin.transmission.user.lastName}"
-						help="" name="lastName" fieldStyle="form-control" />
-					<intranda:formInputText
-						classLeft="col-sm-3 control-label notFocusable" id="transUserMail"
-						label="User Mail Address"
-						field="#{NavigationForm.workflowPlugin.transmission.user.mailAddress}"
-						help="" name="mail" fieldStyle="form-control" /> -->
 				</div>
 			</div>
 		</h:form>
