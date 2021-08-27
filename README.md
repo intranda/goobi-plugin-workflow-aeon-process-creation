@@ -37,7 +37,7 @@ Example if JSON transmission response is built like this:
     "user":{
         "name":"Maxim"
     },
-    items":[
+    "items":[
         { "id":"1", "title":"Hello"}
     ]
 }
