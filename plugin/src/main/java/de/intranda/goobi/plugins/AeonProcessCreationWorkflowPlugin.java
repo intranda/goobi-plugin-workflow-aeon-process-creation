@@ -40,6 +40,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     
     @Getter
     @Setter
+    private List<HierarchicalConfiguration> processFields;
+    
+    @Getter
+    @Setter
     private boolean requestSuccess = false;
     
     @Getter
@@ -144,15 +148,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     }
     
     public void setDefaultTransmissionValues() {
-    	XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
-    	List<HierarchicalConfiguration> transFields = config.configurationsAt("transmission.field");
-    	List<HierarchicalConfiguration> processFields = config.configurationsAt("processes.field");
     	
-    	for(HierarchicalConfiguration field : transFields) {
+    	for(HierarchicalConfiguration field : this.transmissionFields) {
     		checkFieldValue(field, this.transmission);
     	}
     	
-    	for(HierarchicalConfiguration field : processFields) {
+    	for(HierarchicalConfiguration field : this.processFields) {
     		for(int i = 0; i < this.transmission.getItems().size(); i++) {
     			//System.out.println("item: "+ this.transmission.getItems().get(i));
     			checkFieldValue(field, this.transmission.getItems().get(i));
@@ -178,9 +179,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     public AeonProcessCreationWorkflowPlugin() {
         log.info("AeonProcessCreation workflow plugin started");
         XMLConfiguration config = ConfigPlugins.getPluginConfig(title);        
-        value = config.getString("value", "default value");
         
         this.transmissionFields = config.configurationsAt("transmission.field");
+        this.processFields = config.configurationsAt("processes.field");
         
 //        System.out.println(getFieldValue(transmission, "id"));
 //        setFieldValue(transmission, "id", "4321");
