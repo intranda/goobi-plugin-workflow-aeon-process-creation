@@ -43,14 +43,15 @@
 				</div>
 				<div class="box-content nopadding">
 					<c:forEach var="field" items="#{NavigationForm.workflowPlugin.transmissionFields}">
-						<c:set var="fieldname" value="#{field.getString('[@aeon]')" />
-						<c:set var="fieldValue" value="#{NavigationForm.workflowPlugin.getTransmissionFieldValue(fieldname)}" />
+						<c:set var="fieldname" value="#{field.getString('[@aeon]')}" />
+						<c:set var="transmission" value="#{NavigationForm.workflowPlugin.transmission}" />
+						<c:set var="fieldValue" value="#{NavigationForm.workflowPlugin.getFieldValue(transmission, fieldname)}" />
 						<intranda:formInputText
 							name="input"
 							rendered="#{field.getString('type') eq 'input'}"
 							classLeft="col-sm-3 control-label notFocusable"
 							label="#{field.getString('title')}"
-							field="#{empty  ? field.getString('value') : }" 
+							field="#{fieldValue}" 
 							help="#{field.getString('help')}"
 							fieldStyle="form-control" 
 							disabled="#{field.getBoolean('type[@readonly]')}"
@@ -60,22 +61,21 @@
 							name="dropdown"
 							rendered="#{field.getString('type') eq 'select'}"
                             label="#{field.getString('title')}"
-                            field="#{field.getString('value')}"
+                            field="#{fieldValue}"
                             help="#{field.getString('help')}"
                             selectItems="#{field.getList('select')}"
                             fieldStyle="form-control"
-                            required="true" 
                             disabled="#{field.getBoolean('type[@readonly]')}"
                             required="#{not empty field.getString('validation')}"/>
                         
-                        <intranda:formInputCheckBox
+                        <!-- <intranda:formInputCheckBox
                        		name="checkbox"
                        		rendered="#{field.getString('type') eq 'checkbox'}"
                             label="#{field.getString('title')}"
-                            field="#{field.getString('value')}"
+                            field="#{fieldValue}"
                             help="#{field.getString('help')}"
                             disabled="#{field.getBoolean('type[@readonly]')}" 
-                            required="#{not empty field.getString('validation')}"/>
+                            required="#{not empty field.getString('validation')}"/> -->
 					</c:forEach>
 					<!-- <intranda:formInputText
 						classLeft="col-sm-3 control-label notFocusable" id="transId"

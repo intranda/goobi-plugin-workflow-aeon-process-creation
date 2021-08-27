@@ -1,6 +1,7 @@
 package de.intranda.goobi.plugins;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -10,12 +11,15 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang3.StringUtils;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 
+import de.intranda.goobi.plugins.aeon.AeonItem;
 import de.intranda.goobi.plugins.aeon.AeonTransmission;
 import de.sub.goobi.config.ConfigPlugins;
 import lombok.Getter;
@@ -80,6 +84,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     		if(this.transmission == null) {
     			return;
     		}else {
+    			setDefaultTransmissionValues();
     			setRequestSuccess(true);
     			System.out.println(getTransmission());
     		}
@@ -95,22 +100,22 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     	input = "";
     }
     
-    public void setDefaultTransmissionvalues() {
-    	XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
-    	List<HierarchicalConfiguration> transFields = config.configurationsAt("transmission.field");
-    	List<HierarchicalConfiguration> processFields = config.configurationsAt("processes.field");
-    }
-    
-    //********** Returns value of any object (nested or not: example -> user.firstname) ************
-    public Object getTransmissionFieldValue(String fieldName) {
+    /*
+     * Returns value of any attribute 
+     * (nested or not: example -> transmission.user.firstname called with:
+     * getTransmissionFieldValue("user.firstName") )
+     */
+    public Object getFieldValue(Object mainObject ,String fieldName) {
     	List<String> names = new LinkedList<String>(Arrays.asList(fieldName.split("\\.")));
     	Object obj = new Object();
-    	//String str = "";
+    	
     	try {
-	    	Field field = transmission.getClass().getDeclaredField(names.get(0));
+    		//System.out.println("main object: "+mainObject);
+    		Class<?> c = mainObject.getClass();
+    		Field field = c.getDeclaredField(names.get(0));
 	    	
 	    	field.setAccessible(true);
-	    	obj = field.get(transmission);
+	    	obj = field.get(mainObject);
 	    	field.setAccessible(false);
 	    	
 	    	names.remove(0);
@@ -128,22 +133,58 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     	}
     	return obj;
     }
+    
+    public void setFieldValue(Object mainObject, String fieldName, Object newValue) {
+    	try {	
+    		BeanUtils.setProperty(mainObject, fieldName, newValue);
+    	} catch (Exception e) {
+    		log.error(e + ": " + e.getMessage());
+    		e.printStackTrace();
+    	}
+    }
+    
+    public void setDefaultTransmissionValues() {
+    	XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
+    	List<HierarchicalConfiguration> transFields = config.configurationsAt("transmission.field");
+    	List<HierarchicalConfiguration> processFields = config.configurationsAt("processes.field");
+    	
+    	for(HierarchicalConfiguration field : transFields) {
+    		checkFieldValue(field, this.transmission);
+    	}
+    	
+    	for(HierarchicalConfiguration field : processFields) {
+    		for(int i = 0; i < this.transmission.getItems().size(); i++) {
+    			//System.out.println("item: "+ this.transmission.getItems().get(i));
+    			checkFieldValue(field, this.transmission.getItems().get(i));
+    		}
+    	}
+    	//System.out.println(this.transmission);
+    }
+    
+    public void checkFieldValue(HierarchicalConfiguration field, Object object) {
+    	Object fieldvalue = getFieldValue(object, field.getString("[@aeon]"));
+		if(fieldvalue == null || StringUtils.isEmpty(String.valueOf(fieldvalue))) {
+			if(object instanceof Boolean) {
+				setFieldValue(object, field.getString("[@aeon]") , field.getBoolean("value"));
+			}else {
+				setFieldValue(object, field.getString("[@aeon]") , field.getString("value"));
+			}
+		}
+    }
 
     /**
      * Constructor
-     * @throws SecurityException 
-     * @throws NoSuchFieldException 
-     * @throws IllegalAccessException 
-     * @throws IllegalArgumentException 
      */
-    public AeonProcessCreationWorkflowPlugin() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public AeonProcessCreationWorkflowPlugin() {
         log.info("AeonProcessCreation workflow plugin started");
         XMLConfiguration config = ConfigPlugins.getPluginConfig(title);        
         value = config.getString("value", "default value");
         
         this.transmissionFields = config.configurationsAt("transmission.field");
         
-//        System.out.println(getTransmissionFieldValue("id"));
+//        System.out.println(getFieldValue(transmission, "id"));
+//        setFieldValue(transmission, "id", "4321");
+//        System.out.println(getFieldValue(transmission, "id"));
 //        System.out.println(getTransmissionFieldValue("user.firstName"));
         
 //        System.out.println(this.transmissionFields);
