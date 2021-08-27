@@ -75,7 +75,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     	setInput(input);							//set this.input to textfield input
     	
     	if(this.input.equals("1234567890")) {				//(just for testing)
-    		System.out.println("request sent");
+    		//System.out.println("request sent");
     		try {
     			response = this.client.target("http://localhost:8080/goobi/api/")
     					.path("testingRest")
@@ -90,10 +90,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     		}else {
     			setDefaultTransmissionValues();
     			setRequestSuccess(true);
-    			System.out.println(getTransmission());
+    			//System.out.println(getTransmission());
     		}
     	}else {
-    		System.out.println(this.input);
+    		//System.out.println(this.input);
     		setRequestSuccess(false);
     	}
     }
