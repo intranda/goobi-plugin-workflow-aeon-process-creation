@@ -42,10 +42,15 @@
 
 				</div>
 				<div class="box-content nopadding">
+					<!-- loop through config fields (<transmission>) -->
 					<c:forEach var="field" items="#{NavigationForm.workflowPlugin.transmissionFields}">
+						<!-- get the "path" to property (defined in config) -->
 						<c:set var="fieldname" value="#{field.getString('[@aeon]')}" />
 						<c:set var="transmission" value="#{NavigationForm.workflowPlugin.transmission}" />
+						<!-- get value from getFieldValue() -->
 						<c:set var="fieldValue" value="#{NavigationForm.workflowPlugin.getFieldValue(transmission, fieldname)}" />
+						
+						<!-- 3 types of input (input, select, checkbox) -->
 						<intranda:formInputText
 							name="input"
 							rendered="#{field.getString('type') eq 'input'}"

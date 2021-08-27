@@ -1,9 +1,12 @@
+
+<!-- this is all just examplary data: works only with RestTest.java as rest api -->
+
 <config_plugin>
 	
 	<!-- the transmission details are configured here;
   the values here are stored for all created processes; -->
   <transmission>
-
+	<!-- aeon = JSON path to needed property ("id" converts to "transmission.id") -->
     <field aeon="id">
       <title>Transmission Identifier</title>
       <type readonly="true">input</type>
@@ -107,7 +110,7 @@
 
   <!-- the process fields are configured differently -->
   <processes>
-    
+    <!-- aeon = JSON path to needed property ("id" converts to "item.id" ...) -->
     <field aeon="id" displayAlways="true">
       <title>Item Identifier</title>
       <type readonly="true">input</type>
