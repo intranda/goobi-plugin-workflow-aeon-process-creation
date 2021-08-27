@@ -54,7 +54,7 @@
 							field="#{fieldValue}" 
 							help="#{field.getString('help')}"
 							fieldStyle="form-control" 
-							disabled="#{field.getBoolean('type[@readonly]')}"
+							readonly="#{field.getBoolean('type[@readonly]')}"
 							required="#{not empty field.getString('validation')}"/>
 							
 						<intranda:formInputDropDown
@@ -65,7 +65,7 @@
                             help="#{field.getString('help')}"
                             selectItems="#{field.getList('select')}"
                             fieldStyle="form-control"
-                            disabled="#{field.getBoolean('type[@readonly]')}"
+                            readonly="#{field.getBoolean('type[@readonly]')}"
                             required="#{not empty field.getString('validation')}"/>
                         
                         <intranda:formInputCheckBox
@@ -74,7 +74,7 @@
                             label="#{field.getString('title')}"
                             field="#{fieldValue}"
                             help="#{field.getString('help')}"
-                            disabled="#{field.getBoolean('type[@readonly]')}" 
+                            readonly="#{field.getBoolean('type[@readonly]')}" 
                             required="#{not empty field.getString('validation')}"/>
 					</c:forEach>
 				</div>

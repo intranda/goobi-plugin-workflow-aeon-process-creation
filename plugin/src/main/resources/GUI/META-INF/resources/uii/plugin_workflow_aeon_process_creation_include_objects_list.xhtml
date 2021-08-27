@@ -31,13 +31,16 @@
 				</div>
 			</div>
 		</div>
+		<!-- All Objects List (REQUEST SUCCESS) -->
 		<div jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess}">
 			<h:form id="itemForm" styleClass="form-horizontal form-bordered">
+				<!-- iterate through items from transmission -->
 				<c:forEach var="item"
 					items="#{NavigationForm.workflowPlugin.transmission.items}">
 					<div class="box box-bordered">
 						<div class="box-title" style="border-color: #666;">
 							<h2 style="color: #333;">#{item.id}: #{item.title}</h2>
+							<!-- decline / accept / expand buttons -->
 							<div class="pull-right">
 								<button jsf:id="decline"
 									class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5">
@@ -66,17 +69,22 @@
 							</div>
 						</div>
 						<div class="box-content nopadding" style="border-color: #666">
+							<!-- iterates through config fields (<processes>) -->
 							<c:forEach var="field"
 								items="#{NavigationForm.workflowPlugin.processFields}">
+								<!-- gets the fieldname (for item.shelfmark => shelfmark ... these are defined under aeon property in config) -->
 								<c:set var="fieldname" value="#{field.getString('[@aeon]')}" />
+								<!-- gets the fieldvalue through getFieldValue()  -->
 								<c:set var="fieldvalue"
 									value="#{NavigationForm.workflowPlugin.getFieldValue(item, fieldname)}" />
+									
+								<!-- 3 different types of inputs (input, dropdown, checkbox) -->
 								<intranda:formInputText name="input"
 									rendered="#{(field.getString('type') eq 'input') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
 									classLeft="col-sm-3 control-label notFocusable"
 									label="#{field.getString('title')}" field="#{fieldvalue}"
 									help="#{field.getString('help')}" fieldStyle="form-control"
-									disabled="#{field.getBoolean('type[@readonly]')}"
+									readonly="#{field.getBoolean('type[@readonly]')}"
 									required="#{not empty field.getString('validation')}" />
 
 								<intranda:formInputDropDown name="dropdown"
@@ -85,19 +93,20 @@
 									help="#{field.getString('help')}"
 									selectItems="#{field.getList('select')}"
 									fieldStyle="form-control"
-									disabled="#{field.getBoolean('type[@readonly]')}"
+									readonly="#{field.getBoolean('type[@readonly]')}"
 									required="#{not empty field.getString('validation')}" />
 
 								<intranda:formInputCheckBox name="checkbox"
 									rendered="#{(field.getString('type') eq 'checkbox') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
 									label="#{field.getString('title')}" field="#{fieldvalue}"
 									help="#{field.getString('help')}"
-									disabled="#{field.getBoolean('type[@readonly]')}"
+									readonly="#{field.getBoolean('type[@readonly]')}"
 									required="#{not empty field.getString('validation')}" />
 							</c:forEach>
 						</div>
 					</div>
 				</c:forEach>
+				<!-- accept all / decline all buttons -->
 				<div class="margin-top-10 pull-left">
 					<button jsf:id="declineAll" class="btn margin-right-5">
 						<i class="fa fa-times"></i>
