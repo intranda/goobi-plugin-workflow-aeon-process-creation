@@ -5,6 +5,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.Path;
 
+/*
+ * Very simple rest api: returns JSON string with pseudo data 
+ */
+
 @Path("/testingRest")
 public class RestTest {
     @GET
