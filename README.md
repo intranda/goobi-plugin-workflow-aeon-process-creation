@@ -46,14 +46,18 @@ Example if JSON transmission response is built like this:
 So to map the information in the config correctly the desired fields would **have** to be inside `<transmission>`!
 For example to access:
 
+`<transmission>`
 - id: `<field aeon="id">`
 - name of user: `<field aeon="user.name">`
+`</transmission>`
 
 to map the items, the desired fields **have** to be defined in `<processes>` and assume that `item` is the base object!
 So for example to access:
 
+`<processes>`
 - items id: `<field aeon="id">`
 - items title: `<field aeon="title">`
+`</processes>`
 
 This is because the Java backend objects will be mapped according to the JSON response! 
 The main transmission information and item information will be handled seperately.
