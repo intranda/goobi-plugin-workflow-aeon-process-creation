@@ -31,73 +31,94 @@
 				</div>
 			</div>
 		</div>
-		<h:form id="itemForm" styleClass="form-horizontal form-bordered">
-			<c:forEach var="item"
-				items="#{NavigationForm.workflowPlugin.transmission.items}">
-				<div class="box box-bordered">
-					<div class="box-title" style="border-color: #666;">
-						<h2 style="color: #333;">#{item.id}: #{item.title}</h2>
-						<div class="pull-right">
-							<button jsf:id="decline"
-								class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5">
-								<i class="fa fa-times"></i>
-								<f:setPropertyActionListener target="#{item.accepted}"
-									value="#{false}" />
-								<f:ajax render=":itemForm" />
-							</button>
-							<button jsf:id="accept"
-								class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5">
-								<i class="fa fa-check"></i>
-								<f:setPropertyActionListener target="#{item.accepted}"
-									value="#{true}" />
-								<f:ajax render=":itemForm" />
-							</button>
+		<div jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess}">
+			<h:form id="itemForm" styleClass="form-horizontal form-bordered">
+				<c:forEach var="item"
+					items="#{NavigationForm.workflowPlugin.transmission.items}">
+					<div class="box box-bordered">
+						<div class="box-title" style="border-color: #666;">
+							<h2 style="color: #333;">#{item.id}: #{item.title}</h2>
+							<div class="pull-right">
+								<button jsf:id="decline"
+									class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5">
+									<i class="fa fa-times"></i>
+									<f:setPropertyActionListener target="#{item.accepted}"
+										value="#{false}" />
+									<f:ajax render=":itemForm" />
+								</button>
+								<button jsf:id="accept"
+									class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5">
+									<i class="fa fa-check"></i>
+									<f:setPropertyActionListener target="#{item.accepted}"
+										value="#{true}" />
+									<f:ajax render=":itemForm" />
+								</button>
 
-							<button type="button" class="btn margin-right-5"
-								style="background: transparent; padding: 1px 9px"
-								title="#{(item.showDetails) ? 'hide details' : 'show details'}"
-								jsf:id="details">
-								<i
-									style="font-size: 30px; -webkit-text-stroke: 2px #444444; color: #444444;"
-									class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
-								<f:setPropertyActionListener target="#{item.showDetails}"
-									value="#{!item.showDetails}" />
-								<f:ajax render=":itemForm" />
-							</button>
+								<button type="button" class="btn margin-right-5"
+									style="background: transparent; padding: 1px 9px"
+									title="#{(item.showDetails) ? 'hide details' : 'show details'}"
+									jsf:id="details">
+									<i
+										style="font-size: 30px; -webkit-text-stroke: 2px #444444; color: #444444;"
+										class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
+									<f:setPropertyActionListener target="#{item.showDetails}"
+										value="#{!item.showDetails}" />
+									<f:ajax render=":itemForm" />
+								</button>
+							</div>
+						</div>
+						<div class="box-content nopadding" style="border-color: #666">
+							<c:forEach var="field"
+								items="#{NavigationForm.workflowPlugin.processFields}">
+								<c:set var="fieldname" value="#{field.getString('[@aeon]')}" />
+								<c:set var="fieldvalue"
+									value="#{NavigationForm.workflowPlugin.getFieldValue(item, fieldname)}" />
+								<intranda:formInputText name="input"
+									rendered="#{(field.getString('type') eq 'input') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
+									classLeft="col-sm-3 control-label notFocusable"
+									label="#{field.getString('title')}" field="#{fieldvalue}"
+									help="#{field.getString('help')}" fieldStyle="form-control"
+									disabled="#{field.getBoolean('type[@readonly]')}"
+									required="#{not empty field.getString('validation')}" />
+
+								<intranda:formInputDropDown name="dropdown"
+									rendered="#{(field.getString('type') eq 'select') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
+									label="#{field.getString('title')}" field="#{fieldvalue}"
+									help="#{field.getString('help')}"
+									selectItems="#{field.getList('select')}"
+									fieldStyle="form-control"
+									disabled="#{field.getBoolean('type[@readonly]')}"
+									required="#{not empty field.getString('validation')}" />
+
+								<intranda:formInputCheckBox name="checkbox"
+									rendered="#{(field.getString('type') eq 'checkbox') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
+									label="#{field.getString('title')}" field="#{fieldvalue}"
+									help="#{field.getString('help')}"
+									disabled="#{field.getBoolean('type[@readonly]')}"
+									required="#{not empty field.getString('validation')}" />
+							</c:forEach>
 						</div>
 					</div>
-					<div class="box-content nopadding" style="border-color: #666">
-						<c:forEach var="field"
-							items="#{NavigationForm.workflowPlugin.processFields}">
-							<c:set var="fieldname" value="#{field.getString('[@aeon]')}" />
-							<c:set var="fieldvalue" value="#{NavigationForm.workflowPlugin.getFieldValue(item, fieldname)}" />
-							<intranda:formInputText name="input"
-								rendered="#{(field.getString('type') eq 'input') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
-								classLeft="col-sm-3 control-label notFocusable"
-								label="#{field.getString('title')}" field="#{fieldvalue}"
-								help="#{field.getString('help')}" fieldStyle="form-control"
-								disabled="#{field.getBoolean('type[@readonly]')}"
-								required="#{not empty field.getString('validation')}" />
-
-							<intranda:formInputDropDown name="dropdown"
-								rendered="#{(field.getString('type') eq 'select') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
-								label="#{field.getString('title')}" field="#{fieldvalue}"
-								help="#{field.getString('help')}"
-								selectItems="#{field.getList('select')}"
-								fieldStyle="form-control"
-								disabled="#{field.getBoolean('type[@readonly]')}"
-								required="#{not empty field.getString('validation')}" />
-
-							<intranda:formInputCheckBox name="checkbox"
-								rendered="#{(field.getString('type') eq 'checkbox') and (field.getBoolean('[@displayAlways]') or item.showDetails)}"
-								label="#{field.getString('title')}" field="#{fieldvalue}"
-								help="#{field.getString('help')}"
-								disabled="#{field.getBoolean('type[@readonly]')}"
-								required="#{not empty field.getString('validation')}" />
-						</c:forEach>
-					</div>
+				</c:forEach>
+				<div class="margin-top-10 pull-left">
+					<button jsf:id="declineAll" class="btn margin-right-5">
+						<i class="fa fa-times"></i>
+						<h:outputText styleClass="font-size-s" value="Decline all" />
+						<f:setPropertyActionListener
+							target="#{NavigationForm.workflowPlugin.transmission.allItemsAccepted}"
+							value="#{false}" />
+						<f:ajax render=":itemForm" />
+					</button>
+					<button jsf:id="acceptAll" class="btn margin-right-5">
+						<i class="fa fa-check"></i>
+						<h:outputText styleClass="font-size-s" value="Accept all" />
+						<f:setPropertyActionListener
+							target="#{NavigationForm.workflowPlugin.transmission.allItemsAccepted}"
+							value="#{true}" />
+						<f:ajax render=":itemForm" />
+					</button>
 				</div>
-			</c:forEach>
-		</h:form>
+			</h:form>
+		</div>
 	</composite:implementation>
 </ui:composition>
