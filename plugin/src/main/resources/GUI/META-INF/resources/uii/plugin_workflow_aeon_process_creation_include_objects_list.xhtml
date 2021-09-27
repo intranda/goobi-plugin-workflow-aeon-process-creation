@@ -107,7 +107,7 @@
 					</div>
 				</c:forEach>
 				<!-- accept all / decline all buttons -->
-				<div class="margin-top-10 pull-left">
+				<div class="margin-top-10" style="width: 100%">
 					<button jsf:id="declineAll" class="btn margin-right-5">
 						<i class="fa fa-times"></i>
 						<h:outputText styleClass="font-size-s" value="Decline all" />
@@ -124,7 +124,15 @@
 							value="#{true}" />
 						<f:ajax render=":itemForm" />
 					</button>
-				</div>
+
+                    <button
+                        class="btn btn-success pull-right"
+                        jsf:id="absenden"
+                        jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
+                        <i class="fa fa-save margin-right-5"></i>
+                        <h:outputText value="#{msgs.speichern}" />
+                    </button>
+                </div>
 			</h:form>
 		</div>
 	</composite:implementation>
