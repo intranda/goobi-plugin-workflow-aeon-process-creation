@@ -1,71 +1,79 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-	xmlns:composite="http://xmlns.jcp.org/jsf/composite"
-	xmlns:h="http://xmlns.jcp.org/jsf/html"
-	xmlns:f="http://xmlns.jcp.org/jsf/core"
-	xmlns:x="http://myfaces.apache.org/tomahawk"
-	xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
-	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf">
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:x="http://myfaces.apache.org/tomahawk"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
+    xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:jsf="http://xmlns.jcp.org/jsf">
 
-	<composite:interface>
-	</composite:interface>
+    <composite:interface>
+    </composite:interface>
 
-	<composite:implementation>
-                                <h:panelGroup
-                                    rendered="#{!LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
-                                    <h:outputText
-                                        styleClass="alert alert-danger alert-dismissable margin-bottom-10 margin-top-10"
-                                        value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation"></h:outputText>
-                                </h:panelGroup>
-		<h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
-			<div class="row">
-				<div class="col-sm-6">
-					<!--  Transmission Request input Box  -->
-					<div class="box box-color box-bordered">
-						<div class="box-title">
-							<h3>
-								<h:outputText value="Request AEON for Transmission" />
-							</h3>
-						</div>
-						<div class="box-content">
-							<h:form id="requestForm">
-								<div class="form-group">
-									<div class="row">
-										<div class="col-sm-3">
-											<h:outputLabel styleClass="control-label "
-												value="Transmission identifier:" />
-										</div>
-										<div class="col-sm-9">
-											<x:inputText pt:aria-label="Transmission identifier"
-												styleClass="form-control" value="#{NavigationForm.workflowPlugin.input}" />
-										</div>
-									</div>
-								</div>
-								<div class="pull-right">
-									<button jsf:id="cancel" class="btn margin-right-10 font-size-s"
-										jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">Cancel</button>
-									<button jsf:id="sendRequest" class="btn btn-primary font-size-s"
-										jsf:action="#{NavigationForm.workflowPlugin.sendRequest}">Start Request</button>
-								</div>
+    <composite:implementation>
+        <h:panelGroup rendered="#{!LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
+            <h:outputText
+                styleClass="alert alert-danger alert-dismissable margin-bottom-10 margin-top-10"
+                value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation"></h:outputText>
+        </h:panelGroup>
+        <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
+            <div class="row">
+                <div class="col-sm-6">
+                    <!--  Transmission Request input Box  -->
+                    <div class="box box-color box-bordered">
+                        <div class="box-title">
+                            <h3>
+                                <h:outputText value="Request AEON for Transmission" />
+                            </h3>
+                        </div>
+                        <div class="box-content">
+                            <h:form id="requestForm">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h:outputLabel
+                                                styleClass="control-label "
+                                                value="Transmission identifier:" />
+                                        </div>
+                                        <div class="col-sm-9">
+                                            <x:inputText
+                                                pt:aria-label="Transmission identifier"
+                                                styleClass="form-control"
+                                                value="#{NavigationForm.workflowPlugin.input}" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pull-right">
+                                    <button
+                                        jsf:id="cancel"
+                                        class="btn margin-right-10 font-size-s"
+                                        jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">Cancel</button>
+                                    <button
+                                        jsf:id="sendRequest"
+                                        class="btn btn-primary font-size-s"
+                                        jsf:action="#{NavigationForm.workflowPlugin.sendRequest}">Start Request</button>
+                                </div>
 
-							</h:form>
-						</div>
-					</div>
-					
-					<!-- Transmission Details Box -->
-					<ui:include src="plugin_workflow_aeon_process_creation_include_Transmission_details.xhtml" />
-					
-					<!-- Edit Properties Box -->
-					<ui:include src="plugin_workflow_aeon_process_creation_include_properties.xhtml" />
-					
-				</div>
-				<div class="col-sm-6">
-					<!-- Objects List -->
-					<ui:include src="plugin_workflow_aeon_process_creation_include_objects_list.xhtml" />
-				</div>
-			</div>
-		</h:panelGroup>
+                            </h:form>
+                        </div>
+                    </div>
 
-	</composite:implementation>
+                    <!-- Transmission Details Box -->
+                    <ui:include src="plugin_workflow_aeon_process_creation_include_Transmission_details.xhtml" />
+
+                    <!-- Edit Properties Box -->
+                    <ui:include src="plugin_workflow_aeon_process_creation_include_properties.xhtml" />
+
+                </div>
+                <div class="col-sm-6">
+                    <!-- Objects List -->
+                    <ui:include src="plugin_workflow_aeon_process_creation_include_objects_list.xhtml" />
+                </div>
+            </div>
+        </h:panelGroup>
+
+    </composite:implementation>
 </ui:composition>

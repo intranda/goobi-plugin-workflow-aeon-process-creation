@@ -1,6 +1,7 @@
 package de.intranda.goobi.plugins;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,12 +13,14 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.commons.lang3.StringUtils;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 
 import de.intranda.goobi.plugins.aeon.AeonItem;
+import de.intranda.goobi.plugins.aeon.AeonProperty;
 import de.intranda.goobi.plugins.aeon.AeonTransmission;
 import de.sub.goobi.config.ConfigPlugins;
 import lombok.Getter;
@@ -41,6 +44,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @Setter
     //this will contain all fields inside <processes> defined in config
     private List<HierarchicalConfiguration> processFields;
+
+
+    @Getter
+    @Setter
+    private List<AeonProperty> propertyFields = new ArrayList<>();
 
     @Getter
     @Setter
@@ -163,12 +171,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
      * defined in the config
      */
     public void checkFieldValue(HierarchicalConfiguration field, Object object) {
-        Object fieldvalue = getFieldValue(object, field.getString("[@aeon]"));
+        Object fieldvalue = getFieldValue(object, field.getString("@aeon"));
         if (fieldvalue == null || StringUtils.isEmpty(String.valueOf(fieldvalue))) {
             if (object instanceof Boolean) {
-                setFieldValue(object, field.getString("[@aeon]"), field.getBoolean("value"));
+                setFieldValue(object, field.getString("@aeon"), field.getBoolean("value"));
             } else {
-                setFieldValue(object, field.getString("[@aeon]"), field.getString("value"));
+                setFieldValue(object, field.getString("@aeon"), field.getString("value"));
             }
         }
     }
@@ -195,9 +203,14 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     public void createProcesses() {
         // create new processes for selected items
+
+        // TODO validate properties
+
+        // TODO validate
+
         for (AeonItem item : transmission.getItems()) {
             if (item.isAccepted()) {
-                // TODO create
+                // TODO create process
             }
         }
     }
@@ -210,9 +223,17 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         //read config
         XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
+        config.setExpressionEngine(new XPathExpressionEngine());
 
         //read <transmission> and <processes>
-        this.transmissionFields = config.configurationsAt("transmission.field");
-        this.processFields = config.configurationsAt("processes.field");
+        this.transmissionFields = config.configurationsAt("/transmission/field");
+        this.processFields = config.configurationsAt("/processes/field");
+
+        propertyFields.clear();
+        List<HierarchicalConfiguration> properties= config.configurationsAt("/properties/field");
+        for (HierarchicalConfiguration hc : properties) {
+            AeonProperty property = new AeonProperty(hc);
+            propertyFields.add(property);
+        }
     }
 }
