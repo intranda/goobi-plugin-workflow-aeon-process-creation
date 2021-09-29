@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -22,6 +24,9 @@ import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 import de.intranda.goobi.plugins.aeon.AeonItem;
 import de.intranda.goobi.plugins.aeon.AeonProperty;
 import de.intranda.goobi.plugins.aeon.AeonTransmission;
+import de.intranda.goobi.plugins.api.aeon.LoginResponse;
+import de.intranda.goobi.plugins.api.aeon.QueueItem;
+import de.intranda.goobi.plugins.api.aeon.User;
 import de.sub.goobi.config.ConfigPlugins;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,7 +50,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     //this will contain all fields inside <processes> defined in config
     private List<HierarchicalConfiguration> processFields;
 
-
     @Getter
     @Setter
     private List<AeonProperty> propertyFields = new ArrayList<>();
@@ -65,8 +69,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     //input string entered into the TextField
     private String input;
 
-    @Getter
-    Client client = ClientBuilder.newClient();
+    private Client client = ClientBuilder.newClient();
+
+    private String api;
+    private User user;
 
     @Override
     public PluginType getType() {
@@ -103,6 +109,31 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 setRequestSuccess(true);
             }
         } else {
+            LoginResponse res = client.target(api)
+                    .path("Token")
+                    .request(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
+
+            List<QueueItem> queueItems = client.target(api)
+                    .path("Queues")
+                    .path(input)
+                    .path("requests")
+                    .request(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "BEARER " + res.getAccessToken())
+                    .get(new GenericType<List<QueueItem>>(){});
+            for (QueueItem qi: queueItems) {
+                System.out.println(qi.toString());
+            }
+
+
+            //            String r =   client.target(api)
+            //                    .path("Requests")
+            //                    .path("249426")
+            //                    .request(MediaType.APPLICATION_JSON)
+            //                    .header("Authorization", "BEARER " + res.getAccessToken())
+            //                    .get(String.class);
+            //            System.out.println( r);
+
             setRequestSuccess(false);
         }
     }
@@ -216,7 +247,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     }
 
     /**
-     * Constructor
+     * Constructor TODO use empty constructor, remove configuration from here
      */
     public AeonProcessCreationWorkflowPlugin() {
         log.info("AeonProcessCreation workflow plugin started");
@@ -225,12 +256,15 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
         config.setExpressionEngine(new XPathExpressionEngine());
 
+        api = config.getString("/aeon/url");
+        user = new User(config.getString("/aeon/username"), config.getString("/aeon/password"));
+
         //read <transmission> and <processes>
         this.transmissionFields = config.configurationsAt("/transmission/field");
         this.processFields = config.configurationsAt("/processes/field");
 
         propertyFields.clear();
-        List<HierarchicalConfiguration> properties= config.configurationsAt("/properties/field");
+        List<HierarchicalConfiguration> properties = config.configurationsAt("/properties/field");
         for (HierarchicalConfiguration hc : properties) {
             AeonProperty property = new AeonProperty(hc);
             propertyFields.add(property);

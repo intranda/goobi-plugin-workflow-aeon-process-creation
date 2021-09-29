@@ -3,6 +3,14 @@
 
 <config_plugin>
 	
+    <aeon>
+        <url>https://example.com</url>
+        <username>user</username>
+        <password>pw</password>
+    </aeon>
+
+
+
 	<!-- the transmission details are configured here;
   the values here are stored for all created processes; -->
   <transmission>
@@ -68,14 +76,35 @@
   <properties>
 
     <field>
-      <title>E Textfield</title>
+      <title>Strict validation</title>
       <type readonly="false">input</type>
       <variable place="process">Text field</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
-      <validation strict="true">xyz-regular-expression</validation>
+      <validation strict="true">\d+</validation>
+      <message>Value is no number</message>
+    </field>
+
+    <field>
+      <title>loose validation</title>
+      <type readonly="false">input</type>
+      <variable place="process">Text field</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+      <validation strict="false">\d+</validation>
+      <message>Value is no number</message>
+    </field>
+
+    <field>
+      <title>no validation</title>
+      <type readonly="false">input</type>
+      <variable place="process">Text field</variable>
+      <value>default value</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
       <message>Your content does not follow our validation guidelines</message>
     </field>
+
+
 
     <field>
       <title>F Dropdown</title>
@@ -87,16 +116,19 @@
       <select>Robert</select>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-
+<!--
     <field>
       <title>G Vokabularwert</title>
       <type readonly="false">vocabulary</type>
       <variable place="work">DocLanguage</variable>
-      <vocabularyName>Languages</vocabularyName>
-      <vocabularyField>iso</vocabularyField>
+      <vocabularyName>selections</vocabularyName>
+
+      <vocabularyName>Subject terms</vocabularyName>
+      <vocabularyField>type=AccessLocations</vocabularyField>
+
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-
+-->
     <field>
       <title>H Boolean</title>
       <type readonly="false">checkbox</type>
