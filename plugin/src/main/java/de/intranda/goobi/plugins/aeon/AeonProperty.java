@@ -119,17 +119,28 @@ public class AeonProperty {
 
     public void validateProperty(FacesContext context, UIComponent component, Object value) {
         // check if validation expression was configured
-        System.out.println("validator");
         if (StringUtils.isNotBlank(validationExpression)) {
             // check if value is empty
             if (value == null) {
-                FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
+                FacesMessage message =null;
+                if (strictValidation) {
+                    message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
+                } else {
+                    message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
+                    this.value=null;
+                }
                 throw new ValidatorException(message);
             }
             String data = (String) value;
             // check if data matches expression
             if (!data.matches(validationExpression)) {
-                FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
+                FacesMessage message =null;
+                if (strictValidation) {
+                    message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
+                } else {
+                    message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
+                    this.value=data;
+                }
                 throw new ValidatorException(message);
             }
         }
