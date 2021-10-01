@@ -52,7 +52,7 @@
                             value="#{NavigationForm.workflowPlugin.propertyFields}"
                             var="property">
                             <ui:fragment rendered="#{property.type == 'input'}">
-                                <div class="form-group">
+                                <h:panelGroup layout="block" styleClass="form-group" id="group">
                                     <div class="col-sm-3 control-label notFocusable">
                                         <h:outputLabel
                                             for="input"
@@ -70,7 +70,7 @@
                                             validator="#{property.validateProperty}">
                                             <f:ajax
                                                 execute="@this"
-                                                render="@form"
+                                                render="group"
                                                 event="blur" />
                                         </x:inputText>
                                         <h:message
@@ -83,7 +83,7 @@
                                             rendered="#{NavigationForm.showHelp}"
                                             value="#{property.helpMessage}" />
                                     </div>
-                                </div>
+                                </h:panelGroup>
                             </ui:fragment>
 
                             <intranda:formInputDropDownAjax

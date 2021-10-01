@@ -125,6 +125,7 @@ public class AeonProperty {
                 FacesMessage message =null;
                 if (strictValidation) {
                     message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
+                    this.value=null;
                 } else {
                     message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
                     this.value=null;
@@ -137,6 +138,7 @@ public class AeonProperty {
                 FacesMessage message =null;
                 if (strictValidation) {
                     message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
+                    this.value=data;
                 } else {
                     message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
                     this.value=data;
