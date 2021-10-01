@@ -23,6 +23,8 @@ import lombok.Data;
 @Data
 public class AeonProperty {
 
+
+    private String aeonField; // @aeon
     private String title; // /title
     private String type; // /type
     private boolean readonly; // /type/@readonly
@@ -43,6 +45,7 @@ public class AeonProperty {
     private List<String> vocabularyField; // /vocabularyField
 
     public AeonProperty(HierarchicalConfiguration config) {
+        aeonField = config.getString("@aeon");
         title = config.getString("title");
         type = config.getString("type", "input");
         readonly = config.getBoolean("type/@readonly", false);

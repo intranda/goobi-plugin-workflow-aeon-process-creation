@@ -29,6 +29,14 @@
       <artifactId>goobi-core-jar</artifactId>
       <version>${goobi.version}</version>
     </dependency>
+
+    <dependency>
+  <groupId>de.intranda.goobi.plugins.opac</groupId>
+  <artifactId>goobi-plugin-opac-json-gui</artifactId>
+  <version>1.0.1</version>
+   <scope>provided</scope>
+    </dependency>
+    
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>

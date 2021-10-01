@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -17,17 +17,20 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.commons.lang3.StringUtils;
+import org.goobi.interfaces.IJsonPlugin;
+import org.goobi.interfaces.IOverview;
+import org.goobi.interfaces.ISearchField;
 import org.goobi.production.enums.PluginType;
+import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 
-import de.intranda.goobi.plugins.aeon.AeonItem;
 import de.intranda.goobi.plugins.aeon.AeonProperty;
-import de.intranda.goobi.plugins.aeon.AeonTransmission;
 import de.intranda.goobi.plugins.api.aeon.LoginResponse;
-import de.intranda.goobi.plugins.api.aeon.QueueItem;
 import de.intranda.goobi.plugins.api.aeon.User;
 import de.sub.goobi.config.ConfigPlugins;
+import de.unigoettingen.sub.search.opac.ConfigOpac;
+import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -40,15 +43,19 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @Getter
     private String title = "intranda_workflow_aeon_process_creation";
 
-    @Getter
-    @Setter
-    //this will contain all fields inside <transmission> defined in config
-    private List<HierarchicalConfiguration> transmissionFields;
+    //    @Getter
+    //    @Setter
+    //    //this will contain all fields inside <transmission> defined in config
+    //    private List<HierarchicalConfiguration> transmissionFields;
 
     @Getter
     @Setter
     //this will contain all fields inside <processes> defined in config
-    private List<HierarchicalConfiguration> processFields;
+    private List<AeonProperty> recordFields = new ArrayList<>();
+
+    @Getter
+    @Setter
+    private List<AeonProperty> transmissionFields = new ArrayList<>();
 
     @Getter
     @Setter
@@ -59,10 +66,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     //set true when the request was a success (important for xhtml EL expressions rendered checks)
     private boolean requestSuccess = false;
 
-    @Getter
-    @Setter
-    //the response from api (currently RestTest.java)
-    private AeonTransmission transmission = new AeonTransmission();
+    //    @Getter
+    //    @Setter
+    //    //the response from api (currently RestTest.java)
+    //    private AeonTransmission transmission = new AeonTransmission();
 
     @Getter
     @Setter
@@ -73,6 +80,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     private String api;
     private User user;
+
+    private String workflowName;
+    private String opacName;
 
     @Override
     public PluginType getType() {
@@ -89,53 +99,133 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
      * recieves JSON String as response which is parsed into the AeonTransmission object
      */
     public void sendRequest() {
-        AeonTransmission response = null;
-        setInput(input); //set this.input to textfield input
 
-        if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
-            try {
-                response = this.client.target("http://localhost:8080/goobi/api/")
-                        .path("testingRest")
-                        .request(MediaType.APPLICATION_JSON)
-                        .get(AeonTransmission.class);
-            } catch (Exception e) {
-                log.error(e + " " + e.getMessage());
+        //        AeonTransmission response = null;
+        //        if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
+        //            try {
+        //                response = this.client.target("http://localhost:8080/goobi/api/")
+        //                        .path("testingRest")
+        //                        .request(MediaType.APPLICATION_JSON)
+        //                        .get(AeonTransmission.class);
+        //            } catch (Exception e) {
+        //                log.error(e + " " + e.getMessage());
+        //            }
+        //            setTransmission(response);
+        //            if (this.transmission == null) {
+        //                return;
+        //            } else {
+        //                setDefaultTransmissionValues(); //Checks Config for Default values!
+        //                setRequestSuccess(true);
+        //            }
+        //        } else {
+        LoginResponse res = client.target(api)
+                .path("Token")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
+
+        //            QueueItem item = client.target(api)
+        //                    .path("Requests")
+        //                    .path(input)
+        //                    .request(MediaType.APPLICATION_JSON)
+        //                    .header("Authorization", "BEARER " + res.getAccessToken())
+        //                    .get(QueueItem.class);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = client.target(api)
+        .path("Requests")
+        .path(input)
+        .request(MediaType.APPLICATION_JSON)
+        .header("Authorization", "BEARER " + res.getAccessToken())
+        .get(Map.class);
+
+        for (AeonProperty property : transmissionFields) {
+            if (StringUtils.isNoneBlank(property.getAeonField())) {
+                Object value = map.get(property.getAeonField());
+                if (value instanceof String) {
+                    property.setValue((String) value);
+                } else if (value instanceof Integer) {
+                    property.setValue(((Integer) value).toString());
+                } else {
+                    property.setValue((String) value);
+                }
             }
-            setTransmission(response);
-            if (this.transmission == null) {
-                return;
-            } else {
-                setDefaultTransmissionValues(); //Checks Config for Default values!
-                setRequestSuccess(true);
-            }
-        } else {
-            LoginResponse res = client.target(api)
-                    .path("Token")
-                    .request(MediaType.APPLICATION_JSON)
-                    .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
-
-            List<QueueItem> queueItems = client.target(api)
-                    .path("Queues")
-                    .path(input)
-                    .path("requests")
-                    .request(MediaType.APPLICATION_JSON)
-                    .header("Authorization", "BEARER " + res.getAccessToken())
-                    .get(new GenericType<List<QueueItem>>(){});
-            for (QueueItem qi: queueItems) {
-                System.out.println(qi.toString());
-            }
-
-
-            //            String r =   client.target(api)
-            //                    .path("Requests")
-            //                    .path("249426")
-            //                    .request(MediaType.APPLICATION_JSON)
-            //                    .header("Authorization", "BEARER " + res.getAccessToken())
-            //                    .get(String.class);
-            //            System.out.println( r);
-
-            setRequestSuccess(false);
         }
+
+        String catalogueIdentifier = (String) map.get("referenceNumber");
+
+        IOpacPlugin myImportOpac = null;
+        ConfigOpacCatalogue coc = null;
+
+        for (ConfigOpacCatalogue configOpacCatalogue : ConfigOpac.getInstance().getAllCatalogues(workflowName)) {
+            if (configOpacCatalogue.getTitle().equals(opacName)) {
+                myImportOpac = configOpacCatalogue.getOpacPlugin();
+                coc = configOpacCatalogue;
+            }
+        }
+
+        IJsonPlugin plugin = (IJsonPlugin) myImportOpac;
+
+        for (ISearchField sf:  plugin.getSearchFieldList()) {
+            if (sf.getId().equals("Barcode")) {
+                sf.setText(catalogueIdentifier);
+            }
+        }
+        try {
+            plugin.search("", "", coc, null);
+        } catch (Exception e) {
+            log.error(e);
+        }
+        for (IOverview overview : plugin.getOverviewList()) {
+            System.out.println(overview.getTitle());
+        }
+        //        try {
+        //            Class<? extends Object> opacClass = myImportOpac.getClass();
+        //            Method getConfigForOpac = opacClass.getMethod("getConfigForOpac");
+        //            Object jsonOpacConfig = getConfigForOpac.invoke(myImportOpac);
+        //
+        //            Class<? extends Object> jsonOpacConfigClass = jsonOpacConfig.getClass();
+        //
+        //            Method getFieldList = jsonOpacConfigClass.getMethod("getFieldList");
+        //
+        //            Object fieldList = getFieldList.invoke(jsonOpacConfig);
+        //            List<Object> fields = (List<Object>) fieldList;
+        //            for (Object searchField : fields) {
+        //                Class<? extends Object> searchFieldClass = searchField.getClass();
+        //
+        //                Method getId = searchFieldClass.getMethod("getId");
+        //
+        //                Method setText = searchFieldClass.getMethod("setText", String.class);
+        //                Method setSelectedField = searchFieldClass.getMethod("setSelectedField", String.class);
+        //
+        //                Object id = getId.invoke(searchField);
+        //                if (((String) id).equals("Barcode")) {
+        //                    setText.invoke(searchField, catalogueIdentifier);
+        //                    setSelectedField.invoke(searchField, catalogueIdentifier);
+        //                }
+        //
+        //            }
+        //
+        //            Method search = opacClass.getMethod("search", String.class, String.class, ConfigOpacCatalogue.class, Prefs.class);
+        //            search.invoke(myImportOpac, "", "", coc, null);
+        //
+        //            Method getOverviewList = opacClass.getMethod("getOverviewList");
+        //            List<Object>  records = (List<Object>) getOverviewList.invoke(myImportOpac);
+        //            for (Object record : records) {
+        //                Class<? extends Object> recordClass = record.getClass();
+        //                for (AeonProperty prop : recordFields) {
+        //
+        //                }
+        //
+        //            }
+        //
+        //
+        //        } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        //        }
+
+        // use identifier in opac plugin
+
+        setRequestSuccess(true);
+        //        }
     }
 
     /*
@@ -143,7 +233,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
      * (this resets the page to its default state)
      */
     public void resetRequest() {
-        setTransmission(null);
         setRequestSuccess(false);
         input = "";
     }
@@ -212,25 +301,25 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
     }
 
-    /*
-     * Uses above defined functions to iterate through the config
-     * and change values to default if necessary
-     */
-    public void setDefaultTransmissionValues() {
-
-        //iterate through <transmission> (config)
-        for (HierarchicalConfiguration field : this.transmissionFields) {
-            checkFieldValue(field, this.transmission);
-        }
-
-        //iterate through <processes> (config)
-        for (HierarchicalConfiguration field : this.processFields) {
-            //iterate through items (to apply config settings)
-            for (int i = 0; i < this.transmission.getItems().size(); i++) {
-                checkFieldValue(field, this.transmission.getItems().get(i));
-            }
-        }
-    }
+    //    /*
+    //     * Uses above defined functions to iterate through the config
+    //     * and change values to default if necessary
+    //     */
+    //    public void setDefaultTransmissionValues() {
+    //
+    //        //iterate through <transmission> (config)
+    //        for (HierarchicalConfiguration field : this.transmissionFields) {
+    //            checkFieldValue(field, this.transmission);
+    //        }
+    //
+    //        //iterate through <processes> (config)
+    //        for (HierarchicalConfiguration field : this.processFields) {
+    //            //iterate through items (to apply config settings)
+    //            for (int i = 0; i < this.transmission.getItems().size(); i++) {
+    //                checkFieldValue(field, this.transmission.getItems().get(i));
+    //            }
+    //        }
+    //    }
 
     public void createProcesses() {
         // create new processes for selected items
@@ -239,11 +328,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         // TODO validate
 
-        for (AeonItem item : transmission.getItems()) {
-            if (item.isAccepted()) {
-                // TODO create process
-            }
-        }
     }
 
     /**
@@ -259,9 +343,23 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         api = config.getString("/aeon/url");
         user = new User(config.getString("/aeon/username"), config.getString("/aeon/password"));
 
+        workflowName = config.getString("/processCreation/workflowName");
+        opacName = config.getString("/processCreation/opacName");
+
         //read <transmission> and <processes>
-        this.transmissionFields = config.configurationsAt("/transmission/field");
-        this.processFields = config.configurationsAt("/processes/field");
+        List<HierarchicalConfiguration> transmissions = config.configurationsAt("/transmission/field");
+        for (HierarchicalConfiguration hc : transmissions) {
+            AeonProperty property = new AeonProperty(hc);
+            transmissionFields.add(property);
+        }
+        List<HierarchicalConfiguration> processes = config.configurationsAt("/processes/field");
+        for (HierarchicalConfiguration hc : processes) {
+            AeonProperty property = new AeonProperty(hc);
+            recordFields.add(property);
+        }
+
+        //        this.transmissionFields = config.configurationsAt("/transmission/field");
+        //        this.processFields = config.configurationsAt("/processes/field");
 
         propertyFields.clear();
         List<HierarchicalConfiguration> properties = config.configurationsAt("/properties/field");
