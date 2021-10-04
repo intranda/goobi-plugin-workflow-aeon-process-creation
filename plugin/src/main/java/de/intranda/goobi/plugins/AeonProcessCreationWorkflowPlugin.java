@@ -18,7 +18,6 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.commons.lang3.StringUtils;
 import org.goobi.interfaces.IJsonPlugin;
-import org.goobi.interfaces.IOverview;
 import org.goobi.interfaces.ISearchField;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
@@ -26,6 +25,7 @@ import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 
 import de.intranda.goobi.plugins.aeon.AeonProperty;
+import de.intranda.goobi.plugins.aeon.AeonRecord;
 import de.intranda.goobi.plugins.api.aeon.LoginResponse;
 import de.intranda.goobi.plugins.api.aeon.User;
 import de.sub.goobi.config.ConfigPlugins;
@@ -84,6 +84,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     private String workflowName;
     private String opacName;
 
+    @Getter
+    @Setter
+    private List<AeonRecord> recordList = new ArrayList<>();
+
     @Override
     public PluginType getType() {
         return PluginType.Workflow;
@@ -98,46 +102,35 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
      * Sends a Request to the goobi api (RestTest.java) and
      * recieves JSON String as response which is parsed into the AeonTransmission object
      */
+    @SuppressWarnings("unchecked")
     public void sendRequest() {
+        recordList.clear();
+        Map<String, Object> map = null;
 
-        //        AeonTransmission response = null;
-        //        if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
-        //            try {
-        //                response = this.client.target("http://localhost:8080/goobi/api/")
-        //                        .path("testingRest")
-        //                        .request(MediaType.APPLICATION_JSON)
-        //                        .get(AeonTransmission.class);
-        //            } catch (Exception e) {
-        //                log.error(e + " " + e.getMessage());
-        //            }
-        //            setTransmission(response);
-        //            if (this.transmission == null) {
-        //                return;
-        //            } else {
-        //                setDefaultTransmissionValues(); //Checks Config for Default values!
-        //                setRequestSuccess(true);
-        //            }
-        //        } else {
-        LoginResponse res = client.target(api)
-                .path("Token")
-                .request(MediaType.APPLICATION_JSON)
-                .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
+        if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
+            try {
+                map = client.target("http://localhost:8080/goobi/api/")
+                        .path("testingRest")
+                        .path("aeon")
+                        .request(MediaType.APPLICATION_JSON)
+                        .get(Map.class);
 
-        //            QueueItem item = client.target(api)
-        //                    .path("Requests")
-        //                    .path(input)
-        //                    .request(MediaType.APPLICATION_JSON)
-        //                    .header("Authorization", "BEARER " + res.getAccessToken())
-        //                    .get(QueueItem.class);
+            } catch (Exception e) {
+                log.error(e + " " + e.getMessage());
+            }
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> map = client.target(api)
-        .path("Requests")
-        .path(input)
-        .request(MediaType.APPLICATION_JSON)
-        .header("Authorization", "BEARER " + res.getAccessToken())
-        .get(Map.class);
-
+        } else {
+            LoginResponse res = client.target(api)
+                    .path("Token")
+                    .request(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
+            map = client.target(api)
+                    .path("Requests")
+                    .path(input)
+                    .request(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "BEARER " + res.getAccessToken())
+                    .get(Map.class);
+        }
         for (AeonProperty property : transmissionFields) {
             if (StringUtils.isNoneBlank(property.getAeonField())) {
                 Object value = map.get(property.getAeonField());
@@ -164,10 +157,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
 
         IJsonPlugin plugin = (IJsonPlugin) myImportOpac;
-
-        for (ISearchField sf:  plugin.getSearchFieldList()) {
-            if (sf.getId().equals("Barcode")) {
-                sf.setText(catalogueIdentifier);
+        if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
+            plugin.setTestMode(true);
+        } else {
+            for (ISearchField sf : plugin.getSearchFieldList()) {
+                if (sf.getId().equals("Barcode")) {
+                    sf.setText(catalogueIdentifier);
+                }
             }
         }
         try {
@@ -175,57 +171,18 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         } catch (Exception e) {
             log.error(e);
         }
-        for (IOverview overview : plugin.getOverviewList()) {
-            System.out.println(overview.getTitle());
+
+        for (Map<String, String> overview : plugin.getOverviewList()) {
+            AeonRecord record = new AeonRecord();
+            recordList.add(record);
+
+            for (AeonProperty p : recordFields) {
+                AeonProperty prop = p.cloneProperty();
+                prop.setValue(overview.get(prop.getAeonField()));
+                record.getProperties().add(prop);
+            }
         }
-        //        try {
-        //            Class<? extends Object> opacClass = myImportOpac.getClass();
-        //            Method getConfigForOpac = opacClass.getMethod("getConfigForOpac");
-        //            Object jsonOpacConfig = getConfigForOpac.invoke(myImportOpac);
-        //
-        //            Class<? extends Object> jsonOpacConfigClass = jsonOpacConfig.getClass();
-        //
-        //            Method getFieldList = jsonOpacConfigClass.getMethod("getFieldList");
-        //
-        //            Object fieldList = getFieldList.invoke(jsonOpacConfig);
-        //            List<Object> fields = (List<Object>) fieldList;
-        //            for (Object searchField : fields) {
-        //                Class<? extends Object> searchFieldClass = searchField.getClass();
-        //
-        //                Method getId = searchFieldClass.getMethod("getId");
-        //
-        //                Method setText = searchFieldClass.getMethod("setText", String.class);
-        //                Method setSelectedField = searchFieldClass.getMethod("setSelectedField", String.class);
-        //
-        //                Object id = getId.invoke(searchField);
-        //                if (((String) id).equals("Barcode")) {
-        //                    setText.invoke(searchField, catalogueIdentifier);
-        //                    setSelectedField.invoke(searchField, catalogueIdentifier);
-        //                }
-        //
-        //            }
-        //
-        //            Method search = opacClass.getMethod("search", String.class, String.class, ConfigOpacCatalogue.class, Prefs.class);
-        //            search.invoke(myImportOpac, "", "", coc, null);
-        //
-        //            Method getOverviewList = opacClass.getMethod("getOverviewList");
-        //            List<Object>  records = (List<Object>) getOverviewList.invoke(myImportOpac);
-        //            for (Object record : records) {
-        //                Class<? extends Object> recordClass = record.getClass();
-        //                for (AeonProperty prop : recordFields) {
-        //
-        //                }
-        //
-        //            }
-        //
-        //
-        //        } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-        //        }
-
-        // use identifier in opac plugin
-
         setRequestSuccess(true);
-        //        }
     }
 
     /*

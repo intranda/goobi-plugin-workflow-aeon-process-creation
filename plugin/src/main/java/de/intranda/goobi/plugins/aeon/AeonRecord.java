@@ -11,4 +11,8 @@ public class AeonRecord {
 
     private List<AeonProperty> properties = new ArrayList<>();
 
+    //
+    private boolean accepted = false;
+
+    private boolean showDetails = false;
 }

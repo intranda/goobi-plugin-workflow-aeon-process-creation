@@ -23,7 +23,7 @@ import lombok.Data;
 @Data
 public class AeonProperty {
 
-
+    // configuration
     private String aeonField; // @aeon
     private String title; // /title
     private String type; // /type
@@ -41,14 +41,25 @@ public class AeonProperty {
     private boolean strictValidation; // /validation/@strict
     private String validationErrorMessage; // /message
 
+    private boolean displayAlways = false;
+
     private String vocabularyName; // /vocabularyName
     private List<String> vocabularyField; // /vocabularyField
 
+    private HierarchicalConfiguration config;
+
+
+
+
+
     public AeonProperty(HierarchicalConfiguration config) {
+        this.config = config;
         aeonField = config.getString("@aeon");
         title = config.getString("title");
         type = config.getString("type", "input");
         readonly = config.getBoolean("type/@readonly", false);
+
+        displayAlways = config.getBoolean("@displayAlways", false);
 
         propertyName = config.getString("variable", title);
         place = config.getString("variable/@place", "process");
@@ -150,4 +161,10 @@ public class AeonProperty {
             }
         }
     }
+
+    public AeonProperty cloneProperty() {
+        AeonProperty property = new AeonProperty(config);
+        return property;
+    }
+
 }

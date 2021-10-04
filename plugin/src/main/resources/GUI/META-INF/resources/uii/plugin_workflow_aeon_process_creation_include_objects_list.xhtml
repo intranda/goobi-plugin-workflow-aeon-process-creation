@@ -38,101 +38,137 @@
             <h:form
                 id="itemForm"
                 styleClass="form-horizontal form-bordered">
-                <!-- iterate through items from transmission -->
-<!--                 <c:forEach -->
-<!--                     var="item" -->
-<!--                     items="#{NavigationForm.workflowPlugin.transmission.items}"> -->
-<!--                     <div class="box box-bordered"> -->
-<!--                         <div -->
-<!--                             class="box-title" -->
-<!--                             style="border-color: #666;"> -->
-<!--                             <h2 style="color: #333;">#{item.id}: #{item.title}</h2> -->
-<!--                             decline / accept / expand buttons -->
-<!--                             <div class="pull-right"> -->
-<!--                                 <button -->
-<!--                                     jsf:id="decline" -->
-<!--                                     class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5"> -->
-<!--                                     <i class="fa fa-times"></i> -->
-<!--                                     <f:setPropertyActionListener -->
-<!--                                         target="#{item.accepted}" -->
-<!--                                         value="#{false}" /> -->
-<!--                                     <f:ajax render=":itemForm" /> -->
-<!--                                 </button> -->
-<!--                                 <button -->
-<!--                                     jsf:id="accept" -->
-<!--                                     class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5"> -->
-<!--                                     <i class="fa fa-check"></i> -->
-<!--                                     <f:setPropertyActionListener -->
-<!--                                         target="#{item.accepted}" -->
-<!--                                         value="#{true}" /> -->
-<!--                                     <f:ajax render=":itemForm" /> -->
-<!--                                 </button> -->
+                <ui:repeat
+                    var="item"
+                    value="#{NavigationForm.workflowPlugin.recordList}">
+                    <!-- iterate through items from transmission -->
+                    <div class="box box-bordered">
+                        <div
+                            class="box-title"
+                            style="border-color: #666;">
+                            <h2 style="color: #333; max-width: 85%">
+                                <ui:repeat
+                                    var="p"
+                                    value="#{item.properties}">
+                                    <h:outputText
+                                        value="#{p.value} "
+                                        rendered="#{p.displayAlways}" />
+                                </ui:repeat>
+                            </h2>
+                            <!--  decline / accept / expand buttons -->
+                            <div class="pull-right">
+                                <button
+                                    jsf:id="decline"
+                                    class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5">
+                                    <i class="fa fa-times"></i>
+                                    <f:setPropertyActionListener
+                                        target="#{item.accepted}"
+                                        value="#{false}" />
+                                    <f:ajax render=":itemForm" />
+                                </button>
+                                <button
+                                    jsf:id="accept"
+                                    class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5">
+                                    <i class="fa fa-check"></i>
+                                    <f:setPropertyActionListener
+                                        target="#{item.accepted}"
+                                        value="#{true}" />
+                                    <f:ajax render=":itemForm" />
+                                </button>
 
-<!--                                 <button -->
-<!--                                     type="button" -->
-<!--                                     class="btn margin-right-5" -->
-<!--                                     style="background: transparent" -->
-<!--                                     title="#{(item.showDetails) ? 'hide details' : 'show details'}" -->
-<!--                                     jsf:id="details"> -->
-<!--                                     <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i> -->
-<!--                                     <f:setPropertyActionListener -->
-<!--                                         target="#{item.showDetails}" -->
-<!--                                         value="#{!item.showDetails}" /> -->
-<!--                                     <f:ajax render=":itemForm" /> -->
-<!--                                 </button> -->
-<!--                             </div> -->
-<!--                         </div> -->
-<!--                         <div -->
-<!--                             class="box-content nopadding" -->
-<!--                             style="border-color: #666"> -->
-<!--                             iterates through config fields (<processes>) -->
-<!--                             <c:forEach -->
-<!--                                 var="field" -->
-<!--                                 items="#{NavigationForm.workflowPlugin.processFields}"> -->
-<!--                                 gets the fieldname (for item.shelfmark => shelfmark ... these are defined under aeon property in config) -->
-<!--                                 <c:set -->
-<!--                                     var="fieldname" -->
-<!--                                     value="#{field.getString('@aeon')}" /> -->
-<!--                                 gets the fieldvalue through getFieldValue()  -->
-<!--                                 <c:set -->
-<!--                                     var="fieldvalue" -->
-<!--                                     value="#{NavigationForm.workflowPlugin.getFieldValue(item, fieldname)}" /> -->
+                                <button
+                                    type="button"
+                                    class="btn margin-right-5"
+                                    style="background: transparent"
+                                    title="#{(item.showDetails) ? 'hide details' : 'show details'}"
+                                    jsf:id="details">
+                                    <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
+                                    <f:setPropertyActionListener
+                                        target="#{item.showDetails}"
+                                        value="#{!item.showDetails}" />
+                                    <f:ajax render=":itemForm" />
+                                </button>
+                            </div>
+                        </div>
+                        <h:panelGroup
+                            layout="block"
+                            rendered="#{item.showDetails}"
+                            styleClass="box-content nopadding"
+                            style="border-color: #666">
+                            <x:dataList
+                                value="#{item.properties}"
+                                var="property">
+                                <ui:fragment rendered="#{property.type == 'input'}">
+                                    <h:panelGroup
+                                        layout="block"
+                                        styleClass="form-group"
+                                        id="group">
+                                        <div class="col-sm-3 control-label notFocusable">
+                                            <h:outputLabel
+                                                for="input"
+                                                value="#{property.title}" />
+                                        </div>
+                                        <div class="col-sm-9">
+                                            <x:inputText
+                                                id="input"
+                                                forceId="false"
+                                                name="input"
+                                                styleClass="form-control"
+                                                value="#{property.value}"
+                                                required="false"
+                                                readonly="#{property.readonly}"
+                                                validator="#{property.validateProperty}">
+                                                <f:ajax
+                                                    execute="@this"
+                                                    render="group"
+                                                    event="blur" />
+                                            </x:inputText>
+                                            <h:message
+                                                for="input"
+                                                showDetail="true"
+                                                styleClass="help-inline font-danger"
+                                                warnClass="alert" />
+                                            <h:outputText
+                                                styleClass="help-block font-light"
+                                                rendered="#{NavigationForm.showHelp}"
+                                                value="#{property.helpMessage}" />
+                                        </div>
+                                    </h:panelGroup>
+                                </ui:fragment>
 
-<!--                                 3 different types of inputs (input, dropdown, checkbox) -->
-<!--                                 <intranda:formInputText -->
-<!--                                     name="input" -->
-<!--                                     rendered="#{(field.getString('type') eq 'input') and (field.getBoolean('@displayAlways') or item.showDetails)}" -->
-<!--                                     classLeft="col-sm-3 control-label notFocusable" -->
-<!--                                     label="#{field.getString('title')}" -->
-<!--                                     field="#{fieldvalue}" -->
-<!--                                     help="#{field.getString('help')}" -->
-<!--                                     fieldStyle="form-control" -->
-<!--                                     readonly="#{field.getBoolean('type/@readonly')}" -->
-<!--                                     required="#{not empty field.getString('validation')}" /> -->
+                                <intranda:formInputDropDownAjax
+                                    name="dropdown"
+                                    rendered="#{property.type == 'select' or property.type == 'vocabulary'}"
+                                    label="#{property.title}"
+                                    field="#{property.value}"
+                                    help="#{property.helpMessage}"
+                                    selectItems="#{property.selectValues}"
+                                    fieldStyle="form-control"
+                                    readonly="#{property.readonly}"
+                                    required="false"
+                                    validator="#{property.validateProperty}"
+                                    ajaxEvent="change"
+                                    ajaxRender="@this"
+                                    var="var"
+                                    itemLabel="#{var}"
+                                    itemValue="#{var}" />
 
-<!--                                 <intranda:formInputDropDown -->
-<!--                                     name="dropdown" -->
-<!--                                     rendered="#{(field.getString('type') eq 'select') and (field.getBoolean('@displayAlways') or item.showDetails)}" -->
-<!--                                     label="#{field.getString('title')}" -->
-<!--                                     field="#{fieldvalue}" -->
-<!--                                     help="#{field.getString('help')}" -->
-<!--                                     selectItems="#{field.getList('select')}" -->
-<!--                                     fieldStyle="form-control" -->
-<!--                                     readonly="#{field.getBoolean('type/@readonly')}" -->
-<!--                                     required="#{not empty field.getString('validation')}" /> -->
-
-<!--                                 <intranda:formInputCheckBox -->
-<!--                                     name="checkbox" -->
-<!--                                     rendered="#{(field.getString('type') eq 'checkbox') and (field.getBoolean('@displayAlways') or item.showDetails)}" -->
-<!--                                     label="#{field.getString('title')}" -->
-<!--                                     field="#{fieldvalue}" -->
-<!--                                     help="#{field.getString('help')}" -->
-<!--                                     readonly="#{field.getBoolean('type/@readonly')}" -->
-<!--                                     required="#{not empty field.getString('validation')}" /> -->
-<!--                             </c:forEach> -->
-<!--                         </div> -->
-<!--                     </div> -->
-<!--                 </c:forEach> -->
+                                <intranda:formInputCheckBoxAjax
+                                    name="checkbox"
+                                    rendered="#{property.type == 'checkbox'}"
+                                    label="#{property.title}"
+                                    field="#{property.value}"
+                                    help="#{property.helpMessage}"
+                                    fieldStyle="form-control"
+                                    readonly="#{property.readonly}"
+                                    required="false"
+                                    validator="#{property.validateProperty}"
+                                    ajaxEvent="change"
+                                    ajaxRender="@this" />
+                            </x:dataList>
+                        </h:panelGroup>
+                    </div>
+                </ui:repeat>
                 <!-- accept all / decline all buttons -->
                 <div
                     class="margin-top-10"
