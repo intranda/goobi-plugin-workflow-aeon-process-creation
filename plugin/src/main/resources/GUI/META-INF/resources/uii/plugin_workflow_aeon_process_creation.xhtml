@@ -17,7 +17,7 @@
         <h:panelGroup rendered="#{!LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
             <h:outputText
                 styleClass="alert alert-danger alert-dismissable margin-bottom-10 margin-top-10"
-                value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation"></h:outputText>
+                value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation"/>
         </h:panelGroup>
         <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
             <div class="row">
@@ -26,7 +26,7 @@
                     <div class="box box-color box-bordered">
                         <div class="box-title">
                             <h3>
-                                <h:outputText value="Request AEON for Transmission" />
+                                <h:outputText value="#{msgs.plugin_workflow_aeon_requestAeonForTransmission}" />
                             </h3>
                         </div>
                         <div class="box-content">
@@ -36,11 +36,11 @@
                                         <div class="col-sm-3">
                                             <h:outputLabel
                                                 styleClass="control-label "
-                                                value="Transmission identifier:" />
+                                                value="#{msgs.plugin_workflow_aeon_transmissionIdentifier}:" />
                                         </div>
                                         <div class="col-sm-9">
                                             <x:inputText
-                                                pt:aria-label="Transmission identifier"
+                                                pt:aria-label="#{msgs.plugin_workflow_aeon_transmissionIdentifier}"
                                                 styleClass="form-control"
                                                 value="#{NavigationForm.workflowPlugin.input}" />
                                         </div>
@@ -50,11 +50,11 @@
                                     <button
                                         jsf:id="cancel"
                                         class="btn margin-right-10 font-size-s"
-                                        jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">Cancel</button>
+                                        jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">#{msgs.plugin_workflow_aeon_cancel}</button>
                                     <button
                                         jsf:id="sendRequest"
                                         class="btn btn-primary font-size-s"
-                                        jsf:action="#{NavigationForm.workflowPlugin.sendRequest}">Start Request</button>
+                                        jsf:action="#{NavigationForm.workflowPlugin.sendRequest}">#{msgs.plugin_workflow_aeon_startRequest}</button>
                                 </div>
 
                             </h:form>

@@ -21,14 +21,14 @@
             <div
                 class="box-title"
                 style="background-color: #eee;">
-                <h2 class="tableColumnMaxWidthExtraLong">Objects</h2>
+                <h2 class="tableColumnMaxWidthExtraLong">#{msgs.plugin_workflow_aeon_objects}</h2>
 
             </div>
             <div class="box-content nopadding">
 
                 <div style="background-color: #eee; height: 500px;">
                     <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
-                        <p>-no AEON Object requested yet-</p>
+                        <p>#{msgs.plugin_workflow_aeon_notRequestedYet}</p>
                     </div>
                 </div>
             </div>
@@ -59,7 +59,8 @@
                             <div class="pull-right">
                                 <button
                                     jsf:id="decline"
-                                    class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5">
+                                    class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5"
+                                    title="#{msgs.plugin_workflow_aeon_decline}">
                                     <i class="fa fa-times"></i>
                                     <f:setPropertyActionListener
                                         target="#{item.accepted}"
@@ -68,7 +69,8 @@
                                 </button>
                                 <button
                                     jsf:id="accept"
-                                    class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5">
+                                    class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5"
+                                    title="#{msgs.plugin_workflow_aeon_accept}">
                                     <i class="fa fa-check"></i>
                                     <f:setPropertyActionListener
                                         target="#{item.accepted}"
@@ -171,15 +173,14 @@
                 </ui:repeat>
                 <!-- accept all / decline all buttons -->
                 <div
-                    class="margin-top-10"
-                    style="width: 100%">
+                    class="margin-top-10 pull-left">
                     <button
                         jsf:id="declineAll"
-                        class="btn margin-right-5">
-                        <i class="fa fa-times"></i>
+                        class="btn btn-danger margin-right-5">
+                        <i class="fa fa-times margin-right-5"></i>
                         <h:outputText
                             styleClass="font-size-s"
-                            value="Decline all" />
+                            value="#{msgs.plugin_workflow_aeon_declineAll}" />
                         <f:setPropertyActionListener
                             target="#{NavigationForm.workflowPlugin.transmission.allItemsAccepted}"
                             value="#{false}" />
@@ -187,11 +188,11 @@
                     </button>
                     <button
                         jsf:id="acceptAll"
-                        class="btn margin-right-5">
-                        <i class="fa fa-check"></i>
+                        class="btn btn-success margin-right-5">
+                        <i class="fa fa-check margin-right-5"></i>
                         <h:outputText
                             styleClass="font-size-s"
-                            value="Accept all" />
+                            value="#{msgs.plugin_workflow_aeon_acceptAll}" />
                         <f:setPropertyActionListener
                             target="#{NavigationForm.workflowPlugin.transmission.allItemsAccepted}"
                             value="#{true}" />
@@ -199,11 +200,11 @@
                     </button>
 
                     <button
-                        class="btn btn-success pull-right"
+                        class="btn btn-blue pull-right margin-top-10"
                         jsf:id="absenden"
                         jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
                         <i class="fa fa-save margin-right-5"></i>
-                        <h:outputText value="#{msgs.speichern}" />
+                        <h:outputText value="#{msgs.plugin_workflow_aeon_createProcesses}" />
                     </button>
                 </div>
             </h:form>
