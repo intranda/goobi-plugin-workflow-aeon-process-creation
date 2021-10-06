@@ -172,30 +172,27 @@
                     </div>
                 </ui:repeat>
                 <!-- accept all / decline all buttons -->
-                <div
-                    class="margin-top-10 pull-left">
+                <div class="margin-top-10 pull-left">
                     <button
                         jsf:id="declineAll"
-                        class="btn btn-danger margin-right-5">
+                        class="btn btn-danger margin-right-5"
+                        jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
                         <i class="fa fa-times margin-right-5"></i>
                         <h:outputText
                             styleClass="font-size-s"
                             value="#{msgs.plugin_workflow_aeon_declineAll}" />
-                        <f:setPropertyActionListener
-                            target="#{NavigationForm.workflowPlugin.transmission.allItemsAccepted}"
-                            value="#{false}" />
+
                         <f:ajax render=":itemForm" />
                     </button>
                     <button
                         jsf:id="acceptAll"
-                        class="btn btn-success margin-right-5">
+                        class="btn btn-success margin-right-5"
+                        jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
                         <i class="fa fa-check margin-right-5"></i>
                         <h:outputText
                             styleClass="font-size-s"
                             value="#{msgs.plugin_workflow_aeon_acceptAll}" />
-                        <f:setPropertyActionListener
-                            target="#{NavigationForm.workflowPlugin.transmission.allItemsAccepted}"
-                            value="#{true}" />
+
                         <f:ajax render=":itemForm" />
                     </button>
 
@@ -204,7 +201,9 @@
                         jsf:id="absenden"
                         jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
                         <i class="fa fa-save margin-right-5"></i>
-                        <h:outputText value="#{msgs.plugin_workflow_aeon_createProcesses}" />
+                        <h:outputText
+                            styleClass="font-size-s"
+                            value="#{msgs.plugin_workflow_aeon_createProcesses}" />
                     </button>
                 </div>
             </h:form>
