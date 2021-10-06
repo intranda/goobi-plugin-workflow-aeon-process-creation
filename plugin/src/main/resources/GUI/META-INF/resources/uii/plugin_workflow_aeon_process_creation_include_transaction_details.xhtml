@@ -17,7 +17,7 @@
         <h:form
             id="myform"
             styleClass="form-horizontal form-bordered">
-            <!-- Transmission Details Box (NO REQUEST)-->
+            <!-- transaction Details Box (NO REQUEST)-->
             <div
                 jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false}"
                 class="box  thin-margin  lightgrey box-bordered">
@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-            <!-- Transmission Details Box (REQUEST SENT)-->
+            <!-- transaction Details Box (REQUEST SENT)-->
             <div
                 jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess}"
                 class="box box-color  lightgrey box-bordered">
@@ -47,7 +47,7 @@
                 </div>
                 <div class="box-content nopadding">
                     <x:dataList
-                            value="#{NavigationForm.workflowPlugin.transmissionFields}"
+                            value="#{NavigationForm.workflowPlugin.transactionFields}"
                             var="property">
                             <ui:fragment rendered="#{property.type == 'input'}">
                                 <h:panelGroup layout="block" styleClass="form-group" id="group">

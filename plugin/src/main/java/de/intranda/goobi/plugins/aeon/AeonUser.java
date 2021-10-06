@@ -3,7 +3,7 @@ package de.intranda.goobi.plugins.aeon;
 import lombok.Data;
 
 /*
- * Just a class to hold JSON information from transmission
+ * Just a class to hold JSON information from transaction
  * (will have to be designed specifically for aeon)
  */
 @Data

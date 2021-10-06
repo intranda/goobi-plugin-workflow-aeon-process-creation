@@ -56,8 +56,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     //    @Getter
     //    @Setter
-    //    //this will contain all fields inside <transmission> defined in config
-    //    private List<HierarchicalConfiguration> transmissionFields;
+    //    //this will contain all fields inside <transaction> defined in config
+    //    private List<HierarchicalConfiguration> transactionFields;
 
     @Getter
     @Setter
@@ -66,7 +66,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     @Getter
     @Setter
-    private List<AeonProperty> transmissionFields = new ArrayList<>();
+    private List<AeonProperty> transactionFields = new ArrayList<>();
 
     @Getter
     @Setter
@@ -80,7 +80,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     //    @Getter
     //    @Setter
     //    //the response from api (currently RestTest.java)
-    //    private AeonTransmission transmission = new AeonTransmission();
+    //    private AeonTransaction transaction = new AeonTransaction();
 
     @Getter
     @Setter
@@ -116,7 +116,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     /*
      * Sends a Request to the goobi api (RestTest.java) and
-     * recieves JSON String as response which is parsed into the AeonTransmission object
+     * recieves JSON String as response which is parsed into the AeonTransaction object
      */
     @SuppressWarnings("unchecked")
     public void sendRequest() {
@@ -147,7 +147,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     .header("Authorization", "BEARER " + res.getAccessToken())
                     .get(Map.class);
         }
-        for (AeonProperty property : transmissionFields) {
+        for (AeonProperty property : transactionFields) {
             if (StringUtils.isNoneBlank(property.getAeonField())) {
                 Object value = map.get(property.getAeonField());
                 if (value instanceof String) {
@@ -201,7 +201,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     }
 
     /*
-     * resets the transmission object
+     * resets the transaction object
      * (this resets the page to its default state)
      */
     public void resetRequest() {
@@ -211,8 +211,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     /*
      * Returns value of any attribute inside mainObject
-     * (nested example: transmission.user.firstname called with:
-     * getTransmissionFieldValue(transmission, "user.firstName") )
+     * (nested example: transaction.user.firstname called with:
+     * getTransactionFieldValue(transaction, "user.firstName") )
      */
     public Object getFieldValue(Object mainObject, String fieldName) {
 
@@ -246,7 +246,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     /*
      * Returns the value of a field specified in the same way as function above
-     * setFieldValue(transmission, "user.firstName", "Maxim")
+     * setFieldValue(transaction, "user.firstName", "Maxim")
      */
     public void setFieldValue(Object mainObject, String fieldName, Object newValue) {
         try {
@@ -375,11 +375,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         workflowName = config.getString("/processCreation/workflowName");
         opacName = config.getString("/processCreation/opacName");
 
-        //read <transmission> and <processes>
-        List<HierarchicalConfiguration> transmissions = config.configurationsAt("/transmission/field");
-        for (HierarchicalConfiguration hc : transmissions) {
+        //read <transaction> and <processes>
+        List<HierarchicalConfiguration> transactions = config.configurationsAt("/transaction/field");
+        for (HierarchicalConfiguration hc : transactions) {
             AeonProperty property = new AeonProperty(hc);
-            transmissionFields.add(property);
+            transactionFields.add(property);
         }
         List<HierarchicalConfiguration> processes = config.configurationsAt("/processes/field");
         for (HierarchicalConfiguration hc : processes) {
@@ -387,7 +387,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             recordFields.add(property);
         }
 
-        //        this.transmissionFields = config.configurationsAt("/transmission/field");
+        //        this.transactionFields = config.configurationsAt("/transaction/field");
         //        this.processFields = config.configurationsAt("/processes/field");
 
         propertyFields.clear();

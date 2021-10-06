@@ -23,11 +23,11 @@
         <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
             <div class="row">
                 <div class="col-sm-6">
-                    <!--  Transmission Request input Box  -->
+                    <!--  Transaction Request input Box  -->
                     <div class="box box-color box-bordered">
                         <div class="box-title">
                             <h3>
-                                <h:outputText value="#{msgs.plugin_workflow_aeon_requestAeonForTransmission}" />
+                                <h:outputText value="#{msgs.plugin_workflow_aeon_requestAeonForTransaction}" />
                             </h3>
                         </div>
                         <div class="box-content">
@@ -37,11 +37,11 @@
                                         <div class="col-sm-3">
                                             <h:outputLabel
                                                 styleClass="control-label "
-                                                value="#{msgs.plugin_workflow_aeon_transmissionIdentifier}:" />
+                                                value="#{msgs.plugin_workflow_aeon_transactionIdentifier}:" />
                                         </div>
                                         <div class="col-sm-9">
                                             <x:inputText
-                                                pt:aria-label="#{msgs.plugin_workflow_aeon_transmissionIdentifier}"
+                                                pt:aria-label="#{msgs.plugin_workflow_aeon_transactionIdentifier}"
                                                 styleClass="form-control"
                                                 value="#{NavigationForm.workflowPlugin.input}" />
                                         </div>
@@ -62,8 +62,8 @@
                         </div>
                     </div>
 
-                    <!-- Transmission Details Box -->
-                    <ui:include src="plugin_workflow_aeon_process_creation_include_Transmission_details.xhtml" />
+                    <!-- Transaction Details Box -->
+                    <ui:include src="plugin_workflow_aeon_process_creation_include_transaction_details.xhtml" />
 
                     <!-- Edit Properties Box -->
                     <ui:include src="plugin_workflow_aeon_process_creation_include_properties.xhtml" />
