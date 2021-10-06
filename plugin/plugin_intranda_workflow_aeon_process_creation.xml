@@ -143,7 +143,7 @@
   <!-- the process fields are configured differently -->
   <processes>
     <!-- aeon = JSON path to needed property ("id" converts to "item.id" ...) -->
-    <field aeon="id" displayAlways="true">
+    <field aeon="id" displayAlways="true" displayInTitle="true">
       <title>Item Identifier</title>
       <type readonly="true">input</type>
       <variable place="process">Text field</variable>
@@ -151,7 +151,7 @@
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
     
-    <field aeon="title" displayAlways="true">
+    <field aeon="title" displayAlways="true" displayInTitle="false">
       <title>Item Title</title>
       <type readonly="false">input</type>
       <variable place="process">Text field</variable>
@@ -159,7 +159,7 @@
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
     
-    <field aeon="publicationType" displayAlways="false">
+    <field aeon="publicationType" displayAlways="false" displayInTitle="true">
       <title>Publication Type</title>
       <type readonly="false">select</type>
       <variable place="work">publication</variable>
@@ -169,7 +169,7 @@
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
     
-    <field aeon="shelfmark" displayAlways="false">
+    <field aeon="shelfmark" displayAlways="false" displayInTitle="false">
       <title>Shelfmark</title>
       <type readonly="false">input</type>
       <variable place="work">Text field</variable>
