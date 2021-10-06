@@ -92,7 +92,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     public PluginType getType() {
         return PluginType.Workflow;
     }
-
+    
     @Override
     public String getGui() {
         return "/uii/plugin_workflow_aeon_process_creation.xhtml";
