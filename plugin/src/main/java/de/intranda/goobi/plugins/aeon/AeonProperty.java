@@ -46,6 +46,8 @@ public class AeonProperty {
     private String vocabularyName; // /vocabularyName
     private List<String> vocabularyField; // /vocabularyField
 
+    private boolean displayInTitle = false;
+
     private HierarchicalConfiguration config;
 
 
@@ -60,7 +62,7 @@ public class AeonProperty {
         readonly = config.getBoolean("type/@readonly", false);
 
         displayAlways = config.getBoolean("@displayAlways", false);
-
+        displayInTitle = config.getBoolean("@displayInTitle", false);
         propertyName = config.getString("variable", title);
         place = config.getString("variable/@place", "process");
 

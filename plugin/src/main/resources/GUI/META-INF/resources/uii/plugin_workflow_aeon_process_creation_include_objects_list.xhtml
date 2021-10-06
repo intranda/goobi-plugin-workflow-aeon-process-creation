@@ -52,7 +52,7 @@
                                     value="#{item.properties}">
                                     <h:outputText
                                         value="#{p.value} "
-                                        rendered="#{p.displayAlways}" />
+                                        rendered="#{p.displayInTitle}" />
                                 </ui:repeat>
                             </h2>
                             <!--  decline / accept / expand buttons -->
@@ -94,13 +94,14 @@
                         </div>
                         <h:panelGroup
                             layout="block"
-                            rendered="#{item.showDetails}"
                             styleClass="box-content nopadding"
                             style="border-color: #666">
+
+
                             <x:dataList
                                 value="#{item.properties}"
                                 var="property">
-                                <ui:fragment rendered="#{property.type == 'input'}">
+                                <ui:fragment rendered="#{property.type == 'input' and (item.showDetails or property.displayAlways)}">
                                     <h:panelGroup
                                         layout="block"
                                         styleClass="form-group"
@@ -140,7 +141,7 @@
 
                                 <intranda:formInputDropDownAjax
                                     name="dropdown"
-                                    rendered="#{property.type == 'select' or property.type == 'vocabulary'}"
+                                    rendered="#{property.type == 'select' or property.type == 'vocabulary' and (item.showDetails or property.displayAlways)}"
                                     label="#{property.title}"
                                     field="#{property.value}"
                                     help="#{property.helpMessage}"
@@ -157,7 +158,7 @@
 
                                 <intranda:formInputCheckBoxAjax
                                     name="checkbox"
-                                    rendered="#{property.type == 'checkbox'}"
+                                    rendered="#{property.type == 'checkbox' and (item.showDetails or property.displayAlways)}"
                                     label="#{property.title}"
                                     field="#{property.value}"
                                     help="#{property.helpMessage}"
