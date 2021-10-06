@@ -52,7 +52,7 @@
                                     value="#{item.properties}">
                                     <h:outputText
                                         value="#{p.value} "
-                                        rendered="#{p.displayAlways}" />
+                                        rendered="#{p.displayInTitle}" />
                                 </ui:repeat>
                             </h2>
                             <!--  decline / accept / expand buttons -->
@@ -94,13 +94,12 @@
                         </div>
                         <h:panelGroup
                             layout="block"
-                            rendered="#{item.showDetails}"
                             styleClass="box-content nopadding"
                             style="border-color: #666">
                             <x:dataList
                                 value="#{item.properties}"
                                 var="property">
-                                <ui:fragment rendered="#{property.type == 'input'}">
+                                <ui:fragment rendered="#{property.type == 'input' and (item.showDetails or property.displayAlways)}">
                                     <h:panelGroup
                                         layout="block"
                                         styleClass="form-group"
@@ -140,7 +139,7 @@
 
                                 <intranda:formInputDropDownAjax
                                     name="dropdown"
-                                    rendered="#{property.type == 'select' or property.type == 'vocabulary'}"
+                                    rendered="#{property.type == 'select' or property.type == 'vocabulary' and (item.showDetails or property.displayAlways)}"
                                     label="#{property.title}"
                                     field="#{property.value}"
                                     help="#{property.helpMessage}"
@@ -157,7 +156,7 @@
 
                                 <intranda:formInputCheckBoxAjax
                                     name="checkbox"
-                                    rendered="#{property.type == 'checkbox'}"
+                                    rendered="#{property.type == 'checkbox' and (item.showDetails or property.displayAlways)}"
                                     label="#{property.title}"
                                     field="#{property.value}"
                                     help="#{property.helpMessage}"
@@ -178,34 +177,26 @@
                     <button
                         jsf:id="declineAll"
                         class="btn btn-danger margin-right-10 font-size-s"
-                        jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">
+                        jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
                         <i class="fa fa-times margin-right-5"></i>
                         <h:outputText
                             styleClass="font-size-s"
                             value="#{msgs.plugin_workflow_aeon_declineAll}" />
-                        <f:setPropertyActionListener
-                            target="#{NavigationForm.workflowPlugin.transmission.allItemsAccepted}"
-                            value="#{false}" />
                         <f:ajax render=":itemForm" />
                     </button>
 
                     <button
                         jsf:id="acceptAll"
-                        class="btn btn-success margin-right-10 font-size-s">
+                        class="btn btn-success margin-right-10 font-size-s"
+                        jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
                         <i class="fa fa-check margin-right-5"></i>
                         <h:outputText
                             styleClass="font-size-s"
                             value="#{msgs.plugin_workflow_aeon_acceptAll}" />
-                        <f:setPropertyActionListener
-                            target="#{NavigationForm.workflowPlugin.transmission.allItemsAccepted}"
-                            value="#{true}" />
+
                         <f:ajax render=":itemForm" />
                     </button>
 
-                </div>
-                <div
-                    class="margin-top-10 pull-right">
-                    
                     <button
                         class="btn btn-blue font-size-s pull-right"
                         jsf:id="absenden"
@@ -213,7 +204,6 @@
                         <i class="fa fa-save margin-right-5"></i>
                         <h:outputText styleClass="font-size-s" value="#{msgs.plugin_workflow_aeon_createProcesses}" />
                     </button>
-                    
                 </div>
             </h:form>
         </div>
