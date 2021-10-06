@@ -325,4 +325,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             propertyFields.add(property);
         }
     }
+
+    public void acceptAllItems () {
+        for (AeonRecord rec : recordList) {
+            rec.setAccepted(true);
+        }
+    }
+
+    public void declineAllItems () {
+        for (AeonRecord rec : recordList) {
+            rec.setAccepted(false);
+        }
+    }
 }
