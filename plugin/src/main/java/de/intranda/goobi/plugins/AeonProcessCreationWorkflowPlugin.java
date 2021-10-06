@@ -17,6 +17,10 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.commons.lang3.StringUtils;
+import org.goobi.beans.Masterpiece;
+import org.goobi.beans.Process;
+import org.goobi.beans.Step;
+import org.goobi.beans.Template;
 import org.goobi.interfaces.IJsonPlugin;
 import org.goobi.interfaces.ISearchField;
 import org.goobi.production.enums.PluginType;
@@ -29,12 +33,19 @@ import de.intranda.goobi.plugins.aeon.AeonRecord;
 import de.intranda.goobi.plugins.api.aeon.LoginResponse;
 import de.intranda.goobi.plugins.api.aeon.User;
 import de.sub.goobi.config.ConfigPlugins;
+import de.sub.goobi.helper.BeanHelper;
+import de.sub.goobi.helper.ScriptThreadWithoutHibernate;
+import de.sub.goobi.helper.enums.StepStatus;
+import de.sub.goobi.helper.exceptions.DAOException;
+import de.sub.goobi.persistence.managers.ProcessManager;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
+import ugh.dl.Fileformat;
+import ugh.dl.Prefs;
 
 @PluginImplementation
 @Log4j2
@@ -88,11 +99,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @Setter
     private List<AeonRecord> recordList = new ArrayList<>();
 
+    private BeanHelper bhelp = new BeanHelper();
+
+    private IJsonPlugin opacPlugin;
+    private ConfigOpacCatalogue coc = null;
+
     @Override
     public PluginType getType() {
         return PluginType.Workflow;
     }
-    
+
     @Override
     public String getGui() {
         return "/uii/plugin_workflow_aeon_process_creation.xhtml";
@@ -147,7 +163,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         String catalogueIdentifier = (String) map.get("referenceNumber");
 
         IOpacPlugin myImportOpac = null;
-        ConfigOpacCatalogue coc = null;
 
         for (ConfigOpacCatalogue configOpacCatalogue : ConfigOpac.getInstance().getAllCatalogues(workflowName)) {
             if (configOpacCatalogue.getTitle().equals(opacName)) {
@@ -156,26 +171,26 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             }
         }
 
-        IJsonPlugin plugin = (IJsonPlugin) myImportOpac;
+        opacPlugin = (IJsonPlugin) myImportOpac;
         if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
-            plugin.setTestMode(true);
+            opacPlugin.setTestMode(true);
         } else {
-            for (ISearchField sf : plugin.getSearchFieldList()) {
+            for (ISearchField sf : opacPlugin.getSearchFieldList()) {
                 if (sf.getId().equals("Barcode")) {
                     sf.setText(catalogueIdentifier);
                 }
             }
         }
         try {
-            plugin.search("", "", coc, null);
+            opacPlugin.search("", "", coc, null);
         } catch (Exception e) {
             log.error(e);
         }
 
-        for (Map<String, String> overview : plugin.getOverviewList()) {
+        for (Map<String, String> overview : opacPlugin.getOverviewList()) {
             AeonRecord record = new AeonRecord();
             recordList.add(record);
-
+            record.setRecordData(overview);
             for (AeonProperty p : recordFields) {
                 AeonProperty prop = p.cloneProperty();
                 prop.setValue(overview.get(prop.getAeonField()));
@@ -258,33 +273,90 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
     }
 
-    //    /*
-    //     * Uses above defined functions to iterate through the config
-    //     * and change values to default if necessary
-    //     */
-    //    public void setDefaultTransmissionValues() {
-    //
-    //        //iterate through <transmission> (config)
-    //        for (HierarchicalConfiguration field : this.transmissionFields) {
-    //            checkFieldValue(field, this.transmission);
-    //        }
-    //
-    //        //iterate through <processes> (config)
-    //        for (HierarchicalConfiguration field : this.processFields) {
-    //            //iterate through items (to apply config settings)
-    //            for (int i = 0; i < this.transmission.getItems().size(); i++) {
-    //                checkFieldValue(field, this.transmission.getItems().get(i));
-    //            }
-    //        }
-    //    }
-
     public void createProcesses() {
-        // create new processes for selected items
+        // TODO validate properties, details, process values
 
-        // TODO validate properties
+        Process processTemplate = ProcessManager.getProcessById(308899); // TODO
 
-        // TODO validate
+        for (AeonRecord rec : recordList) {
+            if (rec.isAccepted()) {
+                // create process
+                Process process = new Process();
+                process.setTitel("test"); // TODO
+                process.setProjekt(processTemplate.getProjekt());
+                process.setRegelsatz(processTemplate.getRegelsatz());
+                process.setDocket(processTemplate.getDocket());
 
+                bhelp.SchritteKopieren(processTemplate, process);
+                bhelp.ScanvorlagenKopieren(processTemplate, process);
+                bhelp.WerkstueckeKopieren(processTemplate, process);
+                bhelp.EigenschaftenKopieren(processTemplate, process);
+
+                bhelp.EigenschaftHinzufuegen(process, "Template", processTemplate.getTitel());
+                bhelp.EigenschaftHinzufuegen(process, "TemplateID", "" + processTemplate.getId());
+
+                List<Masterpiece> mpl = process.getWerkstuecke();
+                if (mpl.isEmpty()) {
+                    Masterpiece mp = new Masterpiece();
+                    mp.setProzess(process);
+                    mpl.add(mp);
+                }
+                List<Template> tl = process.getVorlagen();
+                if (tl.isEmpty()) {
+                    Template t = new Template();
+                    t.setProzess(process);
+                    tl.add(t);
+                }
+
+
+                // add properties
+                for (AeonProperty prop : propertyFields) {
+                    if (StringUtils.isNoneBlank(prop.getValue())) {
+                        switch (prop.getPlace()) {
+                            case "process":
+                                bhelp.EigenschaftHinzufuegen(process, prop.getTitle(), prop.getValue());
+                                break;
+                            case "work":
+                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getTitle(), prop.getValue());
+                                break;
+                            case "template":
+                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getTitle(), prop.getValue());
+                                break;
+                        }
+                    }
+                }
+
+                // save process
+                try {
+                    ProcessManager.saveProcess(process);
+                } catch (DAOException e1) {
+                    log.error(e1);
+                }
+
+                Prefs prefs = processTemplate.getRegelsatz().getPreferences();
+                String recordIdentifier = rec.getRecordData().get("uri"); // get uri from properties
+
+                try {
+                    // create mets file based on selected node type
+                    opacPlugin.setSelectedUrl(recordIdentifier);
+                    Fileformat fileformat = opacPlugin.search("", "", coc, prefs); // get metadata for selected record
+                    // TODO additional metadata neeeded?
+
+                    // save fileformat
+                    process.writeMetadataFile(fileformat);
+                } catch (Exception e) {
+                    log.error(e);
+                }
+
+                // start any open automatic tasks
+                for (Step s : process.getSchritteList()) {
+                    if (s.getBearbeitungsstatusEnum().equals(StepStatus.OPEN) && s.isTypAutomatisch()) {
+                        ScriptThreadWithoutHibernate myThread = new ScriptThreadWithoutHibernate(s);
+                        myThread.startOrPutToQueue();
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -326,13 +398,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
     }
 
-    public void acceptAllItems () {
+    public void acceptAllItems() {
         for (AeonRecord rec : recordList) {
             rec.setAccepted(true);
         }
     }
 
-    public void declineAllItems () {
+    public void declineAllItems() {
         for (AeonRecord rec : recordList) {
             rec.setAccepted(false);
         }
