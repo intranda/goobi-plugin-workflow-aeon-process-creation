@@ -1,0 +1,86 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:x="http://myfaces.apache.org/tomahawk"
+    xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+    xmlns:jsf="http://xmlns.jcp.org/jsf"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites">
+
+    <composite:interface>
+    </composite:interface>
+
+    <composite:implementation>
+
+        <!-- All Objects List (REQUEST SUCCESS) -->
+        <div>
+            <h:form
+                id="itemSummaryForm"
+                styleClass="form-horizontal form-bordered">
+                <ui:repeat
+                    var="item"
+                    value="#{NavigationForm.workflowPlugin.recordList}">
+                    <!-- iterate through items from transaction -->
+                    <ui:fragment rendered="#{item.accepted}">
+                        <div class="box box-bordered">
+                            <div
+                                class="box-title"
+                                style="border-color: #666;">
+                                <h2 style="color: #333; max-width: 85%">
+                                    <ui:repeat
+                                        var="p"
+                                        value="#{item.properties}">
+                                        <h:outputText
+                                            value="#{p.value} "
+                                            rendered="#{p.displayInTitle}" />
+                                    </ui:repeat>
+                                </h2>
+                                <!--  decline / accept / expand buttons -->
+                                <div class="pull-right">
+                                    <button
+                                        type="button"
+                                        class="btn margin-right-5"
+                                        style="background: transparent"
+                                        title="#{(item.showDetails) ? 'hide details' : 'show details'}"
+                                        jsf:id="details">
+                                        <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
+                                        <f:setPropertyActionListener
+                                            target="#{item.showDetails}"
+                                            value="#{!item.showDetails}" />
+                                        <f:ajax render="itemSummaryForm" />
+                                    </button>
+                                </div>
+                            </div>
+                            <h:panelGroup
+                                layout="block"
+                                styleClass="box-content nopadding"
+                                style="border-color: #666">
+                                <x:dataList
+                                    value="#{item.properties}"
+                                    var="property">
+
+
+                                    <intranda:formOutputText
+                                        name="output"
+                                        label="#{property.title}"
+                                        field="#{property.value}"
+                                        help="#{property.helpMessage}"
+                                        fieldStyle="form-control"
+                                        required="false"
+                                        rendered="#{item.showDetails or property.displayAlways}" />
+
+
+
+                                </x:dataList>
+                            </h:panelGroup>
+                        </div>
+                    </ui:fragment>
+                </ui:repeat>
+
+            </h:form>
+        </div>
+    </composite:implementation>
+</ui:composition>

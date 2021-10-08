@@ -20,7 +20,7 @@
                 styleClass="alert alert-danger alert-dismissable margin-bottom-10 margin-top-10"
                 value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation"/>
         </h:panelGroup>
-        <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
+        <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'request'}">
             <div class="row">
                 <div class="col-sm-6">
                     <!--  Transaction Request input Box  -->
@@ -75,6 +75,24 @@
                 </div>
             </div>
         </h:panelGroup>
+        
+                <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'summary'}">
+            <div class="row">
+                <div class="col-sm-6">
+                 <ui:include src="plugin_workflow_aeon_process_creation_include_created_objects_list.xhtml" />
+                </div>
+                   <div class="col-sm-6">
+                   right area, created dockets, create new requests
+                   <h:form id="summaryForm">
+                     <button
+                                        jsf:id="startNewRequest"
+                                        class="btn margin-right-10 font-size-s"
+                                        jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">#{msgs.plugin_workflow_aeon_startNewRequest}</button>
+                   </h:form>
+                   </div>
+                </div>
+                </h:panelGroup>
+        
 
     </composite:implementation>
 </ui:composition>

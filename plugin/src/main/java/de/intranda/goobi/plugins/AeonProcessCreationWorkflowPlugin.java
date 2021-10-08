@@ -74,6 +74,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     //set true when the request was a success (important for xhtml EL expressions rendered checks)
     private boolean requestSuccess = false;
 
+    @Getter
+    @Setter
+    // set to 'request' to show the first screen and to 'summary' to show created processes
+    private String screenName = "request";
+
     //    @Getter
     //    @Setter
     //    //the response from api (currently RestTest.java)
@@ -204,6 +209,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     public void resetRequest() {
         setRequestSuccess(false);
         input = "";
+        screenName = "request";
     }
 
     public void createProcesses() {
@@ -313,6 +319,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
             }
         }
+        screenName = "summary";
     }
 
     /**
