@@ -50,10 +50,6 @@ public class AeonProperty {
 
     private HierarchicalConfiguration config;
 
-
-
-
-
     public AeonProperty(HierarchicalConfiguration config) {
         this.config = config;
         aeonField = config.getString("@aeon");
@@ -138,26 +134,26 @@ public class AeonProperty {
         if (StringUtils.isNotBlank(validationExpression)) {
             // check if value is empty
             if (value == null) {
-                FacesMessage message =null;
+                FacesMessage message = null;
                 if (strictValidation) {
                     message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
-                    this.value=null;
+                    this.value = null;
                 } else {
                     message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
-                    this.value=null;
+                    this.value = null;
                 }
                 throw new ValidatorException(message);
             }
             String data = (String) value;
             // check if data matches expression
             if (!data.matches(validationExpression)) {
-                FacesMessage message =null;
+                FacesMessage message = null;
                 if (strictValidation) {
                     message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
-                    this.value=data;
+                    this.value = data;
                 } else {
                     message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
-                    this.value=data;
+                    this.value = data;
                 }
                 throw new ValidatorException(message);
             }
@@ -167,6 +163,17 @@ public class AeonProperty {
     public AeonProperty cloneProperty() {
         AeonProperty property = new AeonProperty(config);
         return property;
+    }
+
+    public boolean isValid() {
+        if (StringUtils.isNotBlank(validationExpression) && strictValidation) {
+            if (value == null) {
+                return false;
+            } else if (!value.matches(validationExpression)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

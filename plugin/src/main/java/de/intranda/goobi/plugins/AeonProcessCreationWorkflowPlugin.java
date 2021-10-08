@@ -1,9 +1,6 @@
 package de.intranda.goobi.plugins;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +9,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
@@ -45,6 +41,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.Fileformat;
+import ugh.dl.Metadata;
 import ugh.dl.Prefs;
 
 @PluginImplementation
@@ -209,80 +206,28 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         input = "";
     }
 
-    /*
-     * Returns value of any attribute inside mainObject
-     * (nested example: transaction.user.firstname called with:
-     * getTransactionFieldValue(transaction, "user.firstName") )
-     */
-    public Object getFieldValue(Object mainObject, String fieldName) {
-
-        List<String> names = new LinkedList<>(Arrays.asList(fieldName.split("\\."))); //splits list into single attribute names
-        Object obj = new Object();
-
-        try {
-            Class<?> c = mainObject.getClass(); //gets class of main object
-            Field field = c.getDeclaredField(names.get(0)); //returns first field
-
-            field.setAccessible(true);
-            obj = field.get(mainObject); //defines object as specific attribute of mainObject
-            field.setAccessible(false);
-
-            names.remove(0); //removes first name
-
-            //if its nested this loop will begin
-            for (int i = 0; i < names.size(); i++) {
-                field = obj.getClass().getDeclaredField(names.get(i)); //gets next field
-
-                field.setAccessible(true);
-                obj = field.get(obj); //sets object equal to its own value of the field
-                field.setAccessible(false);
-            }
-        } catch (Exception e) {
-            log.error(e + ": " + e.getMessage());
-            e.printStackTrace();
-        }
-        return obj; //returns the object
-    }
-
-    /*
-     * Returns the value of a field specified in the same way as function above
-     * setFieldValue(transaction, "user.firstName", "Maxim")
-     */
-    public void setFieldValue(Object mainObject, String fieldName, Object newValue) {
-        try {
-            BeanUtils.setProperty(mainObject, fieldName, newValue); //uses BeanUtils to access property
-        } catch (Exception e) {
-            log.error(e + ": " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /*
-     * checks if value of certain property is null or empty string
-     * if so it sets the value of the property to the default value
-     * defined in the config
-     */
-    public void checkFieldValue(HierarchicalConfiguration field, Object object) {
-        Object fieldvalue = getFieldValue(object, field.getString("@aeon"));
-        if (fieldvalue == null || StringUtils.isEmpty(String.valueOf(fieldvalue))) {
-            if (object instanceof Boolean) {
-                setFieldValue(object, field.getString("@aeon"), field.getBoolean("value"));
-            } else {
-                setFieldValue(object, field.getString("@aeon"), field.getString("value"));
-            }
-        }
-    }
-
     public void createProcesses() {
-        // TODO validate properties, details, process values
+        //  validate properties, details, process values
 
-        Process processTemplate = ProcessManager.getProcessById(308899); // TODO
+        for (AeonProperty prop : propertyFields) {
+            if (!prop.isValid()) {
+                return;
+            }
+        }
+
+        for (AeonProperty prop : transactionFields) {
+            if (!prop.isValid()) {
+                return;
+            }
+        }
+
+        Process processTemplate = ProcessManager.getProcessByExactTitle(workflowName);
 
         for (AeonRecord rec : recordList) {
             if (rec.isAccepted()) {
                 // create process
                 Process process = new Process();
-                process.setTitel("test"); // TODO
+
                 process.setProjekt(processTemplate.getProjekt());
                 process.setRegelsatz(processTemplate.getRegelsatz());
                 process.setDocket(processTemplate.getDocket());
@@ -307,7 +252,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     t.setProzess(process);
                     tl.add(t);
                 }
-
 
                 // add properties
                 for (AeonProperty prop : propertyFields) {
@@ -340,8 +284,20 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     // create mets file based on selected node type
                     opacPlugin.setSelectedUrl(recordIdentifier);
                     Fileformat fileformat = opacPlugin.search("", "", coc, prefs); // get metadata for selected record
-                    // TODO additional metadata neeeded?
-
+                    // is additional metadata neeeded?
+                    String title = "";
+                    String identifier = "";
+                    for (Metadata md : fileformat.getDigitalDocument().getLogicalDocStruct().getAllMetadata()) {
+                        // TODO source or digital?
+                        if ("CatalogIDDigital".equals(md.getType().getName())) {
+                            identifier = md.getValue();
+                        } else if ("TitleDocMain".equals(md.getType().getName())) {
+                            title = md.getValue();
+                        }
+                    }
+                    String generatedTitle = opacPlugin.createAtstsl(title, "") + "_" + identifier;
+                    generatedTitle = generatedTitle.replaceAll("[\\W]", "");
+                    process.setTitel(generatedTitle);
                     // save fileformat
                     process.writeMetadataFile(fileformat);
                 } catch (Exception e) {
@@ -360,7 +316,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     }
 
     /**
-     * Constructor TODO use empty constructor, remove configuration from here
+     * Constructor try to use empty constructor, remove configuration from here
      */
     public AeonProcessCreationWorkflowPlugin() {
         log.info("AeonProcessCreation workflow plugin started");
