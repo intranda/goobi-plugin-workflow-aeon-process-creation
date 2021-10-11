@@ -301,12 +301,26 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         }
                     }
                 }
-
-                Prefs prefs = processTemplate.getRegelsatz().getPreferences();
-                String recordIdentifier = rec.getRecordData().get("uri"); // get uri from properties
+                for (AeonProperty prop : transactionFields) {
+                    if (StringUtils.isNoneBlank(prop.getValue())) {
+                        switch (prop.getPlace()) {
+                            case "process":
+                                bhelp.EigenschaftHinzufuegen(process, prop.getTitle(), prop.getValue());
+                                break;
+                            case "work":
+                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getTitle(), prop.getValue());
+                                break;
+                            case "template":
+                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getTitle(), prop.getValue());
+                                break;
+                        }
+                    }
+                }
 
                 try {
-                    // create mets file based on selected node type
+                    // create mets file for selected record
+                    Prefs prefs = processTemplate.getRegelsatz().getPreferences();
+                    String recordIdentifier = rec.getRecordData().get("uri"); // get uri from properties
                     opacPlugin.setSelectedUrl(recordIdentifier);
                     Fileformat fileformat = opacPlugin.search("", "", coc, prefs); // get metadata for selected record
                     // is additional metadata neeeded?
@@ -318,7 +332,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     }
                     String generatedTitle = identifier.replaceAll("[\\W]", "");
                     process.setTitel(generatedTitle);
-                    // TODO check if process title is in use
+
+                    if (ProcessManager.countProcessTitle(generatedTitle, null)>0) {
+                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_titleInUse", generatedTitle));
+                        rec.setAccepted(false);
+                        continue;
+                    }
 
                     // save process
                     ProcessManager.saveProcess(process);
