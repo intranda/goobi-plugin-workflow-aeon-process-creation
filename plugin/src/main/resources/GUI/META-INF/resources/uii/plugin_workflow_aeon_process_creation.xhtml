@@ -82,14 +82,41 @@
                  <ui:include src="plugin_workflow_aeon_process_creation_include_created_objects_list.xhtml" />
                 </div>
                    <div class="col-sm-6">
-                   right area, created dockets, create new requests
+                    <div class="row">
+                <div class="col-sm-12">
+                    <div class="box box-color lightgrey box-bordered">
+                        <div class="box-title">
+                            <h3>
+                                <i class="fa fa-tasks"></i>
+                                <h:outputText value="#{msgs.nextStep}" />
+                            </h3>
+                        </div>
                    <h:form id="summaryForm">
-                     <button
-                                        jsf:id="startNewRequest"
-                                        class="btn margin-right-10 font-size-s"
-                                        jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">#{msgs.plugin_workflow_aeon_startNewRequest}</button>
+                    <div class="box-content">
+                             <ul class="action-ul">
+                                <li class="action-li">
+                                    <button  jsf:id="dockets"  class="expandbutton" jsf:action="#{NavigationForm.workflowPlugin.generateDockets}">
+                                        <span class="btn margin-right-10 fa fa-print fa-lg width-40" />
+                                        <h:outputText value="#{msgs.process_generateDocket}" />
+                                    </button>
+                                </li>
+                                <li class="action-li">
+                                 <button jsf:id="startNewRequest" class="expandbutton" jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">
+                                        <span class="btn margin-right-10 fa fa-file-o fa-lg width-40" />
+                                        <h:outputText value="#{msgs.plugin_workflow_aeon_startNewRequest}" />
+                                    </button>
+                                
+        
+
+                                </li>
+                            </ul>
+                        </div>
+                    
                    </h:form>
                    </div>
+                </div>
+                </div>
+                </div>
                 </div>
                 </h:panelGroup>
         

@@ -2,7 +2,7 @@
 
   <!-- the transmission details are configured here;
   the values here are stored for all created processes; -->
-  <transmission>
+  <transaction>
 
     <!-- each field to use is listed here and used based on the aeon field name -->
     <field aeon="aeon transmission field name">
@@ -79,7 +79,7 @@
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-  </transmission>
+  </transaction>
 
 
   <!-- the properties are configured the same way as the aeon fields above. The only difference is

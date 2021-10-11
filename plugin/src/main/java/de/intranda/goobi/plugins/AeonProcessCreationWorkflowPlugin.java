@@ -1,9 +1,16 @@
 package de.intranda.goobi.plugins;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.faces.context.FacesContext;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -29,13 +36,16 @@ import de.intranda.goobi.plugins.aeon.AeonRecord;
 import de.intranda.goobi.plugins.api.aeon.LoginResponse;
 import de.intranda.goobi.plugins.api.aeon.User;
 import de.sub.goobi.config.ConfigPlugins;
+import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.helper.BeanHelper;
+import de.sub.goobi.helper.FacesContextHelper;
+import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.ScriptThreadWithoutHibernate;
 import de.sub.goobi.helper.enums.StepStatus;
-import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.persistence.managers.ProcessManager;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
+import io.goobi.workflow.xslt.XsltToPdf;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -100,6 +110,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @Getter
     @Setter
     private List<AeonRecord> recordList = new ArrayList<>();
+
+    private List<Process> generatedProcesses = new ArrayList<>();
 
     private BeanHelper bhelp = new BeanHelper();
 
@@ -207,12 +219,26 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
      * (this resets the page to its default state)
      */
     public void resetRequest() {
+        generatedProcesses.clear();
         setRequestSuccess(false);
         input = "";
         screenName = "request";
     }
 
     public void createProcesses() {
+
+        // check if at least one record was selected
+
+        int numberOfRecordsToCreate = 0;
+        for (AeonRecord rec : recordList) {
+            if (rec.isAccepted()) {
+                numberOfRecordsToCreate++;
+            }
+        }
+        if (numberOfRecordsToCreate == 0) {
+            Helper.setFehlerMeldung("plugin_workflow_aeon_nothing_selected");
+        }
+
         //  validate properties, details, process values
 
         for (AeonProperty prop : propertyFields) {
@@ -276,13 +302,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     }
                 }
 
-                // save process
-                try {
-                    ProcessManager.saveProcess(process);
-                } catch (DAOException e1) {
-                    log.error(e1);
-                }
-
                 Prefs prefs = processTemplate.getRegelsatz().getPreferences();
                 String recordIdentifier = rec.getRecordData().get("uri"); // get uri from properties
 
@@ -291,21 +310,22 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     opacPlugin.setSelectedUrl(recordIdentifier);
                     Fileformat fileformat = opacPlugin.search("", "", coc, prefs); // get metadata for selected record
                     // is additional metadata neeeded?
-                    String title = "";
                     String identifier = "";
                     for (Metadata md : fileformat.getDigitalDocument().getLogicalDocStruct().getAllMetadata()) {
-                        // TODO source or digital?
-                        if ("CatalogIDDigital".equals(md.getType().getName())) {
+                        if ("CatalogIDSource".equals(md.getType().getName())) {
                             identifier = md.getValue();
-                        } else if ("TitleDocMain".equals(md.getType().getName())) {
-                            title = md.getValue();
                         }
                     }
-                    String generatedTitle = opacPlugin.createAtstsl(title, "") + "_" + identifier;
-                    generatedTitle = generatedTitle.replaceAll("[\\W]", "");
+                    String generatedTitle = identifier.replaceAll("[\\W]", "");
                     process.setTitel(generatedTitle);
+                    // TODO check if process title is in use
+
+                    // save process
+                    ProcessManager.saveProcess(process);
+
                     // save fileformat
                     process.writeMetadataFile(fileformat);
+                    generatedProcesses.add(process);
                 } catch (Exception e) {
                     log.error(e);
                 }
@@ -372,4 +392,31 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             rec.setAccepted(false);
         }
     }
+
+    public void generateDockets() {
+        String rootpath = ConfigurationHelper.getInstance().getXsltFolder();
+        Path xsltfile = Paths.get(rootpath, "docket_multipage.xsl");
+        FacesContext facesContext = FacesContextHelper.getCurrentFacesContext();
+        if (!facesContext.getResponseComplete()) {
+            HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
+            String fileName = "batch_docket" + ".pdf";
+            ServletContext servletContext = (ServletContext) facesContext.getExternalContext().getContext();
+            String contentType = servletContext.getMimeType(fileName);
+            response.setContentType(contentType);
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + "\"");
+
+            // write docket to servlet output stream
+            try {
+                ServletOutputStream out = response.getOutputStream();
+                XsltToPdf ern = new XsltToPdf();
+                ern.startExport(generatedProcesses, out, xsltfile.toString());
+                out.flush();
+            } catch (IOException e) {
+                log.error("IOException while exporting run note", e);
+            }
+
+            facesContext.responseComplete();
+        }
+    }
+
 }
