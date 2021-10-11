@@ -166,7 +166,7 @@ public class AeonProperty {
     }
 
     public boolean isValid() {
-        if (StringUtils.isNotBlank(validationExpression) && strictValidation) {
+        if (StringUtils.isNotBlank(validationExpression)) {
             if (value == null) {
                 return false;
             } else if (!value.matches(validationExpression)) {

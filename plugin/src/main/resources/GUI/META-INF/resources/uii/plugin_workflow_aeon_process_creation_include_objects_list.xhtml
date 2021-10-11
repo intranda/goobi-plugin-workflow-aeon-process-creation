@@ -124,11 +124,12 @@
                                                     render="group"
                                                     event="blur" />
                                             </x:inputText>
-                                            <h:message
-                                                for="input"
-                                                showDetail="true"
-                                                styleClass="help-inline font-danger"
-                                                warnClass="alert" />
+
+                                            <h:outputText
+                                                styleClass="help-inline  #{property.strictValidation ? 'font-danger' : ''} alert"
+                                                rendered="#{!property.valid}"
+                                                value="#{property.validationErrorMessage}" />
+
                                             <h:outputText
                                                 styleClass="help-block font-light"
                                                 rendered="#{NavigationForm.showHelp}"
@@ -171,9 +172,8 @@
                     </div>
                 </ui:repeat>
                 <!-- accept all / decline all buttons -->
-                <div
-                    class="margin-top-10">
-                    
+                <div class="margin-top-10">
+
                     <button
                         jsf:id="declineAll"
                         class="btn btn-danger margin-right-10 font-size-s"
@@ -198,15 +198,16 @@
                     </button>
 
                 </div>
-                <div
-                    class="margin-top-10 pull-right">
-                    
+                <div class="margin-top-10 pull-right">
+
                     <button
                         class="btn btn-blue font-size-s pull-right"
                         jsf:id="absenden"
                         jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
                         <i class="fa fa-save margin-right-5"></i>
-                        <h:outputText styleClass="font-size-s" value="#{msgs.plugin_workflow_aeon_createProcesses}" />
+                        <h:outputText
+                            styleClass="font-size-s"
+                            value="#{msgs.plugin_workflow_aeon_createProcesses}" />
                     </button>
                 </div>
             </h:form>

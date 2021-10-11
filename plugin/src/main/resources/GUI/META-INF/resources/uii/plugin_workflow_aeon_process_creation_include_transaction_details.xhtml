@@ -47,73 +47,75 @@
                 </div>
                 <div class="box-content nopadding">
                     <x:dataList
-                            value="#{NavigationForm.workflowPlugin.transactionFields}"
-                            var="property">
-                            <ui:fragment rendered="#{property.type == 'input'}">
-                                <h:panelGroup layout="block" styleClass="form-group" id="group">
-                                    <div class="col-sm-3 control-label notFocusable">
-                                        <h:outputLabel
-                                            for="input"
-                                            value="#{property.title}" />
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <x:inputText
-                                            id="input"
-                                            forceId="false"
-                                            name="input"
-                                            styleClass="form-control"
-                                            value="#{property.value}"
-                                            required="false"
-                                            readonly="#{property.readonly}"
-                                            validator="#{property.validateProperty}">
-                                            <f:ajax
-                                                execute="@this"
-                                                render="group"
-                                                event="blur" />
-                                        </x:inputText>
-                                        <h:message
-                                            for="input"
-                                            showDetail="true"
-                                            styleClass="help-inline font-danger"
-                                            warnClass="alert"/>
-                                        <h:outputText
-                                            styleClass="help-block font-light"
-                                            rendered="#{NavigationForm.showHelp}"
-                                            value="#{property.helpMessage}" />
-                                    </div>
-                                </h:panelGroup>
-                            </ui:fragment>
+                        value="#{NavigationForm.workflowPlugin.transactionFields}"
+                        var="property">
+                        <ui:fragment rendered="#{property.type == 'input'}">
+                            <h:panelGroup
+                                layout="block"
+                                styleClass="form-group"
+                                id="group">
+                                <div class="col-sm-3 control-label notFocusable">
+                                    <h:outputLabel
+                                        for="input"
+                                        value="#{property.title}" />
+                                </div>
+                                <div class="col-sm-9">
+                                    <x:inputText
+                                        id="input"
+                                        forceId="false"
+                                        name="input"
+                                        styleClass="form-control"
+                                        value="#{property.value}"
+                                        required="false"
+                                        readonly="#{property.readonly}"
+                                        validator="#{property.validateProperty}">
+                                        <f:ajax
+                                            execute="@this"
+                                            render="group"
+                                            event="blur" />
+                                    </x:inputText>
+                                    <h:outputText
+                                        styleClass="help-inline  #{property.strictValidation ? 'font-danger' : ''} alert"
+                                        rendered="#{!property.valid}"
+                                        value="#{property.validationErrorMessage}" />
+                                    <h:outputText
+                                        styleClass="help-block font-light"
+                                        rendered="#{NavigationForm.showHelp}"
+                                        value="#{property.helpMessage}" />
+                                </div>
+                            </h:panelGroup>
+                        </ui:fragment>
 
-                            <intranda:formInputDropDownAjax
-                                name="dropdown"
-                                rendered="#{property.type == 'select' or property.type == 'vocabulary'}"
-                                label="#{property.title}"
-                                field="#{property.value}"
-                                help="#{property.helpMessage}"
-                                selectItems="#{property.selectValues}"
-                                fieldStyle="form-control"
-                                readonly="#{property.readonly}"
-                                required="false"
-                                validator="#{property.validateProperty}"
-                                ajaxEvent="change"
-                                ajaxRender="@this"
-                                var="var"
-                                itemLabel="#{var}"
-                                itemValue="#{var}" />
+                        <intranda:formInputDropDownAjax
+                            name="dropdown"
+                            rendered="#{property.type == 'select' or property.type == 'vocabulary'}"
+                            label="#{property.title}"
+                            field="#{property.value}"
+                            help="#{property.helpMessage}"
+                            selectItems="#{property.selectValues}"
+                            fieldStyle="form-control"
+                            readonly="#{property.readonly}"
+                            required="false"
+                            validator="#{property.validateProperty}"
+                            ajaxEvent="change"
+                            ajaxRender="@this"
+                            var="var"
+                            itemLabel="#{var}"
+                            itemValue="#{var}" />
 
-                            <intranda:formInputCheckBoxAjax
-                                name="checkbox"
-                                rendered="#{property.type == 'checkbox'}"
-                                label="#{property.title}"
-                                field="#{property.value}"
-                                help="#{property.helpMessage}"
-                                fieldStyle="form-control"
-                                readonly="#{property.readonly}"
-                                required="false"
-                                validator="#{property.validateProperty}"
-                                ajaxEvent="change"
-                                ajaxRender="@this" />
-                        </x:dataList>
+                        <intranda:formInputCheckBoxAjax
+                            name="checkbox"
+                            rendered="#{property.type == 'checkbox'}"
+                            label="#{property.title}"
+                            field="#{property.value}"
+                            help="#{property.helpMessage}"
+                            fieldStyle="form-control"
+                            readonly="#{property.readonly}"
+                            required="false"
+                            validator="#{property.validateProperty}"
+                            ajaxEvent="change"
+                            ajaxRender="@this" />
+                    </x:dataList>
                 </div>
             </div>
         </h:form>

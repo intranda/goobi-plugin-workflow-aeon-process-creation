@@ -43,13 +43,16 @@
                 <h:form
                     id="properties"
                     styleClass="form-horizontal form-bordered">
-                    
+
                     <div style="min-height: 250px">
                         <x:dataList
                             value="#{NavigationForm.workflowPlugin.propertyFields}"
                             var="property">
                             <ui:fragment rendered="#{property.type == 'input'}">
-                                <h:panelGroup layout="block" styleClass="form-group" id="group">
+                                <h:panelGroup
+                                    layout="block"
+                                    styleClass="form-group"
+                                    id="group">
                                     <div class="col-sm-3 control-label notFocusable">
                                         <h:outputLabel
                                             for="input"
@@ -70,11 +73,10 @@
                                                 render="group"
                                                 event="blur" />
                                         </x:inputText>
-                                        <h:message
-                                            for="input"
-                                            showDetail="true"
-                                            styleClass="help-inline font-danger"
-                                            warnClass="alert"/>
+                                        <h:outputText
+                                            styleClass="help-inline  #{property.strictValidation ? 'font-danger' : ''} alert"
+                                            rendered="#{!property.valid}"
+                                            value="#{property.validationErrorMessage}" />
                                         <h:outputText
                                             styleClass="help-block font-light"
                                             rendered="#{NavigationForm.showHelp}"

@@ -242,7 +242,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         //  validate properties, details, process values
 
         for (AeonProperty prop : propertyFields) {
-            if (!prop.isValid()) {
+            if (!prop.isValid() && prop.isStrictValidation()) {
                 return;
             }
         }
