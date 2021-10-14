@@ -20,6 +20,8 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.commons.lang3.StringUtils;
+import org.goobi.aeon.LoginResponse;
+import org.goobi.aeon.User;
 import org.goobi.beans.Batch;
 import org.goobi.beans.Masterpiece;
 import org.goobi.beans.Process;
@@ -34,8 +36,6 @@ import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 
 import de.intranda.goobi.plugins.aeon.AeonProperty;
 import de.intranda.goobi.plugins.aeon.AeonRecord;
-import de.intranda.goobi.plugins.api.aeon.LoginResponse;
-import de.intranda.goobi.plugins.api.aeon.User;
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.helper.BeanHelper;
@@ -89,11 +89,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @Setter
     // set to 'request' to show the first screen and to 'summary' to show created processes
     private String screenName = "request";
-
-    //    @Getter
-    //    @Setter
-    //    //the response from api (currently RestTest.java)
-    //    private AeonTransaction transaction = new AeonTransaction();
 
     @Getter
     @Setter

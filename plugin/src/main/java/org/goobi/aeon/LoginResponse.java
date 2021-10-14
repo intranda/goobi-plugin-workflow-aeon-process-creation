@@ -1,4 +1,4 @@
-package de.intranda.goobi.plugins.api.aeon;
+package org.goobi.aeon;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
