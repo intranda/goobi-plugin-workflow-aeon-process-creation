@@ -20,6 +20,7 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.commons.lang3.StringUtils;
+import org.goobi.beans.Batch;
 import org.goobi.beans.Masterpiece;
 import org.goobi.beans.Process;
 import org.goobi.beans.Step;
@@ -254,11 +255,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
 
         Process processTemplate = ProcessManager.getProcessByExactTitle(workflowName);
-
+        Batch batch = null;
         for (AeonRecord rec : recordList) {
             if (rec.isAccepted()) {
                 // create process
                 Process process = new Process();
+                if (batch == null) {
+                    batch = new Batch();
+                    ProcessManager.saveBatch(batch);
+                }
+                process.setBatch(batch);
 
                 process.setProjekt(processTemplate.getProjekt());
                 process.setRegelsatz(processTemplate.getRegelsatz());
@@ -333,7 +339,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     String generatedTitle = identifier.replaceAll("[\\W]", "");
                     process.setTitel(generatedTitle);
 
-                    if (ProcessManager.countProcessTitle(generatedTitle, null)>0) {
+                    if (ProcessManager.countProcessTitle(generatedTitle, null) > 0) {
                         Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_titleInUse", generatedTitle));
                         rec.setAccepted(false);
                         continue;
