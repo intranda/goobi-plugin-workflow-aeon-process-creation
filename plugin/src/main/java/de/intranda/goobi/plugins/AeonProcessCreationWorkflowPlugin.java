@@ -197,17 +197,19 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             log.error(e);
         }
 
-        for (Map<String, String> overview : opacPlugin.getOverviewList()) {
-            AeonRecord record = new AeonRecord();
-            recordList.add(record);
-            record.setRecordData(overview);
-            for (AeonProperty p : recordFields) {
-                AeonProperty prop = p.cloneProperty();
-                prop.setValue(overview.get(prop.getAeonField()));
-                record.getProperties().add(prop);
+        if (opacPlugin.getOverviewList() != null) {
+            for (Map<String, String> overview : opacPlugin.getOverviewList()) {
+                AeonRecord record = new AeonRecord();
+                recordList.add(record);
+                record.setRecordData(overview);
+                for (AeonProperty p : recordFields) {
+                    AeonProperty prop = p.cloneProperty();
+                    prop.setValue(overview.get(prop.getAeonField()));
+                    record.getProperties().add(prop);
+                }
             }
+            setRequestSuccess(true);
         }
-        setRequestSuccess(true);
     }
 
     /*
