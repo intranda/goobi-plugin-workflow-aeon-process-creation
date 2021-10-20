@@ -210,7 +210,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     }
                 }
                 setRequestSuccess(true);
+            } else {
+                // TODO aeon request valid, but no record in metadata cloud
             }
+        } else {
+            // TODO no valid aeon request
         }
     }
 
