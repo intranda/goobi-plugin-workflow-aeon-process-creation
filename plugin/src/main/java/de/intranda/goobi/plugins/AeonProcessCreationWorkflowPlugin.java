@@ -157,58 +157,60 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     .header("Authorization", "BEARER " + res.getAccessToken())
                     .get(Map.class);
         }
-        for (AeonProperty property : transactionFields) {
-            if (StringUtils.isNoneBlank(property.getAeonField())) {
-                Object value = map.get(property.getAeonField());
-                if (value instanceof String) {
-                    property.setValue((String) value);
-                } else if (value instanceof Integer) {
-                    property.setValue(((Integer) value).toString());
-                } else {
-                    property.setValue((String) value);
+        if (map != null) {
+            for (AeonProperty property : transactionFields) {
+                if (StringUtils.isNoneBlank(property.getAeonField())) {
+                    Object value = map.get(property.getAeonField());
+                    if (value instanceof String) {
+                        property.setValue((String) value);
+                    } else if (value instanceof Integer) {
+                        property.setValue(((Integer) value).toString());
+                    } else {
+                        property.setValue((String) value);
+                    }
                 }
             }
-        }
 
-        String catalogueIdentifier = (String) map.get("referenceNumber");
+            String catalogueIdentifier = (String) map.get("referenceNumber");
 
-        IOpacPlugin myImportOpac = null;
+            IOpacPlugin myImportOpac = null;
 
-        for (ConfigOpacCatalogue configOpacCatalogue : ConfigOpac.getInstance().getAllCatalogues(workflowName)) {
-            if (configOpacCatalogue.getTitle().equals(opacName)) {
-                myImportOpac = configOpacCatalogue.getOpacPlugin();
-                coc = configOpacCatalogue;
-            }
-        }
-
-        opacPlugin = (IJsonPlugin) myImportOpac;
-        if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
-            opacPlugin.setTestMode(true);
-        } else {
-            for (ISearchField sf : opacPlugin.getSearchFieldList()) {
-                if (sf.getId().equals("Barcode")) {
-                    sf.setText(catalogueIdentifier);
+            for (ConfigOpacCatalogue configOpacCatalogue : ConfigOpac.getInstance().getAllCatalogues(workflowName)) {
+                if (configOpacCatalogue.getTitle().equals(opacName)) {
+                    myImportOpac = configOpacCatalogue.getOpacPlugin();
+                    coc = configOpacCatalogue;
                 }
             }
-        }
-        try {
-            opacPlugin.search("", "", coc, null);
-        } catch (Exception e) {
-            log.error(e);
-        }
 
-        if (opacPlugin.getOverviewList() != null) {
-            for (Map<String, String> overview : opacPlugin.getOverviewList()) {
-                AeonRecord record = new AeonRecord();
-                recordList.add(record);
-                record.setRecordData(overview);
-                for (AeonProperty p : recordFields) {
-                    AeonProperty prop = p.cloneProperty();
-                    prop.setValue(overview.get(prop.getAeonField()));
-                    record.getProperties().add(prop);
+            opacPlugin = (IJsonPlugin) myImportOpac;
+            if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
+                opacPlugin.setTestMode(true);
+            } else {
+                for (ISearchField sf : opacPlugin.getSearchFieldList()) {
+                    if (sf.getId().equals("Barcode")) {
+                        sf.setText(catalogueIdentifier);
+                    }
                 }
             }
-            setRequestSuccess(true);
+            try {
+                opacPlugin.search("", "", coc, null);
+            } catch (Exception e) {
+                log.error(e);
+            }
+
+            if (opacPlugin.getOverviewList() != null) {
+                for (Map<String, String> overview : opacPlugin.getOverviewList()) {
+                    AeonRecord record = new AeonRecord();
+                    recordList.add(record);
+                    record.setRecordData(overview);
+                    for (AeonProperty p : recordFields) {
+                        AeonProperty prop = p.cloneProperty();
+                        prop.setValue(overview.get(prop.getAeonField()));
+                        record.getProperties().add(prop);
+                    }
+                }
+                setRequestSuccess(true);
+            }
         }
     }
 
