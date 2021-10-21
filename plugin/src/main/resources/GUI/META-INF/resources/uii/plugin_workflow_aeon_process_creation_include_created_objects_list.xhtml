@@ -62,17 +62,28 @@
                                     value="#{item.properties}"
                                     var="property">
 
-
-                                    <intranda:formOutputText
-                                        name="output"
-                                        label="#{property.title}"
-                                        field="#{property.value}"
-                                        help="#{property.helpMessage}"
-                                        fieldStyle="form-control"
-                                        required="false"
-                                        rendered="#{item.showDetails or property.displayAlways}" />
-
-
+                                    <h:panelGroup
+                                        layout="block"
+                                        styleClass="form-group"
+                                        rendered="#{item.showDetails or property.displayAlways}">
+                                        <h:outputLabel
+                                            for="output"
+                                            styleClass="control-label col-sm-3"
+                                            value="#{property.title}" />
+                                        <div class="col-sm-9">
+                                            <x:outputText
+                                                id="output"
+                                                style="border:0px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                                forceId="true"
+                                                styleClass="form-control"
+                                                value="#{property.value}"
+                                                title="#{property.value}" />
+                                            <h:outputText
+                                                styleClass="help-block font-light"
+                                                rendered="#{NavigationForm.showHelp}"
+                                                value="#{property.helpMessage}" />
+                                        </div>
+                                    </h:panelGroup>
 
                                 </x:dataList>
                             </h:panelGroup>

@@ -14,11 +14,11 @@
     </composite:interface>
 
     <composite:implementation>
-    
+
         <h:panelGroup rendered="#{!LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
             <h:outputText
                 styleClass="alert alert-danger alert-dismissable margin-bottom-10 margin-top-10"
-                value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation"/>
+                value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation" />
         </h:panelGroup>
         <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'request'}">
             <div class="row">
@@ -75,51 +75,57 @@
                 </div>
             </div>
         </h:panelGroup>
-        
-                <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'summary'}">
+
+        <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'summary'}">
             <div class="row">
                 <div class="col-sm-6">
-                 <ui:include src="plugin_workflow_aeon_process_creation_include_created_objects_list.xhtml" />
+                    <ui:include src="plugin_workflow_aeon_process_creation_include_created_objects_list.xhtml" />
                 </div>
-                   <div class="col-sm-6">
+                <div class="col-sm-6">
                     <div class="row">
-                <div class="col-sm-12">
-                    <div class="box box-color lightgrey box-bordered">
-                        <div class="box-title">
-                            <h3>
-                                <i class="fa fa-tasks"></i>
-                                <h:outputText value="#{msgs.nextStep}" />
-                            </h3>
-                        </div>
-                   <h:form id="summaryForm">
-                    <div class="box-content">
-                             <ul class="action-ul">
-                                <li class="action-li">
-                                    <button  jsf:id="dockets"  class="expandbutton" jsf:action="#{NavigationForm.workflowPlugin.generateDockets}">
-                                        <span class="btn margin-right-10 fa fa-print fa-lg width-40" />
-                                        <h:outputText value="#{msgs.process_generateDocket}" />
-                                    </button>
-                                </li>
-                                <li class="action-li">
-                                 <button jsf:id="startNewRequest" class="expandbutton" jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">
-                                        <span class="btn margin-right-10 fa fa-file-o fa-lg width-40" />
-                                        <h:outputText value="#{msgs.plugin_workflow_aeon_startNewRequest}" />
-                                    </button>
-                                
-        
+                        <div class="col-sm-12">
+                            <div class="box box-color lightgrey box-bordered">
+                                <div class="box-title">
+                                    <h3>
+                                        <i class="fa fa-tasks"></i>
+                                        <h:outputText value="#{msgs.nextStep}" />
+                                    </h3>
+                                </div>
+                                <h:form id="summaryForm">
+                                    <div class="box-content">
+                                        <ul class="action-ul">
+                                            <li class="action-li">
+                                                <button
+                                                    jsf:id="dockets"
+                                                    class="expandbutton"
+                                                    jsf:action="#{NavigationForm.workflowPlugin.generateDockets}">
+                                                    <span class="btn margin-right-10 fa fa-print fa-lg width-40" />
+                                                    <h:outputText value="#{msgs.process_generateDocket}" />
+                                                </button>
+                                            </li>
+                                            <li class="action-li">
+                                                <button
+                                                    jsf:id="startNewRequest"
+                                                    class="expandbutton"
+                                                    jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">
+                                                    <span class="btn margin-right-10 fa fa-file-o fa-lg width-40" />
+                                                    <h:outputText value="#{msgs.plugin_workflow_aeon_startNewRequest}" />
+                                                </button>
 
-                                </li>
-                            </ul>
+
+
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </h:form>
+                            </div>
                         </div>
-                    
-                   </h:form>
-                   </div>
+                    </div>
                 </div>
-                </div>
-                </div>
-                </div>
-                </h:panelGroup>
-        
+            </div>
+        </h:panelGroup>
+
 
     </composite:implementation>
 </ui:composition>
