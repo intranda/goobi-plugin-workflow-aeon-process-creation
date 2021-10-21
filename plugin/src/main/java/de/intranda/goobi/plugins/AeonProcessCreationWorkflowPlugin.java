@@ -299,13 +299,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     if (StringUtils.isNoneBlank(prop.getValue())) {
                         switch (prop.getPlace()) {
                             case "process":
-                                bhelp.EigenschaftHinzufuegen(process, prop.getTitle(), prop.getValue());
+                                bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getValue());
                                 break;
                             case "work":
-                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getTitle(), prop.getValue());
+                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getValue());
                                 break;
                             case "template":
-                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getTitle(), prop.getValue());
+                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getValue());
                                 break;
                         }
                     }
@@ -314,13 +314,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     if (StringUtils.isNoneBlank(prop.getValue())) {
                         switch (prop.getPlace()) {
                             case "process":
-                                bhelp.EigenschaftHinzufuegen(process, prop.getTitle(), prop.getValue());
+                                bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getValue());
                                 break;
                             case "work":
-                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getTitle(), prop.getValue());
+                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getValue());
                                 break;
                             case "template":
-                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getTitle(), prop.getValue());
+                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getValue());
                                 break;
                         }
                     }
