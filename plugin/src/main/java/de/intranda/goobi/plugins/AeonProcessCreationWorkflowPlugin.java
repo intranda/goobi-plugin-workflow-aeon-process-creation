@@ -97,8 +97,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     private Client client = ClientBuilder.newClient();
 
-    private String api;
+    private String apiUrl;
     private User user;
+    private String apiKey;
 
     private String workflowName;
     private String opacName;
@@ -146,16 +147,26 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             }
 
         } else {
-            LoginResponse res = client.target(api)
-                    .path("Token")
-                    .request(MediaType.APPLICATION_JSON)
-                    .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
-            map = client.target(api)
-                    .path("Requests")
-                    .path(input)
-                    .request(MediaType.APPLICATION_JSON)
-                    .header("Authorization", "BEARER " + res.getAccessToken())
-                    .get(Map.class);
+
+            if (StringUtils.isNotBlank(apiKey)) {
+                map = client.target(apiUrl)
+                        .path("Requests")
+                        .path(input)
+                        .request(MediaType.APPLICATION_JSON)
+                        .header("X-AEON-API-KEY", apiKey)
+                        .get(Map.class);
+            } else {
+                LoginResponse res = client.target(apiUrl)
+                        .path("Token")
+                        .request(MediaType.APPLICATION_JSON)
+                        .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
+                map = client.target(apiUrl)
+                        .path("Requests")
+                        .path(input)
+                        .request(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "BEARER " + res.getAccessToken())
+                        .get(Map.class);
+            }
         }
         if (map != null) {
             for (AeonProperty property : transactionFields) {
@@ -380,8 +391,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
         config.setExpressionEngine(new XPathExpressionEngine());
 
-        api = config.getString("/aeon/url");
-        user = new User(config.getString("/aeon/username"), config.getString("/aeon/password"));
+        apiUrl = config.getString("/aeon/url");
+        apiKey = config.getString("/aeon/apiKey");
+        user = new User(config.getString("/aeon/username", ""), config.getString("/aeon/password", ""));
 
         workflowName = config.getString("/processCreation/workflowName");
         opacName = config.getString("/processCreation/opacName");
