@@ -58,12 +58,15 @@
                                             for="input"
                                             value="#{property.title}" />
                                     </div>
-                                    <div class="col-sm-9">
+                                    <div class="col-sm-9 position-relative">
+                                        <i class="fa fa-info warning-icon" jsf:rendered="#{!property.valid and !property.strictValidation}" />
+                                        <i class="fa fa-exclamation warning-icon error" jsf:rendered="#{!property.valid and property.strictValidation}" />
+                                    
                                         <x:inputText
                                             id="input"
                                             forceId="false"
                                             name="input"
-                                            styleClass="form-control"
+                                            styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
                                             value="#{property.value}"
                                             required="false"
                                             readonly="#{property.readonly}"
