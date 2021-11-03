@@ -76,10 +76,12 @@
                                                 render="group"
                                                 event="blur" />
                                         </x:inputText>
-                                        <h:outputText
-                                            styleClass="help-inline  #{property.strictValidation ? 'font-danger' : ''} alert"
+                                        <h:panelGroup
+                                            layout="block"
                                             rendered="#{!property.valid}"
-                                            value="#{property.validationErrorMessage}" />
+                                            styleClass=" #{property.strictValidation ? 'font-danger' : ''} validation-message">
+                                            <h:outputText value="#{property.validationErrorMessage}" />
+                                        </h:panelGroup>
                                         <h:outputText
                                             styleClass="help-block font-light"
                                             rendered="#{NavigationForm.showHelp}"
