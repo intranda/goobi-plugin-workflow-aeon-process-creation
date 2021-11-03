@@ -136,7 +136,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
             try {
-                map = client.target("http://localhost:8080/goobi/api/")
+                map = client.target("http://localhost:8888/workflow/api/")
                         .path("testingRest")
                         .path("aeon")
                         .request(MediaType.APPLICATION_JSON)
