@@ -44,7 +44,7 @@
                     id="properties"
                     styleClass="form-horizontal form-bordered">
 
-                    <div style="min-height: 250px">
+                    <div>
                         <x:dataList
                             value="#{NavigationForm.workflowPlugin.propertyFields}"
                             var="property">
@@ -113,7 +113,7 @@
                                 label="#{property.title}"
                                 field="#{property.value}"
                                 help="#{property.helpMessage}"
-                                fieldStyle="form-control"
+                                fieldStyle=""
                                 readonly="#{property.readonly}"
                                 required="false"
                                 validator="#{property.validateProperty}"
