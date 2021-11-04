@@ -276,6 +276,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 Process process = new Process();
                 if (batch == null) {
                     batch = new Batch();
+                    batch.setBatchLabel(input);
                     ProcessManager.saveBatch(batch);
                 }
                 process.setBatch(batch);
