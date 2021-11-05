@@ -258,12 +258,14 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         for (AeonProperty prop : propertyFields) {
             if (!prop.isValid() && prop.isStrictValidation()) {
+                Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
                 return;
             }
         }
 
         for (AeonProperty prop : transactionFields) {
             if (!prop.isValid()) {
+                Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_transaction_fields");
                 return;
             }
         }
@@ -276,6 +278,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 Process process = new Process();
                 if (batch == null) {
                     batch = new Batch();
+                    batch.setBatchName(input);
                     ProcessManager.saveBatch(batch);
                 }
                 process.setBatch(batch);
