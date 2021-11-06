@@ -24,6 +24,32 @@ Lizenz              | GPL 2.0 oder neuer
 Dokumentationsdatum | 05.11.2021 
 
 
+Arbeitsweise des Plugins
+---------------------------------------------------------------------------
+
+Wenn der Nutzer über die Berechtigung zur Nutzung des Plugins verfügt, kann Im Menüpunkt `Worklow` das Plugin `AEON Abfrage Plugin` geöffnet werden.
+
+![Geöffnetes Plugin ohne ausgeführte Suche](intranda_workflow_aeon_process_creation3_de.png)
+
+Hier kann nun ein Transaction identifier eingetragen werden, um die Suche nach einem AEON-Record zu starten.
+
+![Anzeige der Daten nach Ausführung einer Suche](intranda_workflow_aeon_process_creation4_de.png)
+
+Wenn eine erfolgreiche Suche durchgeführt wurde, wurde der Bereich `Abfragedetails` mit den Feldern gefüllt, die innerhalb der Konfiguration im Bereich `<transaction>` festgelegt wurden. Im Bereich `Eigenschaften für alle Vorgänge` werden die frei definierbaren Eigenschaften aus dem Konfigurationsbereich `<properties>` angezeigt.
+
+Diese Felder lassen sich bearbeiten, sofern dies in der Konfigurationsdatei vorgesehen wurde. Verstöße gegen die Validierung werden unmittelbar bei den einzelnen Feldern angezeigt.
+
+Im rechten Bereich der Nutzeroberfläche werden die einzelnen ermittelten Datensätze aufgelistet, die innerhalb der Metadata Cloud zu dem Barcode des AEON-Records gefunden wurden. Jede Box stellt hierbei einen eigenständigen Datensatz dar. Mehr Details eines Datensatzes lassen sich anzeigen, indem weitere Felder der Boxen ausgeklappt werden. Über die entsprechenden Icons pro Box lassen sich diejenigen Datensätze auswählen, für die Vorgänge in Goobi erzeugt werden sollen.
+
+![Ausgeklappte Boxen mit weiteren angezeigten Feldern](intranda_workflow_aeon_process_creation5_de.png)
+
+Sofern mindestens ein Datensatz ausgewählt wurde und keine unerfüllten strikten Validierungen vorliegen, lassen sich mittels Klick auf den Button `Vorgänge anlegen` die einzelnen Goobi-Vorgänge für die ausgewählten Datensätze auf der Basis der konfigurierten Produktionsvorlage anlegen. Anschließend gelangt der Nutzer somit auf eine weitere Ansicht.
+
+![Zweite Seite mit der Möglichkeit einen Laufzettel herunterzuladen](intranda_workflow_aeon_process_creation6_de.png)
+
+Hier werden im linken Bereich noch einmal diejenigen Datensätze aufgeführt, für die Vorgänge in Goobi angelegt wurden. Im rechten Bereich steht die Möglichkeit zur Verfügung einen Laufzettel für alle erzeugten Vorgänge zu generieren und herunterzuladen, wo die zugehörigen Vorgänge alle innerhalb eines gemeinsamen Batches zusammengefasst aufgeführt werden.
+
+
 Installation
 ---------------------------------------------------------------------------
 Das Plugin besteht insgesamt aus den folgenden zu installierenden Dateien:
@@ -236,29 +262,3 @@ Plugin_workflow_aeon_process_creation
 ```
 
 ![Korrekt zugewiesenes Recht für die Nutzer](intranda_workflow_aeon_process_creation2_de.png)
-
-
-Arbeitsweise des Plugins
----------------------------------------------------------------------------
-
-Wenn der Nutzer über die Berechtigung zur Nutzung des Plugins verfügt, kann Im Menüpunkt Worklow das Plugin `AEON Abfrage Plugin` geöffnet werden.
-
-![Geöffnetes Plugin ohne ausgeführte Suche](intranda_workflow_aeon_process_creation3_de.png)
-
-Hier kann nun ein Transaction identifier eingetragen werden, um die Suche nach einem AEON-Record zu starten.
-
-![Geöffnetes Plugin ohne ausgeführte Suche](intranda_workflow_aeon_process_creation4_de.png)
-
-Wenn eine erfolgreiche Suche durchgeführt wurde, wurde der Bereich `Abfragedetails` mit den Feldern gefüllt, die innerhalb der Konfiguration im Bereich `<transaction>` festgelegt wurden. Im Bereich `Eigenschaften für alle Vorgänge` werden die frei definierbaren Eigenschaften aus dem Konfigurationsbereich `<properties>` angezeigt.
-
-Diese Felder lassen sich bearbeiten, sofern dies in der Konfigurationsdatei vorgesehen wurde. Verstöße gegen die Validierung werden unmittelbar bei den einzelnen Feldern angezeigt.
-
-Im rechten Bereich der Nutzeroberfläche werden die einzelnen ermittelten Datensätze aufgelistet, die innerhalb der Metadata Cloud zu dem Barcode des AEON-Records gefunden wurden. Jede Box stellt hierbei einen eigenständigen Datensatz dar. Mehr Details eines Datensatzes lassen sich anzeigen, indem weitere Felder der Boxen ausgeklappt werden. Über die entsprechenden Icons pro Box lassen sich diejenigen Datensätze auswählen, für die Vorgänge in Goobi erzeugt werden sollen.
-
-![Ausgeklappte Boxen mit weiteren angezeigten Feldern](intranda_workflow_aeon_process_creation5_de.png)
-
-Sofern mindestens ein Datensatz ausgewählt wurde und keine unerfüllten strikten Validierungen vorliegen, lassen sich mittels Klick auf den Button `Vorgänge anlegen` die einzelnen Goobi-Vorgänge für die ausgewählten Datensätze auf der Basis der konfigurierten Produktionsvorlage anlegen. Anschließend gelangt der Nutzer somit auf eine weitere Ansicht.
-
-![Zweite Seite mit der Möglichkeit einen Laufzettel herunterzuladen](intranda_workflow_aeon_process_creation6_de.png)
-
-Hier werden im linken Bereich noch einmal diejenigen Datensätze aufgeführt, für die Vorgänge in Goobi angelegt wurden. Im rechten Bereich steht die Möglichkeit zur Verfügung einen Laufzettel für alle erzeugten Vorgänge zu generieren und herunterzuladen, wo die zugehörigen Vorgänge alle innerhalb eines gemeinsamen Batches zusammengefasst aufgeführt werden.
