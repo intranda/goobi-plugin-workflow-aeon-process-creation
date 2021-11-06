@@ -1,10 +1,10 @@
 ---
 description: >-
-  This is a Workflow Plugin for Goobi workflow. It allows to create multiple Goobi processes based on an initial AEON request. It allows to manually select items from the AEON response to decide for which items a Goobi process shall be started.
+  Dies ist ein Workflow Plugin für den Goobi workflow. Es ermöglicht die Erstellung mehrerer Goobi Vorgäng auf der Grundlage einer ersten AEON-Anfrage. Es ermöglicht die manuelle Auswahl von Elementen aus der AEON-Antwort, um zu entscheiden, für welche Elemente ein Goobi Vorgang erzeugt werden soll.
   
 ---
 
-goobi-plugin-workflow-aeon-process-creation
+AEON Datenübernahme
 ===========================================================================
 
 
