@@ -4,7 +4,7 @@ description: >-
   
 ---
 
-goobi-plugin-workflow-aeon-process-creation
+AEON data transfer
 ===========================================================================
 
 
