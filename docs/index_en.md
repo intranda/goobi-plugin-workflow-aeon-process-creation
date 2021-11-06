@@ -76,6 +76,7 @@ The plugin is configured via the configuration file `plugin_intranda_workflow_ae
 <config_plugin>
     <aeon>
         <url>https://example.com/api</url>
+        <apiKey>1234567890</apiKey>
         <username>username</username>
         <password>password</password>
     </aeon>
