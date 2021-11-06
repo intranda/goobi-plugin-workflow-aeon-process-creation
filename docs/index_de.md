@@ -77,6 +77,7 @@ Die Konfiguration des Plugins erfolgt über die Konfigurationsdatei `plugin_intr
 <config_plugin>
     <aeon>
         <url>https://example.com/api</url>
+        <apiKey>1234567890</apiKey>
         <username>username</username>
         <password>password</password>
     </aeon>
