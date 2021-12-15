@@ -103,8 +103,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     private String workflowName;
     private String opacName;
+
     @Getter
-    @Setter
     private String selectedWorkflow;
     @Getter
     private List<String> possibleWorkflows = new ArrayList<>();
@@ -225,13 +225,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         record.getProperties().add(prop);
 
                     }
-
                     String generatedTitle = overview.get("uri").replaceAll("[\\W]", "");
                     record.setProcessTitle(generatedTitle);
                     //  check for duplicates
                     if (ProcessManager.countProcessTitle(generatedTitle, null) > 0) {
                         record.setDuplicate(true);
                     }
+
+                    // TODO check if record needs to be disabled
+                    // record.setDisabled(true);
+
                 }
                 setRequestSuccess(true);
             } else {
@@ -484,6 +487,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
             facesContext.responseComplete();
         }
+    }
+
+    public void setSelectedWorkflow(String selectedWorkflow) {
+        // TODO check, if records needs to be disabled/enabled, when workflow is changed
+        this.selectedWorkflow = selectedWorkflow;
     }
 
 }

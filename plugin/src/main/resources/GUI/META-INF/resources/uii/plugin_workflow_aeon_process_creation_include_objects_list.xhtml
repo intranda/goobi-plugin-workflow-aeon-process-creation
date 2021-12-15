@@ -70,7 +70,9 @@
                                 <button
                                     jsf:id="accept"
                                     class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5"
-                                    title="#{msgs.plugin_workflow_aeon_accept}">
+                                    title="#{msgs.plugin_workflow_aeon_accept}"
+                                    jsf:disabled="#{item.disabled}"
+                                    >
                                     <i class="fa fa-check"></i>
                                     <f:setPropertyActionListener
                                         target="#{item.accepted}"

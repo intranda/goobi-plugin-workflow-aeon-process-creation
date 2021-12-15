@@ -21,4 +21,6 @@ public class AeonRecord {
     private String processTitle;
 
     private boolean duplicate;
+
+    private boolean disabled;
 }
