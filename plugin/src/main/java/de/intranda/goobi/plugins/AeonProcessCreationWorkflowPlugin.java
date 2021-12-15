@@ -30,6 +30,7 @@ import org.goobi.beans.Template;
 import org.goobi.interfaces.IJsonPlugin;
 import org.goobi.interfaces.ISearchField;
 import org.goobi.production.enums.PluginType;
+import org.goobi.production.flow.statistics.hibernate.FilterHelper;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
@@ -103,6 +104,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     private String workflowName;
     private String opacName;
+    @Getter
+    @Setter
+    private String selectedWorkflow;
+    @Getter
+    private List<String> possibleWorkflows = new ArrayList<>();
 
     @Getter
     @Setter
@@ -136,7 +142,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
             try {
-                map = client.target("http://localhost:8888/workflow/api/")
+                map = client.target("http://localhost:8080/goobi/api/")
                         .path("testingRest")
                         .path("aeon")
                         .request(MediaType.APPLICATION_JSON)
@@ -270,7 +276,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             }
         }
 
-        Process processTemplate = ProcessManager.getProcessByExactTitle(workflowName);
+        Process processTemplate = ProcessManager.getProcessByExactTitle(selectedWorkflow);
         Batch batch = null;
         for (AeonRecord rec : recordList) {
             if (rec.isAccepted()) {
@@ -423,6 +429,22 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             AeonProperty property = new AeonProperty(hc);
             propertyFields.add(property);
         }
+
+        String sql = FilterHelper.criteriaBuilder("", true, null, null, null, true, false);
+        // load all process templates
+        List<Process> templates = ProcessManager.getProcesses("prozesse.titel", sql);
+        // use configured default template name
+        for (Process p : templates) {
+            possibleWorkflows.add(p.getTitel());
+            if (p.getTitel().equals(workflowName)) {
+                selectedWorkflow = p.getTitel();
+            }
+        }
+        // if it doesn't exist, use first existing template
+        if (selectedWorkflow == null) {
+            selectedWorkflow = templates.get(0).getTitel();
+        }
+
     }
 
     public void acceptAllItems() {
