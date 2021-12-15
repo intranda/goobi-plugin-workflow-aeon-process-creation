@@ -17,4 +17,8 @@ public class AeonRecord {
     private boolean showDetails = false;
 
     private Map<String, String> recordData;
+
+    private String processTitle;
+
+    private boolean duplicate;
 }

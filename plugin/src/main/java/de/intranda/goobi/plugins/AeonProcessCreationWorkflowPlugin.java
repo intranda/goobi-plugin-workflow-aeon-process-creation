@@ -53,7 +53,6 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.Fileformat;
-import ugh.dl.Metadata;
 import ugh.dl.Prefs;
 
 @PluginImplementation
@@ -224,6 +223,14 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         AeonProperty prop = p.cloneProperty();
                         prop.setValue(overview.get(prop.getAeonField()));
                         record.getProperties().add(prop);
+
+                    }
+
+                    String generatedTitle = overview.get("uri").replaceAll("[\\W]", "");
+                    record.setProcessTitle(generatedTitle);
+                    //  check for duplicates
+                    if (ProcessManager.countProcessTitle(generatedTitle, null) > 0) {
+                        record.setDuplicate(true);
                     }
                 }
                 setRequestSuccess(true);
@@ -354,20 +361,14 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     opacPlugin.setSelectedUrl(recordIdentifier);
                     Fileformat fileformat = opacPlugin.search("", "", coc, prefs); // get metadata for selected record
                     // is additional metadata neeeded?
-                    String identifier = "";
-                    for (Metadata md : fileformat.getDigitalDocument().getLogicalDocStruct().getAllMetadata()) {
-                        if ("CatalogIDSource".equals(md.getType().getName())) {
-                            identifier = md.getValue();
-                        }
-                    }
-                    String generatedTitle = identifier.replaceAll("[\\W]", "");
-                    process.setTitel(generatedTitle);
 
-                    if (ProcessManager.countProcessTitle(generatedTitle, null) > 0) {
-                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_titleInUse", generatedTitle));
-                        rec.setAccepted(false);
-                        continue;
-                    }
+                    process.setTitel(rec.getProcessTitle());
+
+                    //                    if (ProcessManager.countProcessTitle(generatedTitle, null) > 0) {
+                    //                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_titleInUse", generatedTitle));
+                    //                        rec.setAccepted(false);
+                    //                        continue;
+                    //                    }
 
                     // save process
                     ProcessManager.saveProcess(process);

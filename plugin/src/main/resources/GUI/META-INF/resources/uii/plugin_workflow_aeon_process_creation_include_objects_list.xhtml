@@ -96,6 +96,12 @@
                             layout="block"
                             styleClass="box-content nopadding"
                             style="border-color: #666">
+                            
+                            <h:outputFormat value="#{msgs['plugin_workflow_aeon_titleInUse']}" rendered="#{item.duplicate}">
+                               <f:param value="#{item.processTitle}" />
+                            </h:outputFormat>
+                            
+             
                             <x:dataList
                                 value="#{item.properties}"
                                 var="property">
