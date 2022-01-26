@@ -48,6 +48,10 @@
                         <x:dataList
                             value="#{NavigationForm.workflowPlugin.propertyFields}"
                             var="property">
+                            
+                           
+                           <ui:fragment rendered="#{property.documentType == null or property.documentType == NavigationForm.workflowPlugin.documentType}">
+
                             <ui:fragment rendered="#{property.type == 'input'}">
                                 <h:panelGroup
                                     layout="block"
@@ -119,6 +123,8 @@
                                 validator="#{property.validateProperty}"
                                 ajaxEvent="change"
                                 ajaxRender="@this" />
+
+                           </ui:fragment>
                         </x:dataList>
 
                     </div>

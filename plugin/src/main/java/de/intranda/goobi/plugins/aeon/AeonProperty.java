@@ -48,6 +48,8 @@ public class AeonProperty {
 
     private boolean displayInTitle = false;
 
+    private String documentType;
+
     private HierarchicalConfiguration config;
 
     public AeonProperty(HierarchicalConfiguration config) {
@@ -78,6 +80,8 @@ public class AeonProperty {
             vocabularyField = Arrays.asList(config.getStringArray("vocabularyField"));
             initializeVocabulary();
         }
+
+        documentType = config.getString("@documentType", null);
 
     }
 

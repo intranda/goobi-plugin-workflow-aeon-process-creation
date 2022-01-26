@@ -75,8 +75,8 @@
   here that there is no content from aeon to be mapped so that there needs no 'aeon' to be defined;
   the values here are stored for all created processes; -->
   <properties>
-
-    <field>
+<!-- documentType can be blank, than the field is always shown. Otherwise it gets displayed only for the configured doc type -->
+    <field documentType="Manuscript">
       <title>Strict validation</title>
       <type readonly="false">input</type>
       <variable place="process">Text field</variable>

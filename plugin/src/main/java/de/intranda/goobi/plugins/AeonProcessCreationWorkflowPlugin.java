@@ -120,6 +120,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     private IJsonPlugin opacPlugin;
     private ConfigOpacCatalogue coc = null;
 
+    @Getter
+    private String documentType;
+
     @Override
     public PluginType getType() {
         return PluginType.Workflow;
@@ -173,6 +176,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         .get(Map.class);
             }
         }
+        documentType = (String) map.get("documentType");
         if (map != null) {
             for (AeonProperty property : transactionFields) {
                 if (StringUtils.isNoneBlank(property.getAeonField())) {
@@ -273,9 +277,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         //  validate properties, details, process values
 
         for (AeonProperty prop : propertyFields) {
-            if (!prop.isValid() && prop.isStrictValidation()) {
-                Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
-                return;
+            if (prop.getDocumentType() == null || prop.getDocumentType().equals(documentType)) {
+                if (!prop.isValid() && prop.isStrictValidation()) {
+                    Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
+                    return;
+                }
             }
         }
 
@@ -327,17 +333,19 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
                 // add properties
                 for (AeonProperty prop : propertyFields) {
-                    if (StringUtils.isNoneBlank(prop.getValue())) {
-                        switch (prop.getPlace()) {
-                            case "process":
-                                bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getValue());
-                                break;
-                            case "work":
-                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getValue());
-                                break;
-                            case "template":
-                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getValue());
-                                break;
+                    if (prop.getDocumentType() == null || prop.getDocumentType().equals(documentType)) {
+                        if (StringUtils.isNoneBlank(prop.getValue())) {
+                            switch (prop.getPlace()) {
+                                case "process":
+                                    bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getValue());
+                                    break;
+                                case "work":
+                                    bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getValue());
+                                    break;
+                                case "template":
+                                    bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getValue());
+                                    break;
+                            }
                         }
                     }
                 }
