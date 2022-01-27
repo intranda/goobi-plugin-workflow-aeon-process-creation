@@ -71,8 +71,7 @@
                                     jsf:id="accept"
                                     class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5"
                                     title="#{msgs.plugin_workflow_aeon_accept}"
-                                    jsf:disabled="#{item.disabled}"
-                                    >
+                                    jsf:disabled="#{item.disabled}">
                                     <i class="fa fa-check"></i>
                                     <f:setPropertyActionListener
                                         target="#{item.accepted}"
@@ -98,12 +97,14 @@
                             layout="block"
                             styleClass="box-content nopadding"
                             style="border-color: #666">
-                            
-                            <h:outputFormat value="#{msgs['plugin_workflow_aeon_titleInUse']}" rendered="#{item.duplicate}">
-                               <f:param value="#{item.processTitle}" />
+
+                            <h:outputFormat
+                                value="#{msgs['plugin_workflow_aeon_titleInUse']}"
+                                rendered="#{item.duplicate}">
+                                <f:param value="#{item.processTitle}" />
                             </h:outputFormat>
-                            
-             
+
+
                             <x:dataList
                                 value="#{item.properties}"
                                 var="property">
@@ -175,7 +176,99 @@
                                     validator="#{property.validateProperty}"
                                     ajaxEvent="change"
                                     ajaxRender="@this" />
+
+
+
+
+
                             </x:dataList>
+
+                            <ui:fragment rendered="#{item.showDetails}">
+                                <x:dataList
+                                    value="#{item.processProperties}"
+                                    var="property">
+
+                                    <ui:fragment rendered="#{property.type == 'input'}">
+                                        <h:panelGroup
+                                            layout="block"
+                                            styleClass="form-group"
+                                            id="group">
+                                            <div class="col-sm-3 control-label notFocusable">
+                                                <h:outputLabel
+                                                    for="input"
+                                                    value="#{property.title}" />
+                                            </div>
+                                            <div class="col-sm-9 position-relative">
+                                                <i
+                                                    class="fa fa-info warning-icon"
+                                                    jsf:rendered="#{!property.valid and !property.strictValidation}" />
+                                                <i
+                                                    class="fa fa-exclamation warning-icon error"
+                                                    jsf:rendered="#{!property.valid and property.strictValidation}" />
+
+                                                <x:inputText
+                                                    id="input"
+                                                    forceId="false"
+                                                    name="input"
+                                                    styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                    value="#{property.value}"
+                                                    required="false"
+                                                    readonly="#{property.readonly}"
+                                                    validator="#{property.validateProperty}">
+                                                    <f:ajax
+                                                        execute="@this"
+                                                        render="group"
+                                                        event="blur" />
+                                                </x:inputText>
+                                                <h:panelGroup
+                                                    layout="block"
+                                                    rendered="#{!property.valid}"
+                                                    styleClass=" #{property.strictValidation ? 'font-danger' : ''} validation-message">
+                                                    <h:outputText value="#{property.validationErrorMessage}" />
+                                                </h:panelGroup>
+                                                <h:outputText
+                                                    styleClass="help-block font-light"
+                                                    rendered="#{NavigationForm.showHelp}"
+                                                    value="#{property.helpMessage}" />
+                                            </div>
+                                        </h:panelGroup>
+                                    </ui:fragment>
+
+                                    <intranda:formInputDropDownAjax
+                                        name="dropdown"
+                                        rendered="#{property.type == 'select' or property.type == 'vocabulary'}"
+                                        label="#{property.title}"
+                                        field="#{property.value}"
+                                        help="#{property.helpMessage}"
+                                        selectItems="#{property.selectValues}"
+                                        fieldStyle="form-control"
+                                        readonly="#{property.readonly}"
+                                        required="false"
+                                        validator="#{property.validateProperty}"
+                                        ajaxEvent="change"
+                                        ajaxRender="@this"
+                                        var="var"
+                                        itemLabel="#{var}"
+                                        itemValue="#{var}" />
+
+                                    <intranda:formInputCheckBoxAjax
+                                        name="checkbox"
+                                        rendered="#{property.type == 'checkbox'}"
+                                        label="#{property.title}"
+                                        field="#{property.value}"
+                                        help="#{property.helpMessage}"
+                                        fieldStyle=""
+                                        readonly="#{property.readonly}"
+                                        required="false"
+                                        validator="#{property.validateProperty}"
+                                        ajaxEvent="change"
+                                        ajaxRender="@this" />
+
+
+                                </x:dataList>
+
+
+                            </ui:fragment>
                         </h:panelGroup>
                     </div>
                 </ui:repeat>

@@ -52,6 +52,8 @@ public class AeonProperty {
 
     private HierarchicalConfiguration config;
 
+    private boolean overwriteMainField = false;
+
     public AeonProperty(HierarchicalConfiguration config) {
         this.config = config;
         aeonField = config.getString("@aeon");
@@ -134,6 +136,14 @@ public class AeonProperty {
     }
 
     public void validateProperty(FacesContext context, UIComponent component, Object value) {
+        if (overwriteMainField) {
+            // null value is always valid, when we overwrite main fields
+            String s = (String)value;
+            if (StringUtils.isBlank(s)) {
+                return;
+            }
+        }
+
         // check if validation expression was configured
         if (StringUtils.isNotBlank(validationExpression)) {
             // check if value is empty
@@ -170,6 +180,13 @@ public class AeonProperty {
     }
 
     public boolean isValid() {
+        if (overwriteMainField) {
+            // null value is always valid, when we overwrite main fields
+            if (StringUtils.isBlank(value)) {
+                return true;
+            }
+        }
+
         if (StringUtils.isNotBlank(validationExpression)) {
             if (value == null) {
                 return false;

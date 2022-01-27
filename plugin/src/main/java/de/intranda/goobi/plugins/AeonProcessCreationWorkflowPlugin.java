@@ -176,8 +176,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         .get(Map.class);
             }
         }
-        documentType = (String) map.get("documentType");
         if (map != null) {
+            documentType = (String) map.get("documentType");
             for (AeonProperty property : transactionFields) {
                 if (StringUtils.isNoneBlank(property.getAeonField())) {
                     Object value = map.get(property.getAeonField());
@@ -239,6 +239,17 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     // TODO check if record needs to be disabled
                     // record.setDisabled(true);
 
+
+                    // copy properties
+                    for (AeonProperty p : propertyFields) {
+                        if (p.getDocumentType() == null || p.getDocumentType().equals(documentType)) {
+                            AeonProperty prop = p.cloneProperty();
+                            prop.setStrictValidation(false);
+                            prop.setOverwriteMainField(true);
+                            prop.setValue("");
+                            record.getProcessProperties().add(prop);
+                        }
+                    }
                 }
                 setRequestSuccess(true);
             } else {
@@ -334,16 +345,23 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 // add properties
                 for (AeonProperty prop : propertyFields) {
                     if (prop.getDocumentType() == null || prop.getDocumentType().equals(documentType)) {
-                        if (StringUtils.isNoneBlank(prop.getValue())) {
+                        String value = prop.getValue();
+                        for (AeonProperty localProperty : rec.getProcessProperties()) {
+                            if (prop.getTitle().equals(localProperty.getTitle()) && StringUtils.isNoneBlank(localProperty.getValue())) {
+                                value = localProperty.getValue();
+                            }
+                        }
+
+                        if (StringUtils.isNoneBlank(value)) {
                             switch (prop.getPlace()) {
                                 case "process":
-                                    bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getValue());
+                                    bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), value);
                                     break;
                                 case "work":
-                                    bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getValue());
+                                    bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), value);
                                     break;
                                 case "template":
-                                    bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getValue());
+                                    bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), value);
                                     break;
                             }
                         }

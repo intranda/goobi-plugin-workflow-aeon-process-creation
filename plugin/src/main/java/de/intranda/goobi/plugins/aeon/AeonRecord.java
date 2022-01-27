@@ -23,4 +23,8 @@ public class AeonRecord {
     private boolean duplicate;
 
     private boolean disabled;
+
+    private List<AeonProperty> processProperties = new ArrayList<>();
+
+
 }
