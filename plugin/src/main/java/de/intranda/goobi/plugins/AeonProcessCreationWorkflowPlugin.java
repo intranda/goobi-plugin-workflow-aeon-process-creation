@@ -382,7 +382,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     }
                 }
 
-                for (AeonProperty prop : recordFields) {
+
+                for (AeonProperty prop : rec.getProcessProperties()) {
                     if (StringUtils.isNoneBlank(prop.getValue())) {
                         switch (prop.getPlace()) {
                             case "process":
@@ -397,7 +398,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         }
                     }
                 }
-
 
                 try {
                     // create mets file for selected record
