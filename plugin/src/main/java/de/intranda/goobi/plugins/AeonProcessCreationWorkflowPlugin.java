@@ -244,7 +244,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     for (AeonProperty p : propertyFields) {
                         if (p.getDocumentType() == null || p.getDocumentType().equals(documentType)) {
                             AeonProperty prop = p.cloneProperty();
-                            prop.setStrictValidation(false);
                             prop.setOverwriteMainField(true);
                             prop.setValue("");
                             record.getProcessProperties().add(prop);
@@ -382,6 +381,23 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         }
                     }
                 }
+
+                for (AeonProperty prop : recordFields) {
+                    if (StringUtils.isNoneBlank(prop.getValue())) {
+                        switch (prop.getPlace()) {
+                            case "process":
+                                bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getValue());
+                                break;
+                            case "work":
+                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getValue());
+                                break;
+                            case "template":
+                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getValue());
+                                break;
+                        }
+                    }
+                }
+
 
                 try {
                     // create mets file for selected record
