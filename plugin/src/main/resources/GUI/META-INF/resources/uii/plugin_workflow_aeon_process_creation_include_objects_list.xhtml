@@ -99,6 +99,8 @@
                             style="border-color: #666">
 
                             <h:outputFormat
+                                style="padding: 10px;margin-bottom:0;display: block;"
+                                styleClass="alert alert-danger"
                                 value="#{msgs['plugin_workflow_aeon_titleInUse']}"
                                 rendered="#{item.duplicate}">
                                 <f:param value="#{item.processTitle}" />
