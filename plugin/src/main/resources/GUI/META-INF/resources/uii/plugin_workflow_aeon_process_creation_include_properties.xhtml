@@ -50,7 +50,7 @@
                             var="property">
                             
                            
-                           <ui:fragment rendered="#{property.documentType == null or property.documentType == NavigationForm.workflowPlugin.documentType}">
+                           <ui:fragment rendered="#{property.shippingOption == null or property.shippingOption == NavigationForm.workflowPlugin.shippingOption}">
 
                             <ui:fragment rendered="#{property.type == 'input'}">
                                 <h:panelGroup
@@ -74,10 +74,13 @@
                                             value="#{property.value}"
                                             required="false"
                                             readonly="#{property.readonly}"
-                                            validator="#{property.validateProperty}">
+                                            >
+<!--                                             valueChangeListener="#{NavigationForm.workflowPlugin.propertyValueChangeListener}" -->
+<!--                                             <f:passThroughAttribute name="property" value="#{property.title}" /> -->
+<!--                                             validator="#{property.validateProperty}" -->
                                             <f:ajax
-                                                execute="@this"
-                                                render="group"
+                                              execute="@this"
+                                                render="@all"
                                                 event="blur" />
                                         </x:inputText>
                                         <h:panelGroup

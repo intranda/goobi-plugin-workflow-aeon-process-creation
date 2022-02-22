@@ -121,7 +121,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     private ConfigOpacCatalogue coc = null;
 
     @Getter
-    private String documentType;
+    private String shippingOption;
 
     @Override
     public PluginType getType() {
@@ -177,7 +177,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             }
         }
         if (map != null) {
-            documentType = (String) map.get("documentType");
+            shippingOption = (String) map.get("shippingOption");
             for (AeonProperty property : transactionFields) {
                 if (StringUtils.isNoneBlank(property.getAeonField())) {
                     Object value = map.get(property.getAeonField());
@@ -239,13 +239,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     // TODO check if record needs to be disabled
                     // record.setDisabled(true);
 
-
                     // copy properties
                     for (AeonProperty p : propertyFields) {
-                        if (p.getDocumentType() == null || p.getDocumentType().equals(documentType)) {
+                        if (StringUtils.isBlank(shippingOption) || p.getShippingOption() == null || p.getShippingOption().equals(shippingOption)) {
                             AeonProperty prop = p.cloneProperty();
                             prop.setOverwriteMainField(true);
-                            prop.setValue("");
+                            prop.setValue(p.getValue());
+                            prop.setDefaultValue(p.getValue());
                             record.getProcessProperties().add(prop);
                         }
                     }
@@ -287,7 +287,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         //  validate properties, details, process values
 
         for (AeonProperty prop : propertyFields) {
-            if (prop.getDocumentType() == null || prop.getDocumentType().equals(documentType)) {
+            if (StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null || prop.getShippingOption().equals(shippingOption)) {
                 if (!prop.isValid() && prop.isStrictValidation()) {
                     Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
                     return;
@@ -307,6 +307,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         for (AeonRecord rec : recordList) {
             if (rec.isAccepted()) {
                 // create process
+                for (AeonProperty prop : rec.getProcessProperties()) {
+                    if (!prop.isValid() && prop.isStrictValidation()) {
+                        Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
+                    }
+                }
                 Process process = new Process();
                 if (batch == null) {
                     batch = new Batch();
@@ -342,30 +347,30 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
 
                 // add properties
-                for (AeonProperty prop : propertyFields) {
-                    if (prop.getDocumentType() == null || prop.getDocumentType().equals(documentType)) {
-                        String value = prop.getValue();
-                        for (AeonProperty localProperty : rec.getProcessProperties()) {
-                            if (prop.getTitle().equals(localProperty.getTitle()) && StringUtils.isNoneBlank(localProperty.getValue())) {
-                                value = localProperty.getValue();
-                            }
-                        }
-
-                        if (StringUtils.isNoneBlank(value)) {
-                            switch (prop.getPlace()) {
-                                case "process":
-                                    bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), value);
-                                    break;
-                                case "work":
-                                    bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), value);
-                                    break;
-                                case "template":
-                                    bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), value);
-                                    break;
-                            }
-                        }
-                    }
-                }
+                //                for (AeonProperty prop : propertyFields) {
+                //                    if (StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null || prop.getShippingOption().equals(shippingOption)) {
+                //                        String value = prop.getValue();
+                //                        for (AeonProperty localProperty : rec.getProcessProperties()) {
+                //                            if (prop.getTitle().equals(localProperty.getTitle()) && StringUtils.isNoneBlank(localProperty.getValue())) {
+                //                                value = localProperty.getValue();
+                //                            }
+                //                        }
+                //
+                //                        if (StringUtils.isNoneBlank(value)) {
+                //                            switch (prop.getPlace()) {
+                //                                case "process":
+                //                                    bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), value);
+                //                                    break;
+                //                                case "work":
+                //                                    bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), value);
+                //                                    break;
+                //                                case "template":
+                //                                    bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), value);
+                //                                    break;
+                //                            }
+                //                        }
+                //                    }
+                //                }
                 for (AeonProperty prop : transactionFields) {
                     if (StringUtils.isNoneBlank(prop.getValue())) {
                         switch (prop.getPlace()) {
@@ -382,21 +387,20 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     }
                 }
 
-
                 for (AeonProperty prop : rec.getProcessProperties()) {
-                    if (StringUtils.isNoneBlank(prop.getValue())) {
-                        switch (prop.getPlace()) {
-                            case "process":
-                                bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getValue());
-                                break;
-                            case "work":
-                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getValue());
-                                break;
-                            case "template":
-                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getValue());
-                                break;
-                        }
+                    //                    if (StringUtils.isNoneBlank(prop.getValue())) {
+                    switch (prop.getPlace()) {
+                        case "process":
+                            bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getValue());
+                            break;
+                        case "work":
+                            bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getValue());
+                            break;
+                        case "template":
+                            bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getValue());
+                            break;
                     }
+                    //                    }
                 }
 
                 try {
@@ -457,12 +461,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         //read <transaction> and <processes>
         List<HierarchicalConfiguration> transactions = config.configurationsAt("/transaction/field");
         for (HierarchicalConfiguration hc : transactions) {
-            AeonProperty property = new AeonProperty(hc);
+            AeonProperty property = new AeonProperty(hc, this);
             transactionFields.add(property);
         }
         List<HierarchicalConfiguration> processes = config.configurationsAt("/processes/field");
         for (HierarchicalConfiguration hc : processes) {
-            AeonProperty property = new AeonProperty(hc);
+            AeonProperty property = new AeonProperty(hc, this);
             recordFields.add(property);
         }
 
@@ -472,7 +476,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         propertyFields.clear();
         List<HierarchicalConfiguration> properties = config.configurationsAt("/properties/field");
         for (HierarchicalConfiguration hc : properties) {
-            AeonProperty property = new AeonProperty(hc);
+            AeonProperty property = new AeonProperty(hc, this);
             propertyFields.add(property);
         }
 
@@ -536,4 +540,35 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         this.selectedWorkflow = selectedWorkflow;
     }
 
+    //    public void propertyValueChangeListener(ValueChangeEvent e) {
+    //        UIComponent nameInput = e.getComponent();
+    //
+    //        for (String atttr : nameInput.getAttributes().keySet()) {
+    //            System.out.println(atttr + ": " + nameInput.getAttributes().get(atttr));
+    //        }
+    //
+    //        System.out.println(nameInput.getId());
+    //
+    //        for (String atttr : nameInput.getPassThroughAttributes().keySet()) {
+    //            System.out.println(atttr + ": " + nameInput.getPassThroughAttributes().get(atttr));
+    //        }
+    //
+    //        System.out.println("valueChangeListener invoked:" + " OLD: " + e.getOldValue() + " NEW: " + e.getNewValue());
+    //    }
+
+    public void updateProperties(String propertyName, String oldValue, String newValue) {
+        for (AeonRecord record : recordList) {
+            for (AeonProperty prop : record.getProcessProperties()) {
+                if (prop.getTitle().equals(propertyName)) {
+                    // configure new default value
+                    prop.setDefaultValue(newValue);
+                    // update property, if it was not overwritten
+                    if (oldValue.equals(prop.getValue())) {
+                        prop.setValue(newValue);
+                    }
+                    break;
+                }
+            }
+        }
+    }
 }

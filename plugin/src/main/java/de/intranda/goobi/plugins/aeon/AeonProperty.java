@@ -5,11 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.validator.ValidatorException;
-
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.goobi.production.cli.helper.StringPair;
@@ -17,6 +12,7 @@ import org.goobi.vocabulary.Field;
 import org.goobi.vocabulary.VocabRecord;
 import org.goobi.vocabulary.Vocabulary;
 
+import de.intranda.goobi.plugins.AeonProcessCreationWorkflowPlugin;
 import de.sub.goobi.persistence.managers.VocabularyManager;
 import lombok.Data;
 
@@ -32,6 +28,7 @@ public class AeonProperty {
     private String propertyName; // /variable
     private String place; // /variable/@place
 
+    private String defaultValue;
     private String value; // /value
     private List<String> selectValues; // /select
 
@@ -48,13 +45,15 @@ public class AeonProperty {
 
     private boolean displayInTitle = false;
 
-    private String documentType;
+    private String shippingOption;
 
     private HierarchicalConfiguration config;
 
     private boolean overwriteMainField = false;
 
-    public AeonProperty(HierarchicalConfiguration config) {
+    private AeonProcessCreationWorkflowPlugin plugin;
+
+    public AeonProperty(HierarchicalConfiguration config, AeonProcessCreationWorkflowPlugin plugin) {
         this.config = config;
         aeonField = config.getString("@aeon");
         title = config.getString("title");
@@ -83,7 +82,8 @@ public class AeonProperty {
             initializeVocabulary();
         }
 
-        documentType = config.getString("@documentType", null);
+        shippingOption = config.getString("@shippingOption", null);
+        this.plugin= plugin;
 
     }
 
@@ -135,47 +135,47 @@ public class AeonProperty {
         }
     }
 
-    public void validateProperty(FacesContext context, UIComponent component, Object value) {
-        if (overwriteMainField) {
-            // null value is always valid, when we overwrite main fields
-            String s = (String)value;
-            if (StringUtils.isBlank(s)) {
-                return;
-            }
-        }
-
-        // check if validation expression was configured
-        if (StringUtils.isNotBlank(validationExpression)) {
-            // check if value is empty
-            if (value == null) {
-                FacesMessage message = null;
-                if (strictValidation) {
-                    message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
-                    this.value = null;
-                } else {
-                    message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
-                    this.value = null;
-                }
-                throw new ValidatorException(message);
-            }
-            String data = (String) value;
-            // check if data matches expression
-            if (!data.matches(validationExpression)) {
-                FacesMessage message = null;
-                if (strictValidation) {
-                    message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
-                    this.value = data;
-                } else {
-                    message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
-                    this.value = data;
-                }
-                throw new ValidatorException(message);
-            }
-        }
-    }
+    //    public void validateProperty(FacesContext context, UIComponent component, Object value) {
+    //        if (overwriteMainField) {
+    //            // null value is always valid, when we overwrite main fields
+    //            String s = (String)value;
+    //            if (StringUtils.isBlank(s)) {
+    //                return;
+    //            }
+    //        }
+    //        FacesMessage message = null;
+    //
+    //        // check if validation expression was configured
+    //        if (StringUtils.isNotBlank(validationExpression)) {
+    //            // check if value is empty
+    //            if (value == null) {
+    //                if (strictValidation) {
+    //                    message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
+    //                    this.value = null;
+    //                } else {
+    //                    message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
+    //                    this.value = null;
+    //                }
+    //                throw new ValidatorException(message);
+    //            }
+    //            String data = (String) value;
+    //            // check if data matches expression
+    //            if (!data.matches(validationExpression)) {
+    //                FacesMessage message = null;
+    //                if (strictValidation) {
+    //                    message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
+    //                    this.value = data;
+    //                } else {
+    //                    message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
+    //                    this.value = data;
+    //                }
+    //                throw new ValidatorException(message);
+    //            }
+    //        }
+    //    }
 
     public AeonProperty cloneProperty() {
-        AeonProperty property = new AeonProperty(config);
+        AeonProperty property = new AeonProperty(config, plugin);
         return property;
     }
 
@@ -195,6 +195,14 @@ public class AeonProperty {
             }
         }
         return true;
+    }
+
+
+    public void setValue(String value) {
+        if (!overwriteMainField) {
+            plugin.updateProperties(title, this.value, value);
+        }
+        this.value = value;
     }
 
 }
