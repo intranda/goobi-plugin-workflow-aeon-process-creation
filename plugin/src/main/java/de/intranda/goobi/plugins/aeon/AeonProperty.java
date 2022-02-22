@@ -197,6 +197,20 @@ public class AeonProperty {
         return true;
     }
 
+    public boolean isDifferFromDefault() {
+        if (StringUtils.isBlank(defaultValue) && StringUtils.isNotBlank(value)) {
+            return true;
+        }
+        if (StringUtils.isBlank(value) && StringUtils.isNotBlank(defaultValue)) {
+            return true;
+        }
+        if (StringUtils.isBlank(defaultValue) && StringUtils.isBlank(value))  {
+            return false;
+        }
+
+        return !defaultValue.equals(value);
+    }
+
 
     public void setValue(String value) {
         if (!overwriteMainField) {

@@ -206,7 +206,7 @@
                                                 <i
                                                     class="fa fa-exclamation warning-icon error"
                                                     jsf:rendered="#{!property.valid and property.strictValidation}" />
-
+                                                <i class="fa fa-check warning-icon check" jsf:rendered="#{property.valid and property.differFromDefault}" />
                                                 <x:inputText
                                                     id="input"
                                                     forceId="false"

@@ -294,6 +294,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
             }
         }
+        for (AeonRecord rec : recordList) {
+            if (rec.isAccepted()) {
+                // create process
+                for (AeonProperty prop : rec.getProcessProperties()) {
+                    if (!prop.isValid() && prop.isStrictValidation()) {
+                        Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
+                    }
+                }
+            }
+        }
 
         for (AeonProperty prop : transactionFields) {
             if (!prop.isValid()) {
@@ -307,11 +317,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         for (AeonRecord rec : recordList) {
             if (rec.isAccepted()) {
                 // create process
-                for (AeonProperty prop : rec.getProcessProperties()) {
-                    if (!prop.isValid() && prop.isStrictValidation()) {
-                        Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
-                    }
-                }
+
                 Process process = new Process();
                 if (batch == null) {
                     batch = new Batch();
