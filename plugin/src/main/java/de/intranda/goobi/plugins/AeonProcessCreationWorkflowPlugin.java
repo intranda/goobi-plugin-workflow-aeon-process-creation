@@ -568,10 +568,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 if (prop.getTitle().equals(propertyName)) {
                     // configure new default value
                     prop.setDefaultValue(newValue);
-                    // update property, if it was not overwritten
-                    if (oldValue.equals(prop.getValue())) {
-                        prop.setValue(newValue);
-                    }
+                    // update property value
+                    //                    if (oldValue.equals(prop.getValue())) {
+                    prop.setValue(newValue);
+                    //                    }
                     break;
                 }
             }
