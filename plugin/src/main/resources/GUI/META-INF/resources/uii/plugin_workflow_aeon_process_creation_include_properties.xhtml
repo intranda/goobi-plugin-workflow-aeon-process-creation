@@ -130,7 +130,7 @@
                                                 itemValue="#{var}" />
                                         </h:selectOneMenu>
                                         <h:message
-                                            for="#{cc.attrs.name}"
+                                            for="dropdown"
                                             showDetail="true"
                                             styleClass="help-inline font-danger" />
                                         <h:outputText
@@ -141,20 +141,36 @@
                                 </h:panelGroup>
 
 
-
-                                <intranda:formInputCheckBoxAjax
-                                    name="checkbox"
-                                    rendered="#{property.type == 'checkbox'}"
-                                    label="#{property.title}"
-                                    field="#{property.value}"
-                                    help="#{property.helpMessage}"
-                                    fieldStyle=""
-                                    readonly="#{property.readonly}"
-                                    required="false"
-                                    validator="#{property.validateProperty}"
-                                    ajaxEvent="change"
-                                    ajaxRender="@this" />
-
+                                <h:panelGroup
+                                    layout="block"
+                                    styleClass="form-group"
+                                    rendered="#{property.type == 'checkbox'}">
+                                    <div class="col-sm-3 control-label">
+                                        <h:outputLabel
+                                            for="checkbox"
+                                            value="#{property.title}" />
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <h:selectBooleanCheckbox
+                                            id="checkbox"
+                                            styleClass="checkbox-height-fix"
+                                            style="margin-left: 0px;"
+                                            value="#{property.value}">
+                                            <f:ajax
+                                                execute="@this"
+                                                render="@all"
+                                                event="change" />
+                                        </h:selectBooleanCheckbox>
+                                        <h:message
+                                            for="checkbox"
+                                            showDetail="true"
+                                            styleClass="help-inline font-danger" />
+                                        <h:outputText
+                                            styleClass="help-block font-light"
+                                            rendered="#{NavigationForm.showHelp}"
+                                            value="#{property.helpMessage}" />
+                                    </div>
+                                </h:panelGroup>
                             </ui:fragment>
                         </x:dataList>
 
