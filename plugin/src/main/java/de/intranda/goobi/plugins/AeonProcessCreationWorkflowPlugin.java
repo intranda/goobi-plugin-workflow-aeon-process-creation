@@ -258,8 +258,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
                     if (other != null && !other.getProjekt().getProjectIsArchived()) {
                         record.setDuplicate(true);
-                        // TODO new process title, add suffix like date, or process id
-                        record.setProcessTitle(record.getProcessTitle() + "_" + dateFormat.format(new Date()));
 
                         for (AeonProperty property : record.getProperties()) {
                             AeonProperty aeonProperty = property.cloneProperty();
@@ -377,6 +375,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             if (rec.isAccepted()) {
                 // create process
                 // TODO generate different title, if its a duplicate
+
+                if (rec.isDuplicate()) {
+                    rec.setProcessTitle(rec.getProcessTitle() + "_" + dateFormat.format(new Date()));
+                }
 
                 Process process = new Process();
                 if (batch == null) {
