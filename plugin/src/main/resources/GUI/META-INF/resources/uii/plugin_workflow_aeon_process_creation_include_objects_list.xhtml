@@ -99,9 +99,18 @@
                             style="border-color: #666">
 
                             <h:outputFormat
+                            id="titleInUse"
                                 value="#{msgs['plugin_workflow_aeon_titleInUse']}"
-                                rendered="#{item.duplicate}">
+                                rendered="#{item.duplicate}"
+                                
+                                >
                                 <f:param value="#{item.processTitle}" />
+                                                                <f:passThroughAttribute name="data-trigger" value="hover" />
+<!--                                 <f:passThroughAttribute name="data-container" value="#titleInUse" /> -->
+                                <f:passThroughAttribute name="data-toggle" value="popover" />
+                                <f:passThroughAttribute name="data-placement" value="bottom" />
+                                <f:passThroughAttribute name="data-html" value="true" />
+                                <f:passThroughAttribute name="data-content" value="#{item.duplicationPopup}" />
                             </h:outputFormat>
 
 

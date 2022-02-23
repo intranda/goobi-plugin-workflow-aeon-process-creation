@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import lombok.Data;
 
 @Data
@@ -27,5 +29,24 @@ public class AeonRecord {
     private List<AeonProperty> processProperties = new ArrayList<>();
 
     private List<AeonProperty> duplicateProperties = new ArrayList<>();
+
+    public String getDuplicationPopup() {
+        StringBuilder answer = new StringBuilder();
+
+        answer.append("<ul style=\"list-style-type:none;\">");
+        for (AeonProperty property : duplicateProperties) {
+            if (StringUtils.isNotBlank(property.getValue())) {
+                answer.append("<li class=\"key-value-pair\">");
+                answer.append("<b>");
+                answer.append(property.getTitle());
+                answer.append("</b>: ");
+                answer.append(property.getValue());
+                answer.append("</li>");
+            }
+        }
+        answer.append("</ul>");
+
+        return answer.toString();
+    }
 
 }

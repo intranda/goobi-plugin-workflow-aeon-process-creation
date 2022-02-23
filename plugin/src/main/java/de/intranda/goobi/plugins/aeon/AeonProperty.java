@@ -83,7 +83,7 @@ public class AeonProperty {
         }
 
         shippingOption = config.getString("@shippingOption", null);
-        this.plugin= plugin;
+        this.plugin = plugin;
 
     }
 
@@ -204,13 +204,12 @@ public class AeonProperty {
         if (StringUtils.isBlank(value) && StringUtils.isNotBlank(defaultValue)) {
             return true;
         }
-        if (StringUtils.isBlank(defaultValue) && StringUtils.isBlank(value))  {
+        if (StringUtils.isBlank(defaultValue) && StringUtils.isBlank(value)) {
             return false;
         }
 
         return !defaultValue.equals(value);
     }
-
 
     public void setValue(String value) {
         if (!overwriteMainField) {
@@ -218,5 +217,4 @@ public class AeonProperty {
         }
         this.value = value;
     }
-
 }
