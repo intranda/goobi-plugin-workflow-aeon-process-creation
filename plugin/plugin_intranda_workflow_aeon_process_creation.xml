@@ -2,11 +2,13 @@
 <!-- this is all just examplary data: works only with RestTest.java as rest api -->
 
 <config_plugin>
-	
-  <aeon>
-    <url>https://aeon-test-mssa.library.yale.edu/api</url>
-    <apiKey>ff01c2c4-19fd-46e9-b390-65416b621c8e</apiKey>
-  </aeon>
+
+   <aeon>
+       <url>https://example.com/api</url>
+       <apiKey>1234567890</apiKey>
+       <username>username</username>
+       <password>password</password>
+   </aeon>
 
   <processCreation>
     <workflowName>Yale</workflowName>
@@ -52,7 +54,15 @@
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-    
+
+	<field aeon="shippingOption">
+      <title>Shipping option</title>
+      <type readonly="true">input</type>
+      <variable place="process">Shipping option</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
     <field aeon="username">
       <title>User Name</title>
       <type readonly="false">input</type>
@@ -60,7 +70,7 @@
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-    
+
   </transaction>
 
 
@@ -190,7 +200,7 @@
       <select>aspace</select>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-    
+
     <field aeon="author" displayAlways="false" displayInTitle="false">
       <title>Author</title>
       <type readonly="false">input</type>
@@ -231,5 +241,5 @@
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-  </processes>	
+  </processes>
 </config_plugin>
