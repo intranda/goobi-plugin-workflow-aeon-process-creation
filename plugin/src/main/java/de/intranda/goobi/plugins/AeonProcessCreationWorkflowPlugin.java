@@ -24,9 +24,12 @@ import org.goobi.aeon.LoginResponse;
 import org.goobi.aeon.User;
 import org.goobi.beans.Batch;
 import org.goobi.beans.Masterpiece;
+import org.goobi.beans.Masterpieceproperty;
 import org.goobi.beans.Process;
+import org.goobi.beans.Processproperty;
 import org.goobi.beans.Step;
 import org.goobi.beans.Template;
+import org.goobi.beans.Templateproperty;
 import org.goobi.interfaces.IJsonPlugin;
 import org.goobi.interfaces.ISearchField;
 import org.goobi.production.enums.PluginType;
@@ -231,10 +234,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     }
                     String generatedTitle = overview.get("uri").replaceAll("[\\W]", "");
                     record.setProcessTitle(generatedTitle);
-                    //  check for duplicates
-                    if (ProcessManager.countProcessTitle(generatedTitle, null) > 0) {
-                        record.setDuplicate(true);
-                    }
 
                     // TODO check if record needs to be disabled
                     // record.setDisabled(true);
@@ -249,6 +248,29 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                             record.getProcessProperties().add(prop);
                         }
                     }
+
+
+
+                    //  check for duplicates in active projects
+
+                    Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
+                    if (other != null && !other.getProjekt().getProjectIsArchived()) {
+                        record.setDuplicate(true);
+                        // TODO new process title, add suffix like date, or process id
+
+                        for (AeonProperty property :   record.getProperties()) {
+                            AeonProperty aeonProperty = property.cloneProperty();
+                            aeonProperty.setValue("");
+                            record.getDuplicateProperties().add(aeonProperty);
+                            extractProcessValues(other, aeonProperty);
+                        }
+                        for (AeonProperty property :  record.getProcessProperties()) {
+                            AeonProperty aeonProperty = property.cloneProperty();
+                            aeonProperty.setValue("");
+                            record.getDuplicateProperties().add(aeonProperty);
+                            extractProcessValues(other, aeonProperty);
+                        }
+                    }
                 }
                 setRequestSuccess(true);
             } else {
@@ -256,6 +278,39 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             }
         } else {
             // TODO no valid aeon request
+        }
+    }
+
+    private void extractProcessValues(Process other, AeonProperty aeonProperty) {
+        switch (aeonProperty.getPlace()) {
+            case "process":
+                for (Processproperty processProperty : other.getEigenschaften()) {
+                    if (processProperty.getTitel().equals(aeonProperty.getPropertyName())) {
+                        aeonProperty.setValue(processProperty.getWert());
+                        break;
+                    }
+                }
+                break;
+            case "template":
+                if (other.getVorlagenSize()>0) {
+                    for (Templateproperty templateProperty : other.getVorlagen().get(0).getEigenschaften()) {
+                        if (templateProperty.getTitel().equals(aeonProperty.getPropertyName())) {
+                            aeonProperty.setValue(templateProperty.getWert());
+                            break;
+                        }
+                    }
+                }
+                break;
+            default:
+                if (other.getWerkstueckeSize()>0) {
+                    for (Masterpieceproperty templateProperty : other.getWerkstuecke().get(0).getEigenschaften()) {
+                        if (templateProperty.getTitel().equals(aeonProperty.getPropertyName())) {
+                            aeonProperty.setValue(templateProperty.getWert());
+                            break;
+                        }
+                    }
+                }
+                break;
         }
     }
 
@@ -282,6 +337,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
         if (numberOfRecordsToCreate == 0) {
             Helper.setFehlerMeldung("plugin_workflow_aeon_nothing_selected");
+            return;
         }
 
         //  validate properties, details, process values
@@ -296,10 +352,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
         for (AeonRecord rec : recordList) {
             if (rec.isAccepted()) {
-                // create process
                 for (AeonProperty prop : rec.getProcessProperties()) {
                     if (!prop.isValid() && prop.isStrictValidation()) {
                         Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
+                        return;
                     }
                 }
             }
@@ -317,6 +373,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         for (AeonRecord rec : recordList) {
             if (rec.isAccepted()) {
                 // create process
+                // TODO generate different title, if its a duplicate
 
                 Process process = new Process();
                 if (batch == null) {

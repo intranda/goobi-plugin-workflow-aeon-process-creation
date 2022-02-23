@@ -26,5 +26,6 @@ public class AeonRecord {
 
     private List<AeonProperty> processProperties = new ArrayList<>();
 
+    private List<AeonProperty> duplicateProperties = new ArrayList<>();
 
 }
