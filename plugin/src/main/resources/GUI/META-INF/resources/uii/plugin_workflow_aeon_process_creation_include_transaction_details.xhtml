@@ -68,7 +68,7 @@
                                         value="#{property.value}"
                                         required="false"
                                         readonly="#{property.readonly}"
-                                        validator="#{property.validateProperty}">
+                                        >
                                         <f:ajax
                                             execute="@this"
                                             render="group"
@@ -96,7 +96,6 @@
                             fieldStyle="form-control"
                             readonly="#{property.readonly}"
                             required="false"
-                            validator="#{property.validateProperty}"
                             ajaxEvent="change"
                             ajaxRender="@this"
                             var="var"
@@ -112,7 +111,6 @@
                             fieldStyle="form-control"
                             readonly="#{property.readonly}"
                             required="false"
-                            validator="#{property.validateProperty}"
                             ajaxEvent="change"
                             ajaxRender="@this" />
                     </x:dataList>
