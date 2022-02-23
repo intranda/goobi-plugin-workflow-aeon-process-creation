@@ -3,71 +3,64 @@
 
 <config_plugin>
 	
-    <aeon>
-        <url>https://example.com/api</url>
-        <apiKey>1234567890</apiKey>
-        <username>username</username>
-        <password>password</password>
-    </aeon>
+  <aeon>
+    <url>https://aeon-test-mssa.library.yale.edu/api</url>
+    <apiKey>ff01c2c4-19fd-46e9-b390-65416b621c8e</apiKey>
+  </aeon>
 
+  <processCreation>
+    <workflowName>Yale</workflowName>
+    <opacName>SearchApiTest</opacName>
+  </processCreation>
 
-
-	<!-- the transaction details are configured here;
+  <!-- the transmission details are configured here;
   the values here are stored for all created processes; -->
   <transaction>
-	<!-- aeon = JSON path to needed property ("id" converts to "transaction.id") -->
-    <field aeon="id">
+    <!-- aeon = JSON path to needed property ("id" converts to "transmission.id") -->
+    <field aeon="transactionNumber">
       <title>Transaction Identifier</title>
       <type readonly="true">input</type>
       <variable place="process">Text field</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
-      <validation strict="true">xyz-regular-expression</validation>
+      <validation strict="true">\d+</validation>
       <message>Your content does not follow our validation guidelines</message>
     </field>
 
     <field aeon="creationDate">
       <title>Creation Date</title>
       <type readonly="false">input</type>
-      <variable place="process">Text field</variable>
+      <variable place="process">Creation Date</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
-      <validation strict="true">xyz-regular-expression</validation>
+
       <message>Your content does not follow our validation guidelines</message>
     </field>
 
-    <field aeon="title">
+    <field aeon="itemTitle">
       <title>Title</title>
       <type readonly="false">input</type>
-      <variable place="process">Text field</variable>
-      <value>Transaction</value>
+      <variable place="process">Title field</variable>
+      <value>Transmission</value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-    <field aeon="user.firstName">
-      <title>User First Name</title>
+    <field aeon="documentType">
+      <title>Document type</title>
       <type readonly="false">input</type>
-      <variable place="process">Text field</variable>
+      <variable place="process">Document type</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
     
-    <field aeon="user.lastName">
-      <title>User Last Name</title>
+    <field aeon="username">
+      <title>User Name</title>
       <type readonly="false">input</type>
-      <variable place="process">Text field</variable>
+      <variable place="process">User Name</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
     
-    <field aeon="user.mailAddress">
-      <title>User Mail Address</title>
-      <type readonly="false">input</type>
-      <variable place="process">Text field</variable>
-      <value></value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
-
   </transaction>
 
 
@@ -75,11 +68,11 @@
   here that there is no content from aeon to be mapped so that there needs no 'aeon' to be defined;
   the values here are stored for all created processes; -->
   <properties>
-<!-- shippingOption can be blank, than the field is always shown. Otherwise it gets displayed only for the configured shippingOption type -->
-    <field shippingOption="Film (DRMS)">
+
+    <field>
       <title>Strict validation</title>
       <type readonly="false">input</type>
-      <variable place="process">Text field</variable>
+      <variable place="process">Strict validation</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
       <validation strict="true">\d+</validation>
@@ -89,7 +82,7 @@
     <field>
       <title>loose validation</title>
       <type readonly="false">input</type>
-      <variable place="process">Text field</variable>
+      <variable place="process">loose validation</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
       <validation strict="false">\d+</validation>
@@ -99,13 +92,11 @@
     <field>
       <title>no validation</title>
       <type readonly="false">input</type>
-      <variable place="process">Text field</variable>
+      <variable place="process">no validation</variable>
       <value>default value</value>
       <help>This is my description for the field so that everyone gets some help.</help>
       <message>Your content does not follow our validation guidelines</message>
     </field>
-
-
 
     <field>
       <title>F Dropdown</title>
@@ -143,43 +134,102 @@
 
   <!-- the process fields are configured differently -->
   <processes>
-    <!-- aeon = JSON path to needed property ("id" converts to "item.id" ...) -->
-    <field aeon="id" displayAlways="true" displayInTitle="true">
-      <title>Item Identifier</title>
+<!--
+{
+        "title": "Marcheￌﾁ de Saint-Pierre : meￌﾁlodrame en cinq actes / par Benjamin Antier et Alexis de Comberousse. ",
+        "recordType": "ils",
+        "barcode": "39002001054627",
+        "uri": "/ils/item/4168081?bib=1848655",
+        "bibId": "1848655",
+        "itemId": "4168081",
+        "holdingId": "3055899",
+        "author": "Antier, Benjamin, 1787-1870. ",
+        "callNumber": "Hf75 3 19-20",
+        "volume": "19-20",
+        "pubDate": "1839"
+    }
+-->
+    <field aeon="bibId" displayAlways="true" displayInTitle="false">
+      <title>Bib Identifier</title>
       <type readonly="true">input</type>
-      <variable place="process">Text field</variable>
+      <variable place="process">Bib Identifier</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
-    
-    <field aeon="title" displayAlways="true" displayInTitle="false">
-      <title>Item Title</title>
-      <type readonly="false">input</type>
-      <variable place="process">Text field</variable>
-      <value></value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
-    
-    <field aeon="publicationType" displayAlways="false" displayInTitle="true">
-      <title>Publication Type</title>
-      <type readonly="false">select</type>
-      <variable place="work">publication</variable>
-      <value>Something else</value>
-      <select>Monograph</select>
-      <select>Something else</select>
-      <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
-    
-    <field aeon="shelfmark" displayAlways="false" displayInTitle="false">
-      <title>Shelfmark</title>
-      <type readonly="false">input</type>
-      <variable place="work">Text field</variable>
-      <value></value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-      <validation strict="true">xyz-regular-expression</validation>
-      <message>Your content does not follow our validation guidelines</message>
     </field>
 
-  </processes>
-	
+    <field aeon="title" displayAlways="true" displayInTitle="true">
+      <title>Item Title</title>
+      <type readonly="false">input</type>
+      <variable place="process">Item Title</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <field aeon="itemId" displayAlways="false" displayInTitle="false">
+      <title>Item Identifier</title>
+      <type readonly="true">input</type>
+      <variable place="process">Item Identifier</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <field aeon="holdingId" displayAlways="false" displayInTitle="false">
+      <title>Holding Identifier</title>
+      <type readonly="true">input</type>
+      <variable place="process">Holding Identifier</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <field aeon="recordType" displayAlways="false" displayInTitle="false">
+      <title>Record type</title>
+      <type readonly="false">select</type>
+      <variable place="work">publication</variable>
+      <value></value>
+      <select>ils</select>
+      <select>aspace</select>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    
+    <field aeon="author" displayAlways="false" displayInTitle="false">
+      <title>Author</title>
+      <type readonly="false">input</type>
+      <variable place="work">Author</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <field aeon="callNumber" displayAlways="false" displayInTitle="false">
+      <title>Shelfmark</title>
+      <type readonly="false">input</type>
+      <variable place="work">Shelfmark</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <field aeon="volume" displayAlways="false" displayInTitle="false">
+      <title>Volume</title>
+      <type readonly="false">input</type>
+      <variable place="work">Volume</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <field aeon="collection" displayAlways="false" displayInTitle="false">
+      <title>Collection</title>
+      <type readonly="false">input</type>
+      <variable place="work">Collection</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <field aeon="series" displayAlways="false" displayInTitle="false">
+      <title>Series</title>
+      <type readonly="false">input</type>
+      <variable place="work">Series</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+  </processes>	
 </config_plugin>

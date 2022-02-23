@@ -3,7 +3,9 @@ package de.intranda.goobi.plugins;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -131,6 +133,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         return PluginType.Workflow;
     }
 
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
     @Override
     public String getGui() {
         return "/uii/plugin_workflow_aeon_process_creation.xhtml";
@@ -249,22 +253,21 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         }
                     }
 
-
-
                     //  check for duplicates in active projects
 
                     Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
                     if (other != null && !other.getProjekt().getProjectIsArchived()) {
                         record.setDuplicate(true);
                         // TODO new process title, add suffix like date, or process id
+                        record.setProcessTitle(record.getProcessTitle() + "_" + dateFormat.format(new Date()));
 
-                        for (AeonProperty property :   record.getProperties()) {
+                        for (AeonProperty property : record.getProperties()) {
                             AeonProperty aeonProperty = property.cloneProperty();
                             aeonProperty.setValue("");
                             record.getDuplicateProperties().add(aeonProperty);
                             extractProcessValues(other, aeonProperty);
                         }
-                        for (AeonProperty property :  record.getProcessProperties()) {
+                        for (AeonProperty property : record.getProcessProperties()) {
                             AeonProperty aeonProperty = property.cloneProperty();
                             aeonProperty.setValue("");
                             record.getDuplicateProperties().add(aeonProperty);
@@ -292,7 +295,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
                 break;
             case "template":
-                if (other.getVorlagenSize()>0) {
+                if (other.getVorlagenSize() > 0) {
                     for (Templateproperty templateProperty : other.getVorlagen().get(0).getEigenschaften()) {
                         if (templateProperty.getTitel().equals(aeonProperty.getPropertyName())) {
                             aeonProperty.setValue(templateProperty.getWert());
@@ -302,7 +305,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
                 break;
             default:
-                if (other.getWerkstueckeSize()>0) {
+                if (other.getWerkstueckeSize() > 0) {
                     for (Masterpieceproperty templateProperty : other.getWerkstuecke().get(0).getEigenschaften()) {
                         if (templateProperty.getTitel().equals(aeonProperty.getPropertyName())) {
                             aeonProperty.setValue(templateProperty.getWert());
