@@ -99,11 +99,20 @@
                             style="border-color: #666">
 
                             <h:outputFormat
+                            	id="titleInUse"
                                 style="padding: 10px;margin-bottom:0;display: block;"
                                 styleClass="alert alert-danger"
                                 value="#{msgs['plugin_workflow_aeon_titleInUse']}"
-                                rendered="#{item.duplicate}">
+                                rendered="#{item.duplicate}"
+                                
+                                >
                                 <f:param value="#{item.processTitle}" />
+                                                                <f:passThroughAttribute name="data-trigger" value="hover" />
+<!--                                 <f:passThroughAttribute name="data-container" value="#titleInUse" /> -->
+                                <f:passThroughAttribute name="data-toggle" value="popover" />
+                                <f:passThroughAttribute name="data-placement" value="bottom" />
+                                <f:passThroughAttribute name="data-html" value="true" />
+                                <f:passThroughAttribute name="data-content" value="#{item.duplicationPopup}" />
                             </h:outputFormat>
 
 
@@ -129,7 +138,8 @@
                                                 value="#{property.value}"
                                                 required="false"
                                                 readonly="#{property.readonly}"
-                                                validator="#{property.validateProperty}">
+                                                >
+<!--                                                 validator="#{property.validateProperty}" -->
                                                 <f:ajax
                                                     execute="@this"
                                                     render="group"
@@ -159,12 +169,12 @@
                                     fieldStyle="form-control"
                                     readonly="#{property.readonly}"
                                     required="false"
-                                    validator="#{property.validateProperty}"
                                     ajaxEvent="change"
                                     ajaxRender="@this"
                                     var="var"
                                     itemLabel="#{var}"
                                     itemValue="#{var}" />
+<!--                                     validator="#{property.validateProperty}" -->
 
                                 <intranda:formInputCheckBoxAjax
                                     name="checkbox"
@@ -175,9 +185,9 @@
                                     fieldStyle="form-control"
                                     readonly="#{property.readonly}"
                                     required="false"
-                                    validator="#{property.validateProperty}"
                                     ajaxEvent="change"
                                     ajaxRender="@this" />
+<!--                                     validator="#{property.validateProperty}" -->
 
 
 
@@ -207,7 +217,7 @@
                                                 <i
                                                     class="fa fa-exclamation warning-icon error"
                                                     jsf:rendered="#{!property.valid and property.strictValidation}" />
-
+                                                <i class="fa fa-check warning-icon check" jsf:rendered="#{property.valid and property.differFromDefault}" />
                                                 <x:inputText
                                                     id="input"
                                                     forceId="false"
@@ -216,7 +226,8 @@
                                                     value="#{property.value}"
                                                     required="false"
                                                     readonly="#{property.readonly}"
-                                                    validator="#{property.validateProperty}">
+                                                    >
+<!--                                                     validator="#{property.validateProperty}" -->
                                                     <f:ajax
                                                         execute="@this"
                                                         render="group"
@@ -246,12 +257,12 @@
                                         fieldStyle="form-control"
                                         readonly="#{property.readonly}"
                                         required="false"
-                                        validator="#{property.validateProperty}"
                                         ajaxEvent="change"
                                         ajaxRender="@this"
                                         var="var"
                                         itemLabel="#{var}"
                                         itemValue="#{var}" />
+<!--                                         validator="#{property.validateProperty}" -->
 
                                     <intranda:formInputCheckBoxAjax
                                         name="checkbox"
@@ -262,9 +273,9 @@
                                         fieldStyle=""
                                         readonly="#{property.readonly}"
                                         required="false"
-                                        validator="#{property.validateProperty}"
                                         ajaxEvent="change"
                                         ajaxRender="@this" />
+<!--                                         validator="#{property.validateProperty}" -->
 
 
                                 </x:dataList>
