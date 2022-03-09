@@ -133,6 +133,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         return PluginType.Workflow;
     }
 
+
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
@@ -320,6 +321,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
      * (this resets the page to its default state)
      */
     public void resetRequest() {
+        initializeConfiguration();
         generatedProcesses.clear();
         setRequestSuccess(false);
         input = "";
@@ -514,7 +516,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
      */
     public AeonProcessCreationWorkflowPlugin() {
         log.info("AeonProcessCreation workflow plugin started");
+        initializeConfiguration();
+    }
 
+
+    private void initializeConfiguration() {
         //read config
         XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
         config.setExpressionEngine(new XPathExpressionEngine());
@@ -564,6 +570,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
 
     }
+
 
     public void acceptAllItems() {
         for (AeonRecord rec : recordList) {
