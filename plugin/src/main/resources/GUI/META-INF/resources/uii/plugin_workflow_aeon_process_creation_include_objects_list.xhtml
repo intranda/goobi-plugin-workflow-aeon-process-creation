@@ -99,20 +99,28 @@
                             style="border-color: #666">
 
                             <h:outputFormat
-                            	id="titleInUse"
+                                id="titleInUse"
                                 style="padding: 10px;margin-bottom:0;display: block;"
                                 styleClass="alert alert-danger"
                                 value="#{msgs['plugin_workflow_aeon_titleInUse']}"
-                                rendered="#{item.duplicate}"
-                                
-                                >
+                                rendered="#{item.duplicate}">
                                 <f:param value="#{item.processTitle}" />
-                                                                <f:passThroughAttribute name="data-trigger" value="hover" />
-<!--                                 <f:passThroughAttribute name="data-container" value="#titleInUse" /> -->
-                                <f:passThroughAttribute name="data-toggle" value="popover" />
-                                <f:passThroughAttribute name="data-placement" value="bottom" />
-                                <f:passThroughAttribute name="data-html" value="true" />
-                                <f:passThroughAttribute name="data-content" value="#{item.duplicationPopup}" />
+                                <f:passThroughAttribute
+                                    name="data-trigger"
+                                    value="hover" />
+                                <!--                                 <f:passThroughAttribute name="data-container" value="#titleInUse" /> -->
+                                <f:passThroughAttribute
+                                    name="data-toggle"
+                                    value="popover" />
+                                <f:passThroughAttribute
+                                    name="data-placement"
+                                    value="bottom" />
+                                <f:passThroughAttribute
+                                    name="data-html"
+                                    value="true" />
+                                <f:passThroughAttribute
+                                    name="data-content"
+                                    value="#{item.duplicationPopup}" />
                             </h:outputFormat>
 
 
@@ -137,9 +145,8 @@
                                                 styleClass="form-control"
                                                 value="#{property.value}"
                                                 required="false"
-                                                readonly="#{property.readonly}"
-                                                >
-<!--                                                 validator="#{property.validateProperty}" -->
+                                                readonly="#{property.readonly}">
+                                                <!--                                                 validator="#{property.validateProperty}" -->
                                                 <f:ajax
                                                     execute="@this"
                                                     render="group"
@@ -174,7 +181,7 @@
                                     var="var"
                                     itemLabel="#{var}"
                                     itemValue="#{var}" />
-<!--                                     validator="#{property.validateProperty}" -->
+                                <!--                                     validator="#{property.validateProperty}" -->
 
                                 <intranda:formInputCheckBoxAjax
                                     name="checkbox"
@@ -187,7 +194,7 @@
                                     required="false"
                                     ajaxEvent="change"
                                     ajaxRender="@this" />
-<!--                                     validator="#{property.validateProperty}" -->
+                                <!--                                     validator="#{property.validateProperty}" -->
 
 
 
@@ -200,24 +207,26 @@
                                     value="#{item.processProperties}"
                                     var="property">
 
-                                    <ui:fragment rendered="#{property.type == 'input'}">
-                                        <h:panelGroup
-                                            layout="block"
-                                            styleClass="form-group"
-                                            id="group">
-                                            <div class="col-sm-3 control-label notFocusable">
-                                                <h:outputLabel
-                                                    for="input"
-                                                    value="#{property.title}" />
-                                            </div>
-                                            <div class="col-sm-9 position-relative">
-                                                <i
-                                                    class="fa fa-info warning-icon"
-                                                    jsf:rendered="#{!property.valid and !property.strictValidation}" />
-                                                <i
-                                                    class="fa fa-exclamation warning-icon error"
-                                                    jsf:rendered="#{!property.valid and property.strictValidation}" />
-                                                <i class="fa fa-check warning-icon check" jsf:rendered="#{property.valid and property.differFromDefault}" />
+                                    <h:panelGroup
+                                        layout="block"
+                                        styleClass="form-group"
+                                        id="group">
+                                        <div class="col-sm-3 control-label notFocusable">
+                                            <h:outputLabel
+                                                for="input"
+                                                value="#{property.title}" />
+                                        </div>
+                                        <div class="col-sm-9 position-relative">
+                                            <i
+                                                class="fa fa-info warning-icon"
+                                                jsf:rendered="#{!property.valid and !property.strictValidation}" />
+                                            <i
+                                                class="fa fa-exclamation warning-icon error"
+                                                jsf:rendered="#{!property.valid and property.strictValidation}" />
+                                            <i
+                                                class="fa fa-exchange warning-icon check"
+                                                jsf:rendered="#{property.valid and property.differFromDefault}" />
+                                            <ui:fragment rendered="#{property.type == 'input'}">
                                                 <x:inputText
                                                     id="input"
                                                     forceId="false"
@@ -225,57 +234,60 @@
                                                     styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
                                                     value="#{property.value}"
                                                     required="false"
-                                                    readonly="#{property.readonly}"
-                                                    >
-<!--                                                     validator="#{property.validateProperty}" -->
+                                                    readonly="#{property.readonly}">
+                                                    <!--                                                     validator="#{property.validateProperty}" -->
                                                     <f:ajax
                                                         execute="@this"
                                                         render="group"
                                                         event="blur" />
                                                 </x:inputText>
-                                                <h:panelGroup
-                                                    layout="block"
-                                                    rendered="#{!property.valid}"
-                                                    styleClass=" #{property.strictValidation ? 'font-danger' : ''} validation-message">
-                                                    <h:outputText value="#{property.validationErrorMessage}" />
-                                                </h:panelGroup>
-                                                <h:outputText
-                                                    styleClass="help-block font-light"
-                                                    rendered="#{NavigationForm.showHelp}"
-                                                    value="#{property.helpMessage}" />
-                                            </div>
-                                        </h:panelGroup>
-                                    </ui:fragment>
+                                            </ui:fragment>
+                                            <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary'}">
 
-                                    <intranda:formInputDropDownAjax
-                                        name="dropdown"
-                                        rendered="#{property.type == 'select' or property.type == 'vocabulary'}"
-                                        label="#{property.title}"
-                                        field="#{property.value}"
-                                        help="#{property.helpMessage}"
-                                        selectItems="#{property.selectValues}"
-                                        fieldStyle="form-control"
-                                        readonly="#{property.readonly}"
-                                        required="false"
-                                        ajaxEvent="change"
-                                        ajaxRender="@this"
-                                        var="var"
-                                        itemLabel="#{var}"
-                                        itemValue="#{var}" />
-<!--                                         validator="#{property.validateProperty}" -->
+                                                <h:selectOneMenu
+                                                    styleClass="form-control"
+                                                    value="#{property.value}">
+                                                    <f:ajax
+                                                        event="change"
+                                                        render="group"
+                                                        execute="@this" />
+                                                    <f:selectItem
+                                                        itemValue=""
+                                                        itemLabel="#{msgs.bitteAuswaehlen}"
+                                                        itemDisabled="true" />
+                                                    <f:selectItems
+                                                        value="#{property.selectValues}"
+                                                        var="var"
+                                                        itemLabel="#{var}"
+                                                        itemValue="#{var}" />
+                                                </h:selectOneMenu>
+                                            </ui:fragment>
 
-                                    <intranda:formInputCheckBoxAjax
-                                        name="checkbox"
-                                        rendered="#{property.type == 'checkbox'}"
-                                        label="#{property.title}"
-                                        field="#{property.value}"
-                                        help="#{property.helpMessage}"
-                                        fieldStyle=""
-                                        readonly="#{property.readonly}"
-                                        required="false"
-                                        ajaxEvent="change"
-                                        ajaxRender="@this" />
-<!--                                         validator="#{property.validateProperty}" -->
+                                            <ui:fragment rendered="#{property.type == 'checkbox'}">
+                                                <h:selectBooleanCheckbox
+                                                    styleClass="checkbox-height-fix"
+                                                    style="margin-left: 0px;"
+                                                    value="#{property.value}">
+                                                    <f:ajax
+                                                        event="change"
+                                                        render="group"
+                                                        execute="@this" />
+                                                </h:selectBooleanCheckbox>
+                                            </ui:fragment>
+
+                                            <h:panelGroup
+                                                layout="block"
+                                                rendered="#{!property.valid}"
+                                                styleClass=" #{property.strictValidation ? 'font-danger' : ''} validation-message">
+                                                <h:outputText value="#{property.validationErrorMessage}" />
+                                            </h:panelGroup>
+                                            <h:outputText
+                                                styleClass="help-block font-light"
+                                                rendered="#{NavigationForm.showHelp}"
+                                                value="#{property.helpMessage}" />
+                                        </div>
+                                    </h:panelGroup>
+
 
 
                                 </x:dataList>
