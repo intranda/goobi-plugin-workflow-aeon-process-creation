@@ -254,23 +254,25 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         }
                     }
 
-                    //  check for duplicates in active projects
+                    //  check for duplicates in active projects, load the latest active process
+                    List<Process> processes = ProcessManager.getProcesses("prozesse.erstellungsdatum desc", "prozesse.titel like \"" + generatedTitle + "%\"", 0, 1)   ;
+                    for (Process other : processes) {
+                        //                 Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
+                        if (!other.getProjekt().getProjectIsArchived()) {
+                            record.setDuplicate(true);
 
-                    Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
-                    if (other != null && !other.getProjekt().getProjectIsArchived()) {
-                        record.setDuplicate(true);
-
-                        for (AeonProperty property : record.getProperties()) {
-                            AeonProperty aeonProperty = property.cloneProperty();
-                            aeonProperty.setValue("");
-                            record.getDuplicateProperties().add(aeonProperty);
-                            extractProcessValues(other, aeonProperty);
-                        }
-                        for (AeonProperty property : record.getProcessProperties()) {
-                            AeonProperty aeonProperty = property.cloneProperty();
-                            aeonProperty.setValue("");
-                            record.getDuplicateProperties().add(aeonProperty);
-                            extractProcessValues(other, aeonProperty);
+                            for (AeonProperty property : record.getProperties()) {
+                                AeonProperty aeonProperty = property.cloneProperty();
+                                aeonProperty.setValue("");
+                                record.getDuplicateProperties().add(aeonProperty);
+                                extractProcessValues(other, aeonProperty);
+                            }
+                            for (AeonProperty property : record.getProcessProperties()) {
+                                AeonProperty aeonProperty = property.cloneProperty();
+                                aeonProperty.setValue("");
+                                record.getDuplicateProperties().add(aeonProperty);
+                                extractProcessValues(other, aeonProperty);
+                            }
                         }
                     }
                 }
