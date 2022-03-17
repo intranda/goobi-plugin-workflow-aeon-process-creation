@@ -15,7 +15,7 @@
     <composite:implementation>
         <!-- Properties Box (NO REQUEST)-->
         <div
-            jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false}"
+            jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false or NavigationForm.workflowPlugin.operationType != 'creation'}"
             class="box thin-margin lightgrey box-bordered">
             <div
                 class="box-title"
@@ -34,7 +34,7 @@
         </div>
         <!-- Properties Box (REQUEST SENT) ++++ STILL EMPTY +++++  -->
         <div
-            jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess}"
+            jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess and NavigationForm.workflowPlugin.operationType == 'creation'}"
             class="box box-color orange box-bordered">
             <div class="box-title">
                 <h2>#{msgs.plugin_workflow_aeon_propertiesForAllProcesses}</h2>

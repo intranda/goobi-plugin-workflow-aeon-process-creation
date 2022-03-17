@@ -29,6 +29,7 @@ import org.goobi.beans.Masterpiece;
 import org.goobi.beans.Masterpieceproperty;
 import org.goobi.beans.Process;
 import org.goobi.beans.Processproperty;
+import org.goobi.beans.Project;
 import org.goobi.beans.Step;
 import org.goobi.beans.Template;
 import org.goobi.beans.Templateproperty;
@@ -49,7 +50,9 @@ import de.sub.goobi.helper.FacesContextHelper;
 import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.ScriptThreadWithoutHibernate;
 import de.sub.goobi.helper.enums.StepStatus;
+import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.persistence.managers.ProcessManager;
+import de.sub.goobi.persistence.managers.ProjectManager;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 import io.goobi.workflow.xslt.XsltToPdf;
@@ -133,13 +136,22 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         return PluginType.Workflow;
     }
 
-
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     public String getGui() {
         return "/uii/plugin_workflow_aeon_process_creation.xhtml";
     }
+
+    @Getter
+    @Setter
+    // defines the current operation type, possible values are creation to create new processes and cancel to disable processes
+    private String operationType = "creation";
+
+    private String transactionFieldName;
+    private String cancellationPropertyName;
+    private String cancellationPropertyValue;
+    private String cancellationProjectName;
 
     /*
      * Sends a Request to the goobi api (RestTest.java) and
@@ -148,140 +160,147 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @SuppressWarnings("unchecked")
     public void sendRequest() {
         recordList.clear();
-        Map<String, Object> map = null;
+        if ("creation".equals(operationType)) {
 
-        if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
-            try {
-                map = client.target("http://localhost:8080/goobi/api/")
-                        .path("testingRest")
-                        .path("aeon")
-                        .request(MediaType.APPLICATION_JSON)
-                        .get(Map.class);
+            Map<String, Object> map = null;
 
-            } catch (Exception e) {
-                log.error(e + " " + e.getMessage());
-            }
-
-        } else {
-
-            if (StringUtils.isNotBlank(apiKey)) {
-                map = client.target(apiUrl)
-                        .path("Requests")
-                        .path(input)
-                        .request(MediaType.APPLICATION_JSON)
-                        .header("X-AEON-API-KEY", apiKey)
-                        .get(Map.class);
-            } else {
-                LoginResponse res = client.target(apiUrl)
-                        .path("Token")
-                        .request(MediaType.APPLICATION_JSON)
-                        .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
-                map = client.target(apiUrl)
-                        .path("Requests")
-                        .path(input)
-                        .request(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "BEARER " + res.getAccessToken())
-                        .get(Map.class);
-            }
-        }
-        if (map != null) {
-            shippingOption = (String) map.get("shippingOption");
-            for (AeonProperty property : transactionFields) {
-                if (StringUtils.isNoneBlank(property.getAeonField())) {
-                    Object value = map.get(property.getAeonField());
-                    if (value instanceof String) {
-                        property.setValue((String) value);
-                    } else if (value instanceof Integer) {
-                        property.setValue(((Integer) value).toString());
-                    } else {
-                        property.setValue((String) value);
-                    }
-                }
-            }
-
-            String catalogueIdentifier = (String) map.get("referenceNumber");
-
-            IOpacPlugin myImportOpac = null;
-
-            for (ConfigOpacCatalogue configOpacCatalogue : ConfigOpac.getInstance().getAllCatalogues(workflowName)) {
-                if (configOpacCatalogue.getTitle().equals(opacName)) {
-                    myImportOpac = configOpacCatalogue.getOpacPlugin();
-                    coc = configOpacCatalogue;
-                }
-            }
-
-            opacPlugin = (IJsonPlugin) myImportOpac;
             if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
-                opacPlugin.setTestMode(true);
+                try {
+                    map = client.target("http://localhost:8080/goobi/api/")
+                            .path("testingRest")
+                            .path("aeon")
+                            .request(MediaType.APPLICATION_JSON)
+                            .get(Map.class);
+
+                } catch (Exception e) {
+                    log.error(e + " " + e.getMessage());
+                }
+
             } else {
-                for (ISearchField sf : opacPlugin.getSearchFieldList()) {
-                    if (sf.getId().equals("Barcode")) {
-                        sf.setText(catalogueIdentifier);
-                    }
+
+                if (StringUtils.isNotBlank(apiKey)) {
+                    map = client.target(apiUrl)
+                            .path("Requests")
+                            .path(input)
+                            .request(MediaType.APPLICATION_JSON)
+                            .header("X-AEON-API-KEY", apiKey)
+                            .get(Map.class);
+                } else {
+                    LoginResponse res = client.target(apiUrl)
+                            .path("Token")
+                            .request(MediaType.APPLICATION_JSON)
+                            .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
+                    map = client.target(apiUrl)
+                            .path("Requests")
+                            .path(input)
+                            .request(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "BEARER " + res.getAccessToken())
+                            .get(Map.class);
                 }
             }
-            try {
-                opacPlugin.search("", "", coc, null);
-            } catch (Exception e) {
-                log.error(e);
-            }
-
-            if (opacPlugin.getOverviewList() != null) {
-                for (Map<String, String> overview : opacPlugin.getOverviewList()) {
-                    AeonRecord record = new AeonRecord();
-                    recordList.add(record);
-                    record.setRecordData(overview);
-                    for (AeonProperty p : recordFields) {
-                        AeonProperty prop = p.cloneProperty();
-                        prop.setValue(overview.get(prop.getAeonField()));
-                        record.getProperties().add(prop);
-
+            if (map != null) {
+                shippingOption = (String) map.get("shippingOption");
+                for (AeonProperty property : transactionFields) {
+                    if (StringUtils.isNoneBlank(property.getAeonField())) {
+                        Object value = map.get(property.getAeonField());
+                        if (value instanceof String) {
+                            property.setValue((String) value);
+                        } else if (value instanceof Integer) {
+                            property.setValue(((Integer) value).toString());
+                        } else {
+                            property.setValue((String) value);
+                        }
                     }
-                    String generatedTitle = overview.get("uri").replaceAll("[\\W]", "");
-                    record.setProcessTitle(generatedTitle);
+                }
 
-                    // TODO check if record needs to be disabled
-                    // record.setDisabled(true);
+                String catalogueIdentifier = (String) map.get("referenceNumber");
 
-                    // copy properties
-                    for (AeonProperty p : propertyFields) {
-                        if (StringUtils.isBlank(shippingOption) || p.getShippingOption() == null || p.getShippingOption().equals(shippingOption)) {
+                IOpacPlugin myImportOpac = null;
+
+                for (ConfigOpacCatalogue configOpacCatalogue : ConfigOpac.getInstance().getAllCatalogues(workflowName)) {
+                    if (configOpacCatalogue.getTitle().equals(opacName)) {
+                        myImportOpac = configOpacCatalogue.getOpacPlugin();
+                        coc = configOpacCatalogue;
+                    }
+                }
+
+                opacPlugin = (IJsonPlugin) myImportOpac;
+                if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
+                    opacPlugin.setTestMode(true);
+                } else {
+                    for (ISearchField sf : opacPlugin.getSearchFieldList()) {
+                        if (sf.getId().equals("Barcode")) {
+                            sf.setText(catalogueIdentifier);
+                        }
+                    }
+                }
+                try {
+                    opacPlugin.search("", "", coc, null);
+                } catch (Exception e) {
+                    log.error(e);
+                }
+
+                if (opacPlugin.getOverviewList() != null) {
+                    for (Map<String, String> overview : opacPlugin.getOverviewList()) {
+                        AeonRecord record = new AeonRecord();
+                        recordList.add(record);
+                        record.setRecordData(overview);
+                        for (AeonProperty p : recordFields) {
                             AeonProperty prop = p.cloneProperty();
-                            prop.setOverwriteMainField(true);
-                            prop.setValue(p.getValue());
-                            prop.setDefaultValue(p.getValue());
-                            record.getProcessProperties().add(prop);
+                            prop.setValue(overview.get(prop.getAeonField()));
+                            record.getProperties().add(prop);
+
                         }
-                    }
+                        String generatedTitle = overview.get("uri").replaceAll("[\\W]", "");
+                        record.setProcessTitle(generatedTitle);
 
-                    //  check for duplicates in active projects, load the latest active process
-                    List<Process> processes = ProcessManager.getProcesses("prozesse.erstellungsdatum desc", "prozesse.titel like \"" + generatedTitle + "%\"", 0, 1)   ;
-                    for (Process other : processes) {
-                        //                 Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
-                        if (!other.getProjekt().getProjectIsArchived()) {
-                            record.setDuplicate(true);
+                        // TODO check if record needs to be disabled
+                        // record.setDisabled(true);
 
-                            for (AeonProperty property : record.getProperties()) {
-                                AeonProperty aeonProperty = property.cloneProperty();
-                                aeonProperty.setValue("");
-                                record.getDuplicateProperties().add(aeonProperty);
-                                extractProcessValues(other, aeonProperty);
-                            }
-                            for (AeonProperty property : record.getProcessProperties()) {
-                                AeonProperty aeonProperty = property.cloneProperty();
-                                aeonProperty.setValue("");
-                                record.getDuplicateProperties().add(aeonProperty);
-                                extractProcessValues(other, aeonProperty);
+                        // copy properties
+                        for (AeonProperty p : propertyFields) {
+                            if (StringUtils.isBlank(shippingOption) || p.getShippingOption() == null
+                                    || p.getShippingOption().equals(shippingOption)) {
+                                AeonProperty prop = p.cloneProperty();
+                                prop.setOverwriteMainField(true);
+                                prop.setValue(p.getValue());
+                                prop.setDefaultValue(p.getValue());
+                                record.getProcessProperties().add(prop);
                             }
                         }
+
+                        //  check for duplicates in active projects, load the latest active process
+                        List<Process> processes = ProcessManager.getProcesses("prozesse.erstellungsdatum desc",
+                                "prozesse.titel like \"" + generatedTitle + "%\"", 0, 1);
+                        for (Process other : processes) {
+                            //                 Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
+                            if (!other.getProjekt().getProjectIsArchived()) {
+                                record.setDuplicate(true);
+
+                                for (AeonProperty property : record.getProperties()) {
+                                    AeonProperty aeonProperty = property.cloneProperty();
+                                    aeonProperty.setValue("");
+                                    record.getDuplicateProperties().add(aeonProperty);
+                                    extractProcessValues(other, aeonProperty);
+                                }
+                                for (AeonProperty property : record.getProcessProperties()) {
+                                    AeonProperty aeonProperty = property.cloneProperty();
+                                    aeonProperty.setValue("");
+                                    record.getDuplicateProperties().add(aeonProperty);
+                                    extractProcessValues(other, aeonProperty);
+                                }
+                            }
+                        }
                     }
+                    setRequestSuccess(true);
+                } else {
+                    // TODO aeon request valid, but no record in metadata cloud
                 }
-                setRequestSuccess(true);
             } else {
-                // TODO aeon request valid, but no record in metadata cloud
+                // TODO no valid aeon request
             }
         } else {
-            // TODO no valid aeon request
+            searchForDeactivateProcess();
         }
     }
 
@@ -328,6 +347,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         setRequestSuccess(false);
         input = "";
         screenName = "request";
+        operationType="creation";
     }
 
     public void createProcesses() {
@@ -521,7 +541,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         initializeConfiguration();
     }
 
-
     private void initializeConfiguration() {
         //read config
         XMLConfiguration config = ConfigPlugins.getPluginConfig(title);
@@ -533,6 +552,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         workflowName = config.getString("/processCreation/workflowName");
         opacName = config.getString("/processCreation/opacName");
+
+        // process cancellation
+        transactionFieldName = config.getString("/processCancellation/transactionFieldName");
+        cancellationPropertyName = config.getString("/processCancellation/propertyName");
+        cancellationPropertyValue = config.getString("/processCancellation/propertyValue");
+        cancellationProjectName = config.getString("/processCancellation/projectName");
 
         //read <transaction> and <processes>
         List<HierarchicalConfiguration> transactions = config.configurationsAt("/transaction/field");
@@ -573,10 +598,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     }
 
-
     public void acceptAllItems() {
         for (AeonRecord rec : recordList) {
-            rec.setAccepted(true);
+            if (!rec.isDisabled()) {
+                rec.setAccepted(true);
+            }
         }
     }
 
@@ -617,22 +643,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         this.selectedWorkflow = selectedWorkflow;
     }
 
-    //    public void propertyValueChangeListener(ValueChangeEvent e) {
-    //        UIComponent nameInput = e.getComponent();
-    //
-    //        for (String atttr : nameInput.getAttributes().keySet()) {
-    //            System.out.println(atttr + ": " + nameInput.getAttributes().get(atttr));
-    //        }
-    //
-    //        System.out.println(nameInput.getId());
-    //
-    //        for (String atttr : nameInput.getPassThroughAttributes().keySet()) {
-    //            System.out.println(atttr + ": " + nameInput.getPassThroughAttributes().get(atttr));
-    //        }
-    //
-    //        System.out.println("valueChangeListener invoked:" + " OLD: " + e.getOldValue() + " NEW: " + e.getNewValue());
-    //    }
-
     public void updateProperties(String propertyName, String oldValue, String newValue) {
         for (AeonRecord record : recordList) {
             for (AeonProperty prop : record.getProcessProperties()) {
@@ -647,5 +657,109 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
             }
         }
+    }
+
+    public void searchForDeactivateProcess() {
+
+        StringBuilder sql = new StringBuilder();
+        //        sql.append("SELECT ");
+        //        sql.append("p1.prozesseID ");
+        //        sql.append(", p2.wert ");
+        //        sql.append("FROM ");
+        //        sql.append("prozesseeigenschaften p1 ");
+        //        sql.append("LEFT JOIN ");
+        //        sql.append("prozesseeigenschaften p2 ON p1.prozesseID = p2.prozesseID ");
+        //        sql.append("AND p1.titel = '");
+        //        sql.append(transactionFieldName);
+        //        sql.append("' AND p2.titel = '");
+        //        sql.append(cancelationPropertyName);
+        //        sql.append("' WHERE ");
+        //        sql.append("p1.wert = '");
+        //        sql.append(transactionNumber);
+        //        sql.append("' ");
+        // first value: process id
+        // second value: cancelation allowed value:
+
+        sql.append("(prozesse.ProzesseID in (select prozesseID from prozesseeigenschaften where prozesseeigenschaften.Titel = '");
+        sql.append(transactionFieldName);
+        sql.append("' AND prozesseeigenschaften.Wert = '");
+        sql.append(input);
+        sql.append("')) AND projekte.projectIsArchived = false ");
+
+        recordList.clear();
+
+        List<Process> processList = ProcessManager.getProcesses("prozesse.titel", sql.toString());
+
+        for (Process process : processList) {
+            //                 Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
+            AeonRecord record = new AeonRecord();
+            record.setProcessTitle(process.getTitel());
+            record.setExistingProcess(process);
+
+            for (AeonProperty p : recordFields) {
+                AeonProperty prop = p.cloneProperty();
+                prop.setOverwriteMainField(true);
+                extractProcessValues(process, prop);
+                record.getProperties().add(prop);
+
+            }
+            for (AeonProperty property : propertyFields) {
+                AeonProperty aeonProperty = property.cloneProperty();
+                aeonProperty.setOverwriteMainField(true);
+                extractProcessValues(process, aeonProperty);
+
+                record.getProcessProperties().add(aeonProperty);
+            }
+
+            // TODO check if property is set, mark it as cancellable
+            record.setDisabled(true);
+            if (process.getEigenschaften() != null) {
+                for (Processproperty pp : process.getEigenschaften()) {
+                    if (pp.getTitel().equals(cancellationPropertyName) && cancellationPropertyValue.equals(pp.getWert())) {
+                        record.setDisabled(false);
+                        break;
+                    }
+                }
+            }
+
+            recordList.add(record);
+
+            //        ### Allow cancelation of items
+            //        - should happen in the same AEON Goobi interface (e.g. on the right side)
+            //        - User shall:
+            //          - type in TN number
+            //          - display all the items, that were part of the request
+            //          - User selects the ones to be cancelled
+            //          - allow the cancelation only if specific property with name `Can be cancelled` is set to `true`
+            //        - _ToDo Yale:_ Decide if deletion or deactivation
+            //        - _ToDo intranda:_ develop this
+
+        }
+
+        if (!recordList.isEmpty()) {
+            setRequestSuccess(true);
+        }
+    }
+
+    public void cancelProcesses() {
+        for (AeonRecord record : recordList) {
+            Project project = null;
+            try {
+                project = ProjectManager.getProjectByName(cancellationProjectName);
+            } catch (DAOException e) {
+                log.error(e);
+            }
+            if (project == null) {
+                Helper.setFehlerMeldung("keinProjektAngegeben");
+            }
+            // move selected processes to configured project
+            if (!record.isDisabled() && record.isAccepted()) {
+                Process process = record.getExistingProcess();
+                process.setProjekt(project);
+                process.setProjectId(project.getId());
+                ProcessManager.saveProcessInformation(process);
+            }
+        }
+        resetRequest();
     }
 }

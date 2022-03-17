@@ -19,7 +19,7 @@
             styleClass="form-horizontal form-bordered">
             <!-- transaction Details Box (NO REQUEST)-->
             <div
-                jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false}"
+                jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false or NavigationForm.workflowPlugin.operationType != 'creation'}"
                 class="box  thin-margin  lightgrey box-bordered">
                 <div
                     class="box-title"
@@ -39,7 +39,7 @@
 
             <!-- transaction Details Box (REQUEST SENT)-->
             <div
-                jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess}"
+                jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess and NavigationForm.workflowPlugin.operationType == 'creation'}"
                 class="box box-color  lightgrey box-bordered">
                 <div class="box-title">
                     <h2>#{msgs.plugin_workflow_aeon_requestedDetails}</h2>

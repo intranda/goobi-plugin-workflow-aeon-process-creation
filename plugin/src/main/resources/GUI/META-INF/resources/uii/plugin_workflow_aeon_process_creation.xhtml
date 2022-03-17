@@ -53,7 +53,6 @@
 .font-danger.validation-message {
     color: #ff4433;
 }
-
 </style>
 
 
@@ -78,6 +77,39 @@
                                     <div class="row">
                                         <div class="col-sm-3">
                                             <h:outputLabel
+                                                styleClass="control-label"
+                                                value="#{msgs.plugin_workflow_aeon_selectType}:" />
+                                        </div>
+                                        <div class="col-sm-9">
+                                            <h:selectOneRadio
+                                                id="typeSelection"
+                                                value="#{NavigationForm.workflowPlugin.operationType}"
+                                                styleClass="inline-table focusableChild"
+                                                disabledClass="margin-sides-10"
+                                                enabledClass="margin-sides-10">
+                                                <f:selectItem
+                                                    pt:styleClass="focusable"
+                                                    itemLabel="#{msgs.plugin_workflow_aeon_processCreation}"
+                                                    itemValue="creation" />
+                                                <f:selectItem
+                                                    itemClass="focusable"
+                                                    itemLabel="#{msgs.plugin_workflow_aeon_processCancellation}"
+                                                    itemValue="cancel" />
+                                                <f:ajax
+                                                    render="requestForm"
+                                                    execute="@this" />
+                                            </h:selectOneRadio>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h:outputLabel
                                                 styleClass="control-label "
                                                 value="#{msgs.plugin_workflow_aeon_transactionIdentifier}:" />
                                         </div>
@@ -89,7 +121,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
+
+                                <div class="form-group" jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}">
                                     <div class="row">
 
                                         <div class="col-sm-3">

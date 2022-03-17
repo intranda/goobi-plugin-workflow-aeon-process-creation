@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.goobi.beans.Process;
 
 import lombok.Data;
 
@@ -29,6 +30,8 @@ public class AeonRecord {
     private List<AeonProperty> processProperties = new ArrayList<>();
 
     private List<AeonProperty> duplicateProperties = new ArrayList<>();
+
+    private Process existingProcess;
 
     public String getDuplicationPopup() {
         StringBuilder answer = new StringBuilder();

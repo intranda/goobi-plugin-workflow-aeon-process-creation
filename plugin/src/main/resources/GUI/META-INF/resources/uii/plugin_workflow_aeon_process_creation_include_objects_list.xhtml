@@ -72,7 +72,7 @@
                                     class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5"
                                     title="#{msgs.plugin_workflow_aeon_accept}"
                                     jsf:disabled="#{item.disabled}">
-                                    <i class="fa fa-check"></i>
+                                    <i class="fa #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'fa-check' : 'fa-trash'}"></i>
                                     <f:setPropertyActionListener
                                         target="#{item.accepted}"
                                         value="#{true}" />
@@ -315,7 +315,7 @@
                         jsf:id="acceptAll"
                         class="btn btn-success margin-right-10 font-size-s"
                         jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
-                        <i class="fa fa-check margin-right-5"></i>
+                        <i class="fa #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'fa-check' : 'fa-trash'} margin-right-5"></i>
                         <h:outputText
                             styleClass="font-size-s"
                             value="#{msgs.plugin_workflow_aeon_acceptAll}" />
@@ -329,11 +329,23 @@
                     <button
                         class="btn btn-blue font-size-s pull-right"
                         jsf:id="absenden"
+                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
                         jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
                         <i class="fa fa-save margin-right-5"></i>
                         <h:outputText
                             styleClass="font-size-s"
                             value="#{msgs.plugin_workflow_aeon_createProcesses}" />
+                    </button>
+                    
+                                        <button
+                        class="btn btn-blue font-size-s pull-right"
+                        jsf:id="disable"
+                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
+                        jsf:action="#{NavigationForm.workflowPlugin.cancelProcesses}">
+                        <i class="fa fa-trash margin-right-5"></i>
+                        <h:outputText
+                            styleClass="font-size-s"
+                            value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
                     </button>
                 </div>
             </h:form>

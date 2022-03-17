@@ -15,6 +15,14 @@
     <opacName>SearchApiTest</opacName>
   </processCreation>
 
+    <processCancellation>
+        <transactionFieldName>Transaction Identifier</transactionFieldName>
+        <propertyName>Cancellation allowed</propertyName>
+        <propertyValue>yes</propertyValue>
+        <projectName>Manuscript_Project</projectName>
+    </processCancellation>
+
+
   <!-- the transmission details are configured here;
   the values here are stored for all created processes; -->
   <transaction>
@@ -22,7 +30,7 @@
     <field aeon="transactionNumber">
       <title>Transaction Identifier</title>
       <type readonly="true">input</type>
-      <variable place="process">Text field</variable>
+      <variable place="process">Transaction Identifier</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
       <validation strict="true">\d+</validation>
