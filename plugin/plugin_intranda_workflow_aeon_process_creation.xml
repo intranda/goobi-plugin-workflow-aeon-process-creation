@@ -11,7 +11,8 @@
    </aeon>
 
   <processCreation>
-    <workflowName>Yale</workflowName>
+    <defaultWorkflowName>Paper workflow</defaultWorkflowName>
+    <workflowName type="Audio Recording (DRMS)">Audio files</workflowName>
     <opacName>SearchApiTest</opacName>
   </processCreation>
 
@@ -107,7 +108,7 @@
       <message>Value is no number</message>
     </field>
 
-    <field>
+    <field shippingOption="Audio Recording (DRMS)">
       <title>no validation</title>
       <type readonly="false">input</type>
       <variable place="process">no validation</variable>

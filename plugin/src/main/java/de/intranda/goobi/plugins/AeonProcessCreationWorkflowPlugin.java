@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -109,7 +110,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     private User user;
     private String apiKey;
 
-    private String workflowName;
+    private String defaultWorkflowName;
+    private Map<String, String> specialWorkflowNames = new HashMap<>();
     private String opacName;
 
     @Getter
@@ -212,12 +214,30 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         }
                     }
                 }
+                // use configured default template name
+                selectedWorkflow = null ;
+                // first, check if a special workflow name was configured for the current type
+                if (specialWorkflowNames.containsKey(shippingOption)) {
+                    String workflowName = specialWorkflowNames.get(shippingOption);
+                    if (possibleWorkflows.contains(workflowName)) {
+                        selectedWorkflow = workflowName;
+                    }
+                }
+                // otherwise try to use the default workflow
+                if (selectedWorkflow == null && possibleWorkflows.contains(defaultWorkflowName)) {
+                    selectedWorkflow = defaultWorkflowName;
+                }
+
+                // if it doesn't exist, use first existing template
+                if (selectedWorkflow == null) {
+                    selectedWorkflow = possibleWorkflows.get(0);
+                }
 
                 String catalogueIdentifier = (String) map.get("referenceNumber");
 
                 IOpacPlugin myImportOpac = null;
 
-                for (ConfigOpacCatalogue configOpacCatalogue : ConfigOpac.getInstance().getAllCatalogues(workflowName)) {
+                for (ConfigOpacCatalogue configOpacCatalogue : ConfigOpac.getInstance().getAllCatalogues(defaultWorkflowName)) {
                     if (configOpacCatalogue.getTitle().equals(opacName)) {
                         myImportOpac = configOpacCatalogue.getOpacPlugin();
                         coc = configOpacCatalogue;
@@ -347,7 +367,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         setRequestSuccess(false);
         input = "";
         screenName = "request";
-        operationType="creation";
+        operationType = "creation";
     }
 
     public void createProcesses() {
@@ -550,7 +570,14 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         apiKey = config.getString("/aeon/apiKey");
         user = new User(config.getString("/aeon/username", ""), config.getString("/aeon/password", ""));
 
-        workflowName = config.getString("/processCreation/workflowName");
+        defaultWorkflowName = config.getString("/processCreation/defaultWorkflowName");
+
+        for (HierarchicalConfiguration hc :   config.configurationsAt("/processCreation/workflowName")) {
+            String doctype = hc.getString("@type");
+            String workflowName = hc.getString(".");
+            specialWorkflowNames.put(doctype, workflowName);
+        }
+
         opacName = config.getString("/processCreation/opacName");
 
         // process cancellation
@@ -584,18 +611,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         String sql = FilterHelper.criteriaBuilder("", true, null, null, null, true, false);
         // load all process templates
         List<Process> templates = ProcessManager.getProcesses("prozesse.titel", sql);
-        // use configured default template name
         for (Process p : templates) {
             possibleWorkflows.add(p.getTitel());
-            if (p.getTitel().equals(workflowName)) {
-                selectedWorkflow = p.getTitel();
-            }
         }
-        // if it doesn't exist, use first existing template
-        if (selectedWorkflow == null) {
-            selectedWorkflow = templates.get(0).getTitel();
-        }
-
     }
 
     public void acceptAllItems() {
