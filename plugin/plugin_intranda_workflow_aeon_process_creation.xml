@@ -108,7 +108,7 @@
       <message>Value is no number</message>
     </field>
 
-    <field shippingOption="Audio Recording (DRMS)">
+    <field type="Audio Recording (DRMS)">
       <title>no validation</title>
       <type readonly="false">input</type>
       <variable place="process">no validation</variable>

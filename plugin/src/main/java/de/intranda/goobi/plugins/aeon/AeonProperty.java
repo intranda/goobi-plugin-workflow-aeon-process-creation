@@ -82,7 +82,7 @@ public class AeonProperty {
             initializeVocabulary();
         }
 
-        shippingOption = config.getString("@shippingOption", null);
+        shippingOption = config.getString("@type", null);
         this.plugin = plugin;
 
     }
