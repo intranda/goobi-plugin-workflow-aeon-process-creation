@@ -110,10 +110,15 @@
                                             value="#{property.title}" />
                                     </div>
                                     <div class="col-sm-9">
-
+                                        <i
+                                            class="fa fa-info warning-icon"
+                                            jsf:rendered="#{!property.valid and !property.strictValidation}" />
+                                        <i
+                                            class="fa fa-exclamation warning-icon error"
+                                            jsf:rendered="#{!property.valid and property.strictValidation}" />
                                         <h:selectOneMenu
                                             id="dropdown"
-                                            styleClass="form-control"
+                                            styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
                                             value="#{property.value}">
                                             <f:ajax
                                                 execute="@this"

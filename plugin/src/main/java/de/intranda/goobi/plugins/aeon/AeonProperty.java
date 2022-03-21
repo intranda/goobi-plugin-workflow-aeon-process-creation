@@ -188,7 +188,7 @@ public class AeonProperty {
         }
 
         if (StringUtils.isNotBlank(validationExpression)) {
-            if (value == null) {
+            if (StringUtils.isBlank(value) ) {
                 return false;
             } else if (!value.matches(validationExpression)) {
                 return false;

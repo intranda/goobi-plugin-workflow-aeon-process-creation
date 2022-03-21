@@ -124,7 +124,7 @@
                                 styleClass="alert alert-danger"
                                 value="#{msgs.plugin_workflow_aeon_deletionDisabled}"
                                 rendered="#{item.disabled and NavigationForm.workflowPlugin.operationType == 'cancel'}" />
-                          
+
 
 
                             <x:dataList
@@ -248,7 +248,7 @@
                                             <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary'}">
 
                                                 <h:selectOneMenu
-                                                    styleClass="form-control"
+                                                    styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
                                                     value="#{property.value}">
                                                     <f:ajax
                                                         event="change"
