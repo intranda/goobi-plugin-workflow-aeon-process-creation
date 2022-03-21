@@ -57,6 +57,7 @@
                             </h2>
                             <!--  decline / accept / expand buttons -->
                             <div class="pull-right">
+                            <!-- 
                                 <button
                                     jsf:id="decline"
                                     class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5"
@@ -78,6 +79,21 @@
                                         value="#{true}" />
                                     <f:ajax render=":itemForm" />
                                 </button>
+-->
+                                <button
+                                    class="btn toggle margin-right-5"
+                                    title="#{msgs.plugin_workflow_aeon_accept}"
+                                    jsf:disabled="#{item.disabled}"
+                                    jsf:id="toggle-accept">
+                                    <i class="fa #{item.accepted == false?'fa fa-toggle-off':'fa fa-toggle-on toggle-on'}
+                                    #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}
+                                    " />
+                                    <f:ajax render=":itemForm" />
+                                    <f:setPropertyActionListener
+                                        target="#{item.accepted}"
+                                        value="#{not item.accepted}" />
+                                </button>
+
 
                                 <button
                                     type="button"
