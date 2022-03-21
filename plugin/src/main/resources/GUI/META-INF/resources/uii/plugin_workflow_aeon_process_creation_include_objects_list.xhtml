@@ -57,33 +57,11 @@
                             </h2>
                             <!--  decline / accept / expand buttons -->
                             <div class="pull-right">
-                            <!-- 
-                                <button
-                                    jsf:id="decline"
-                                    class="btn btn-mini #{item.accepted ? '' : 'btn-danger'} margin-right-5"
-                                    title="#{msgs.plugin_workflow_aeon_decline}">
-                                    <i class="fa fa-times"></i>
-                                    <f:setPropertyActionListener
-                                        target="#{item.accepted}"
-                                        value="#{false}" />
-                                    <f:ajax render=":itemForm" />
-                                </button>
-                                <button
-                                    jsf:id="accept"
-                                    class="btn btn-mini #{item.accepted ? 'btn-success' : ''} margin-right-5"
-                                    title="#{msgs.plugin_workflow_aeon_accept}"
-                                    jsf:disabled="#{item.disabled}">
-                                    <i class="fa #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'fa-check' : 'fa-trash'}"></i>
-                                    <f:setPropertyActionListener
-                                        target="#{item.accepted}"
-                                        value="#{true}" />
-                                    <f:ajax render=":itemForm" />
-                                </button>
--->
+
                                 <button
                                     class="btn toggle margin-right-5"
                                     title="#{msgs.plugin_workflow_aeon_accept}"
-                                    jsf:disabled="#{item.disabled}"
+                                    jsf:rendered="#{not item.disabled}"
                                     jsf:id="toggle-accept">
                                     <i class="fa #{item.accepted == false?'fa fa-toggle-off':'fa fa-toggle-on toggle-on'}
                                     #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}
@@ -138,6 +116,15 @@
                                     name="data-content"
                                     value="#{item.duplicationPopup}" />
                             </h:outputFormat>
+
+
+                            <h:outputText
+                                id="item-disabled"
+                                style="padding: 10px;margin-bottom:0;display: block;"
+                                styleClass="alert alert-danger"
+                                value="#{msgs.plugin_workflow_aeon_deletionDisabled}"
+                                rendered="#{item.disabled and NavigationForm.workflowPlugin.operationType == 'cancel'}" />
+                          
 
 
                             <x:dataList
@@ -318,7 +305,7 @@
 
                     <button
                         jsf:id="declineAll"
-                        class="btn btn-danger margin-right-10 font-size-s"
+                        class="btn btn-lightgrey margin-right-10 font-size-s"
                         jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
                         <i class="fa fa-times margin-right-5"></i>
                         <h:outputText
@@ -352,8 +339,8 @@
                             styleClass="font-size-s"
                             value="#{msgs.plugin_workflow_aeon_createProcesses}" />
                     </button>
-                    
-                                        <button
+
+                    <button
                         class="btn btn-blue font-size-s pull-right"
                         jsf:id="disable"
                         jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
