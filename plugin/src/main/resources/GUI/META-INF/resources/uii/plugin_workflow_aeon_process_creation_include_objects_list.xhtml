@@ -198,7 +198,40 @@
                                     ajaxEvent="change"
                                     ajaxRender="@this" />
                                 <!--                                     validator="#{property.validateProperty}" -->
-
+                                <h:panelGroup
+                                    layout="block"
+                                    styleClass="form-group"
+                                    rendered="#{property.type == 'radio'}  and (item.showDetails or property.displayAlways)}">
+                                    <div class="col-sm-3 control-label">
+                                        <h:outputLabel
+                                            for="radio"
+                                            value="#{property.title}" />
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <h:selectOneRadio
+                                            id="radio"
+                                            styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                            value="#{property.value}">
+                                            <f:ajax
+                                                execute="@this"
+                                                render="@all"
+                                                event="change" />
+                                            <f:selectItems
+                                                value="#{property.selectValues}"
+                                                var="var"
+                                                itemLabel="#{var}"
+                                                itemValue="#{var}" />
+                                        </h:selectOneRadio>
+                                        <h:message
+                                            for="radio"
+                                            showDetail="true"
+                                            styleClass="help-inline font-danger" />
+                                        <h:outputText
+                                            styleClass="help-block font-light"
+                                            rendered="#{NavigationForm.showHelp}"
+                                            value="#{property.helpMessage}" />
+                                    </div>
+                                </h:panelGroup>
 
 
 
@@ -277,6 +310,25 @@
                                                         execute="@this" />
                                                 </h:selectBooleanCheckbox>
                                             </ui:fragment>
+
+                                            <ui:fragment rendered="#{property.type == 'radio'}">
+                                                <h:selectOneRadio
+                                                    id="radio"
+                                                    styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                    value="#{property.value}">
+                                                    <f:ajax
+                                                        execute="@this"
+                                                        render="@all"
+                                                        event="change" />
+                                                    <f:selectItems
+                                                        value="#{property.selectValues}"
+                                                        var="var"
+                                                        itemLabel="#{var}"
+                                                        itemValue="#{var}" />
+                                                </h:selectOneRadio>
+
+                                            </ui:fragment>
+
 
                                             <h:panelGroup
                                                 layout="block"

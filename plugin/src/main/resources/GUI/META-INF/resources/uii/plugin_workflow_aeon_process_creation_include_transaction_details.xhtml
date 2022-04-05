@@ -86,6 +86,48 @@
                             </h:panelGroup>
                         </ui:fragment>
 
+                                <h:panelGroup
+                                    layout="block"
+                                    styleClass="form-group"
+                                    rendered="#{property.type == 'radio'}">
+                                    <div class="col-sm-3 control-label">
+                                        <h:outputLabel
+                                            for="radio"
+                                            value="#{property.title}" />
+                                    </div>
+                                    <div class="col-sm-9">
+<!--                                         <i -->
+<!--                                             class="fa fa-info warning-icon" -->
+<!--                                             jsf:rendered="#{!property.valid and !property.strictValidation}" /> -->
+<!--                                         <i -->
+<!--                                             class="fa fa-exclamation warning-icon error" -->
+<!--                                             jsf:rendered="#{!property.valid and property.strictValidation}" /> -->
+                                        <h:selectOneRadio
+                                            id="radio"
+                                            styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                            value="#{property.value}">
+                                            <f:ajax
+                                                execute="@this"
+                                                render="@all"
+                                                event="change" />
+                                            <f:selectItems
+                                                value="#{property.selectValues}"
+                                                var="var"
+                                                itemLabel="#{var}"
+                                                itemValue="#{var}" />
+                                        </h:selectOneRadio>
+                                        <h:message
+                                            for="radio"
+                                            showDetail="true"
+                                            styleClass="help-inline font-danger" />
+                                        <h:outputText
+                                            styleClass="help-block font-light"
+                                            rendered="#{NavigationForm.showHelp}"
+                                            value="#{property.helpMessage}" />
+                                    </div>
+                                </h:panelGroup>
+
+
                         <intranda:formInputDropDownAjax
                             name="dropdown"
                             rendered="#{property.type == 'select' or property.type == 'vocabulary'}"
