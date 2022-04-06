@@ -52,23 +52,25 @@
 
                             <ui:fragment rendered="#{property.shippingOption == null or property.shippingOption == NavigationForm.workflowPlugin.shippingOption}">
 
-                                <ui:fragment rendered="#{property.type == 'input'}">
-                                    <h:panelGroup
-                                        layout="block"
-                                        styleClass="form-group"
-                                        id="group">
-                                        <div class="col-sm-3 control-label notFocusable">
-                                            <h:outputLabel
-                                                for="input"
-                                                value="#{property.title}" />
-                                        </div>
-                                        <div class="col-sm-9 position-relative">
-                                            <i
-                                                class="fa fa-info warning-icon"
-                                                jsf:rendered="#{!property.valid and !property.strictValidation}" />
-                                            <i
-                                                class="fa fa-exclamation warning-icon error"
-                                                jsf:rendered="#{!property.valid and property.strictValidation}" />
+                                <h:panelGroup
+                                    layout="block"
+                                    styleClass="form-group"
+                                    id="group">
+                                    <div class="col-sm-3 control-label notFocusable">
+                                        <h:outputLabel
+                                            for="input"
+                                            value="#{property.title}" />
+                                    </div>
+                                    <div class="col-sm-9 position-relative">
+                                        <i
+                                            class="fa fa-info warning-icon"
+                                            jsf:rendered="#{!property.valid and !property.strictValidation}" />
+                                        <i
+                                            class="fa fa-exclamation warning-icon error"
+                                            jsf:rendered="#{!property.valid and property.strictValidation}" />
+
+                                        <!-- input field -->
+                                        <ui:fragment rendered="#{property.type == 'input'}">
                                             <x:inputText
                                                 id="input"
                                                 forceId="false"
@@ -77,148 +79,117 @@
                                                 value="#{property.value}"
                                                 required="false"
                                                 readonly="#{property.readonly}">
-                                                <!--                                             valueChangeListener="#{NavigationForm.workflowPlugin.propertyValueChangeListener}" -->
-                                                <!--                                             <f:passThroughAttribute name="property" value="#{property.title}" /> -->
-                                                <!--                                             validator="#{property.validateProperty}" -->
                                                 <f:ajax
                                                     execute="@this"
                                                     render="@all"
                                                     event="blur" />
                                             </x:inputText>
-                                            <h:panelGroup
-                                                layout="block"
-                                                rendered="#{!property.valid}"
-                                                styleClass=" #{property.strictValidation ? 'font-danger' : ''} validation-message">
-                                                <h:outputText value="#{property.validationErrorMessage}" />
-                                            </h:panelGroup>
-                                            <h:outputText
-                                                styleClass="help-block font-light"
-                                                rendered="#{NavigationForm.showHelp}"
-                                                value="#{property.helpMessage}" />
-                                        </div>
-                                    </h:panelGroup>
-                                </ui:fragment>
+                                        </ui:fragment>
 
+                                        <!-- select menu -->
+                                        <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary'}">
+                                            <h:selectOneMenu
+                                                id="dropdown"
+                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                value="#{property.value}">
+                                                <f:ajax
+                                                    execute="@this"
+                                                    render="@all"
+                                                    event="change" />
+                                                <f:selectItem
+                                                    itemValue=""
+                                                    itemLabel="#{msgs.bitteAuswaehlen}"
+                                                    itemDisabled="true" />
+                                                <f:selectItems
+                                                    value="#{property.selectValues}"
+                                                    var="var"
+                                                    itemLabel="#{var}"
+                                                    itemValue="#{var}" />
+                                            </h:selectOneMenu>
+                                        </ui:fragment>
 
-                                <h:panelGroup
-                                    layout="block"
-                                    styleClass="form-group"
-                                    rendered="#{property.type == 'select' or property.type == 'vocabulary'}">
-                                    <div class="col-sm-3 control-label">
-                                        <h:outputLabel
-                                            for="dropdown"
-                                            value="#{property.title}" />
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <i
-                                            class="fa fa-info warning-icon"
-                                            jsf:rendered="#{!property.valid and !property.strictValidation}" />
-                                        <i
-                                            class="fa fa-exclamation warning-icon error"
-                                            jsf:rendered="#{!property.valid and property.strictValidation}" />
-                                        <h:selectOneMenu
-                                            id="dropdown"
-                                            styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                            value="#{property.value}">
-                                            <f:ajax
-                                                execute="@this"
-                                                render="@all"
-                                                event="change" />
-                                            <f:selectItem
-                                                itemValue=""
-                                                itemLabel="#{msgs.bitteAuswaehlen}"
-                                                itemDisabled="true" />
-                                            <f:selectItems
-                                                value="#{property.selectValues}"
-                                                var="var"
-                                                itemLabel="#{var}"
-                                                itemValue="#{var}" />
-                                        </h:selectOneMenu>
-                                        <h:message
-                                            for="dropdown"
-                                            showDetail="true"
-                                            styleClass="help-inline font-danger" />
+                                        <!-- checkbox -->
+                                        <ui:fragment rendered="#{property.type == 'checkbox'}">
+                                            <h:selectBooleanCheckbox
+                                                id="checkbox"
+                                                styleClass="checkbox-height-fix"
+                                                style="margin-left: 0px;"
+                                                value="#{property.value}">
+                                                <f:ajax
+                                                    execute="@this"
+                                                    render="@all"
+                                                    event="change" />
+                                            </h:selectBooleanCheckbox>
+                                        </ui:fragment>
+
+                                        <!-- radio buttons -->
+                                        <ui:fragment rendered="#{property.type == 'radio'}">
+                                            <h:selectOneRadio
+                                                id="radio"
+                                                styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                value="#{property.value}">
+                                                <f:ajax
+                                                    execute="@this"
+                                                    render="@all"
+                                                    event="change" />
+                                                <f:selectItems
+                                                    value="#{property.selectValues}"
+                                                    var="var"
+                                                    itemLabel="#{var}"
+                                                    itemValue="#{var}" />
+                                            </h:selectOneRadio>
+
+                                        </ui:fragment>
+
+                                        <!-- select menu and additional text box -->
+                                        <ui:fragment rendered="#{property.type == 'select+text'}">
+                                            <h:selectOneMenu
+                                                id="selection"
+                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                value="#{property.value}">
+                                                <f:ajax
+                                                    execute="@this"
+                                                    render="@all"
+                                                    event="change" />
+                                                <f:selectItem
+                                                    itemValue=""
+                                                    itemLabel="#{msgs.bitteAuswaehlen}"
+                                                    itemDisabled="true" />
+                                                <f:selectItems
+                                                    value="#{property.selectValues}"
+                                                    var="var"
+                                                    itemLabel="#{var}"
+                                                    itemValue="#{var}" />
+                                            </h:selectOneMenu>
+                                            <x:inputText
+                                                style="margin-top: 5px;"
+                                                id="additionalInput"
+                                                forceId="false"
+                                                rendered="#{property.displayMap[property.value]}"
+                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                value="#{property.additionalValue}"
+                                                required="false"
+                                                readonly="#{property.readonly}">
+                                                <f:ajax
+                                                    execute="@this"
+                                                    render="@all"
+                                                    event="blur" />
+                                            </x:inputText>
+
+                                        </ui:fragment>
+
+                                        <h:panelGroup
+                                            layout="block"
+                                            rendered="#{!property.valid}"
+                                            styleClass=" #{property.strictValidation ? 'font-danger' : ''} validation-message">
+                                            <h:outputText value="#{property.validationErrorMessage}" />
+                                        </h:panelGroup>
                                         <h:outputText
                                             styleClass="help-block font-light"
                                             rendered="#{NavigationForm.showHelp}"
                                             value="#{property.helpMessage}" />
                                     </div>
                                 </h:panelGroup>
-
-
-                                <h:panelGroup
-                                    layout="block"
-                                    styleClass="form-group"
-                                    rendered="#{property.type == 'checkbox'}">
-                                    <div class="col-sm-3 control-label">
-                                        <h:outputLabel
-                                            for="checkbox"
-                                            value="#{property.title}" />
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <h:selectBooleanCheckbox
-                                            id="checkbox"
-                                            styleClass="checkbox-height-fix"
-                                            style="margin-left: 0px;"
-                                            value="#{property.value}">
-                                            <f:ajax
-                                                execute="@this"
-                                                render="@all"
-                                                event="change" />
-                                        </h:selectBooleanCheckbox>
-                                        <h:message
-                                            for="checkbox"
-                                            showDetail="true"
-                                            styleClass="help-inline font-danger" />
-                                        <h:outputText
-                                            styleClass="help-block font-light"
-                                            rendered="#{NavigationForm.showHelp}"
-                                            value="#{property.helpMessage}" />
-                                    </div>
-                                </h:panelGroup>
-
-
-                                <h:panelGroup
-                                    layout="block"
-                                    styleClass="form-group"
-                                    rendered="#{property.type == 'radio'}">
-                                    <div class="col-sm-3 control-label">
-                                        <h:outputLabel
-                                            for="radio"
-                                            value="#{property.title}" />
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <i
-                                            class="fa fa-info warning-icon"
-                                            jsf:rendered="#{!property.valid and !property.strictValidation}" />
-                                        <i
-                                            class="fa fa-exclamation warning-icon error"
-                                            jsf:rendered="#{!property.valid and property.strictValidation}" />
-                                        <h:selectOneRadio
-                                            id="radio"
-                                            styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                            value="#{property.value}">
-                                            <f:ajax
-                                                execute="@this"
-                                                render="@all"
-                                                event="change" />
-                                            <f:selectItems
-                                                value="#{property.selectValues}"
-                                                var="var"
-                                                itemLabel="#{var}"
-                                                itemValue="#{var}" />
-                                        </h:selectOneRadio>
-                                        <h:message
-                                            for="radio"
-                                            showDetail="true"
-                                            styleClass="help-inline font-danger" />
-                                        <h:outputText
-                                            styleClass="help-block font-light"
-                                            rendered="#{NavigationForm.showHelp}"
-                                            value="#{property.helpMessage}" />
-                                    </div>
-                                </h:panelGroup>
-
                             </ui:fragment>
                         </x:dataList>
                     </div>

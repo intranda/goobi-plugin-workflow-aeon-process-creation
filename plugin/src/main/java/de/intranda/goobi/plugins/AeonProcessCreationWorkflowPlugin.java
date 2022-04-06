@@ -179,7 +179,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
 
             } else {
-
                 if (StringUtils.isNotBlank(apiKey)) {
                     map = client.target(apiUrl)
                             .path("Requests")
@@ -461,10 +460,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 // add properties
                 for (AeonProperty prop : rec.getProperties()) {
                     if (StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null || prop.getShippingOption().equals(shippingOption)) {
-                        String value = prop.getValue();
+                        String value = prop.getExportValue();
                         for (AeonProperty localProperty : rec.getProcessProperties()) {
-                            if (prop.getTitle().equals(localProperty.getTitle()) && StringUtils.isNoneBlank(localProperty.getValue())) {
-                                value = localProperty.getValue();
+                            if (prop.getTitle().equals(localProperty.getTitle()) && StringUtils.isNoneBlank(localProperty.getExportValue())) {
+                                value = localProperty.getExportValue();
                             }
                         }
 
@@ -484,16 +483,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     }
                 }
                 for (AeonProperty prop : transactionFields) {
-                    if (StringUtils.isNoneBlank(prop.getValue())) {
+                    if (StringUtils.isNoneBlank(prop.getExportValue())) {
                         switch (prop.getPlace()) {
                             case "process":
-                                bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getValue());
+                                bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getExportValue());
                                 break;
                             case "work":
-                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getValue());
+                                bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getExportValue());
                                 break;
                             case "template":
-                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getValue());
+                                bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getExportValue());
                                 break;
                         }
                     }
@@ -503,13 +502,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     //                    if (StringUtils.isNoneBlank(prop.getValue())) {
                     switch (prop.getPlace()) {
                         case "process":
-                            bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getValue());
+                            bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getExportValue());
                             break;
                         case "work":
-                            bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getValue());
+                            bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), prop.getPropertyName(), prop.getExportValue());
                             break;
                         case "template":
-                            bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getValue());
+                            bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getExportValue());
                             break;
                     }
                     //                    }

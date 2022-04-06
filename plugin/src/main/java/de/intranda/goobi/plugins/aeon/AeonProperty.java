@@ -3,7 +3,9 @@ package de.intranda.goobi.plugins.aeon;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.lang.StringUtils;
@@ -30,7 +32,10 @@ public class AeonProperty {
 
     private String defaultValue;
     private String value; // /value
+    private String additionalValue; // second field for select+text fields
     private List<String> selectValues; // /select
+
+    private Map<String, Boolean> displayMap; // store whether additional fields should be displayed for a selected value or not
 
     private String helpMessage; // /help
 
@@ -66,11 +71,16 @@ public class AeonProperty {
         place = config.getString("variable/@place", "process");
 
         value = config.getString("value", "");
-
-        String[] data = config.getStringArray("select");
-        if (data != null) {
-            selectValues = Arrays.asList(data);
+        displayMap = new HashMap<>();
+        selectValues = new ArrayList<>();
+        List<HierarchicalConfiguration> selections = config.configurationsAt("select");
+        for (HierarchicalConfiguration hc : selections) {
+            boolean showAdditionalField = hc.getBoolean("@text", false);
+            String data = hc.getString(".");
+            displayMap.put(data, showAdditionalField);
+            selectValues.add(data);
         }
+
         helpMessage = config.getString("help", "");
 
         validationExpression = config.getString("validation", "");
@@ -188,10 +198,16 @@ public class AeonProperty {
         }
 
         if (StringUtils.isNotBlank(validationExpression)) {
-            if (StringUtils.isBlank(value) ) {
-                return false;
-            } else if (!value.matches(validationExpression)) {
-                return false;
+            if (!displayMap.isEmpty() && StringUtils.isNotBlank(value) && displayMap.get(value)) {
+                if(!additionalValue.matches(validationExpression)) {
+                    return false;
+                }
+            } else {
+                if (StringUtils.isBlank(value)) {
+                    return false;
+                } else if (!value.matches(validationExpression)) {
+                    return false;
+                }
             }
         }
         return true;
@@ -216,5 +232,12 @@ public class AeonProperty {
             plugin.updateProperties(title, this.value, value);
         }
         this.value = value;
+    }
+
+    public String getExportValue() {
+        if (StringUtils.isNotBlank(additionalValue)) {
+            return additionalValue;
+        }
+        return value;
     }
 }
