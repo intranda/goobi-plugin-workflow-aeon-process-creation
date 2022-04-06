@@ -199,6 +199,9 @@ public class AeonProperty {
 
         if (StringUtils.isNotBlank(validationExpression)) {
             if (!displayMap.isEmpty() && StringUtils.isNotBlank(value) && displayMap.get(value)) {
+                if (overwriteMainField && StringUtils.isBlank(additionalValue)) {
+                    return true;
+                }
                 if(!additionalValue.matches(validationExpression)) {
                     return false;
                 }

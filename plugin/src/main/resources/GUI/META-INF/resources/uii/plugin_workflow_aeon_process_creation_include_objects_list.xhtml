@@ -234,6 +234,60 @@
                                 </h:panelGroup>
 
 
+                                <h:panelGroup
+                                    layout="block"
+                                    styleClass="form-group"
+                                    rendered="#{property.type == 'select+text'}  and (item.showDetails or property.displayAlways)}">
+                                    <div class="col-sm-3 control-label">
+                                        <h:outputLabel
+                                            for="selection"
+                                            value="#{property.title}" />
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <!-- select menu and additional text box -->
+                                            <h:selectOneMenu
+                                                id="selection"
+                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                value="#{property.value}">
+                                                <f:ajax
+                                                    execute="@this"
+                                                    render="@all"
+                                                    event="change" />
+                                                <f:selectItem
+                                                    itemValue=""
+                                                    itemLabel="#{msgs.bitteAuswaehlen}"
+                                                    itemDisabled="true" />
+                                                <f:selectItems
+                                                    value="#{property.selectValues}"
+                                                    var="var"
+                                                    itemLabel="#{var}"
+                                                    itemValue="#{var}" />
+                                            </h:selectOneMenu>
+                                            <x:inputText
+                                                style="margin-top: 5px;"
+                                                id="additionalInput"
+                                                forceId="false"
+                                                rendered="#{property.displayMap[property.value]}"
+                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                value="#{property.additionalValue}"
+                                                required="false"
+                                                readonly="#{property.readonly}">
+                                                <f:ajax
+                                                    execute="@this"
+                                                    render="@all"
+                                                    event="blur" />
+                                            </x:inputText>
+                                       <h:message
+                                            for="selection"
+                                            showDetail="true"
+                                            styleClass="help-inline font-danger" />
+                                        <h:outputText
+                                            styleClass="help-block font-light"
+                                            rendered="#{NavigationForm.showHelp}"
+                                            value="#{property.helpMessage}" />
+                                    </div>
+                                </h:panelGroup>
+                                
 
 
                             </x:dataList>
@@ -328,6 +382,43 @@
                                                 </h:selectOneRadio>
 
                                             </ui:fragment>
+
+                                        <!-- select menu and additional text box -->
+                                        <ui:fragment rendered="#{property.type == 'select+text'}">
+                                            <h:selectOneMenu
+                                                id="selection"
+                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                value="#{property.value}">
+                                                <f:ajax
+                                                    execute="@this"
+                                                    render="@all"
+                                                    event="change" />
+                                                <f:selectItem
+                                                    itemValue=""
+                                                    itemLabel="#{msgs.bitteAuswaehlen}"
+                                                    itemDisabled="true" />
+                                                <f:selectItems
+                                                    value="#{property.selectValues}"
+                                                    var="var"
+                                                    itemLabel="#{var}"
+                                                    itemValue="#{var}" />
+                                            </h:selectOneMenu>
+                                            <x:inputText
+                                                style="margin-top: 5px;"
+                                                id="additionalInput"
+                                                forceId="false"
+                                                rendered="#{property.displayMap[property.value]}"
+                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                value="#{property.additionalValue}"
+                                                required="false"
+                                                readonly="#{property.readonly}">
+                                                <f:ajax
+                                                    execute="@this"
+                                                    render="@all"
+                                                    event="blur" />
+                                            </x:inputText>
+                                        </ui:fragment>
+
 
 
                                             <h:panelGroup
