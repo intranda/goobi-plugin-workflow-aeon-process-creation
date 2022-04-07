@@ -212,10 +212,27 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
             }
             if (map != null) {
+                try {
+                    // get data from user table
+                    String username = (String) map.get("username");
+                    if (StringUtils.isNotBlank(username) && !username.contains("\\")) {
+                        Map<String, Object> userDataMap = client.target(apiUrl)
+                                .path("Users")
+                                .path(username)
+                                .request(MediaType.APPLICATION_JSON)
+                                .header("X-AEON-API-KEY", apiKey)
+                                .get(Map.class);
+                        map.put("lastName", userDataMap.get("lastName"));
+                        map.put("eMailAddress", userDataMap.get("eMailAddress"));
+                    }
+                } catch (Exception e) {
+                    log.error(e);
+                }
+
                 // validate if required fields are available
                 for (String fieldname : requiredFields) {
-                    if (map.get(fieldname) == null) {
-                        Helper.setFehlerMeldung("null field " + fieldname); // TODO usefull error message
+                    if (map.containsKey(fieldname) && map.get(fieldname) == null) {
+                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldNull", fieldname));
                     }
                 }
 
