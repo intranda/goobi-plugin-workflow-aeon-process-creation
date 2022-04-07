@@ -711,11 +711,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         cancellationProjectName = config.getString("/processCancellation/projectName");
 
         //read <transaction> and <processes>
+        transactionFields.clear();
         List<HierarchicalConfiguration> transactions = config.configurationsAt("/transaction/field");
         for (HierarchicalConfiguration hc : transactions) {
             AeonProperty property = new AeonProperty(hc, this);
             transactionFields.add(property);
         }
+        recordFields.clear();
         List<HierarchicalConfiguration> processes = config.configurationsAt("/processes/field");
         for (HierarchicalConfiguration hc : processes) {
             AeonProperty property = new AeonProperty(hc, this);
