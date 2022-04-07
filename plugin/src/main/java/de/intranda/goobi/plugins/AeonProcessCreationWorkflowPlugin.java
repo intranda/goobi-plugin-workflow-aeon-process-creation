@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +89,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @Getter
     @Setter
     private List<AeonProperty> propertyFields = new ArrayList<>();
+
+    // contains a list of required fields that are mandatory in the metadata cloud result
+    private List<String> requiredFields;
 
     @Getter
     @Setter
@@ -200,9 +204,23 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
             }
             if (map != null) {
+                // validate if required fields are available
+                for (String fieldname : requiredFields) {
+                    if (map.get(fieldname) == null) {
+                        Helper.setFehlerMeldung("null field " + fieldname); // TODO
+                    }
+                }
+
+                //                284994 (DRMS) Book & Paper
+                //                286670 (DRMS) Book & Paper
+                //                286528 - Audio Recording (DRMS)
+                //                287365 - Video (DRMS)
+                //                287366 - Film (DRMS)
+                //                287367 - Transmissives
+
                 shippingOption = (String) map.get("shippingOption");
                 for (AeonProperty property : transactionFields) {
-                    if (StringUtils.isNoneBlank(property.getAeonField())) {
+                    if (StringUtils.isNotBlank(property.getAeonField())) {
                         Object value = map.get(property.getAeonField());
                         if (value instanceof String) {
                             property.setValue((String) value);
@@ -213,8 +231,22 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         }
                     }
                 }
+
+                for (AeonProperty property : propertyFields) {
+                    if (StringUtils.isNotBlank(property.getAeonField())) {
+                        Object value = map.get(property.getAeonField());
+                        if (value instanceof String) {
+                            property.setValue((String) value);
+                        } else if (value instanceof Integer) {
+                            property.setValue(((Integer) value).toString());
+                        } else {
+                            property.setValue((String) value);
+                        }
+                    }
+                }
+
                 // use configured default template name
-                selectedWorkflow = null ;
+                selectedWorkflow = null;
                 // first, check if a special workflow name was configured for the current type
                 if (specialWorkflowNames.containsKey(shippingOption)) {
                     String workflowName = specialWorkflowNames.get(shippingOption);
@@ -268,13 +300,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                             AeonProperty prop = p.cloneProperty();
                             prop.setValue(overview.get(prop.getAeonField()));
                             record.getProperties().add(prop);
-
                         }
                         String generatedTitle = overview.get("uri").replaceAll("[\\W]", "");
                         record.setProcessTitle(generatedTitle);
-
-                        // TODO check if record needs to be disabled
-                        // record.setDisabled(true);
 
                         // copy properties
                         for (AeonProperty p : propertyFields) {
@@ -313,10 +341,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     }
                     setRequestSuccess(true);
                 } else {
-                    // TODO aeon request valid, but no record in metadata cloud
+                    //  aeon request valid, but no record in metadata cloud
                 }
             } else {
-                // TODO no valid aeon request
+                //  no valid aeon request
             }
         } else {
             searchForDeactivateProcess();
@@ -571,7 +599,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         defaultWorkflowName = config.getString("/processCreation/defaultWorkflowName");
 
-        for (HierarchicalConfiguration hc :   config.configurationsAt("/processCreation/workflowName")) {
+        for (HierarchicalConfiguration hc : config.configurationsAt("/processCreation/workflowName")) {
             String doctype = hc.getString("@type");
             String workflowName = hc.getString(".");
             specialWorkflowNames.put(doctype, workflowName);
@@ -597,6 +625,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             recordFields.add(property);
         }
 
+        requiredFields = Arrays.asList(config.getStringArray("/requiredFields/field"));
         //        this.transactionFields = config.configurationsAt("/transaction/field");
         //        this.processFields = config.configurationsAt("/processes/field");
 
