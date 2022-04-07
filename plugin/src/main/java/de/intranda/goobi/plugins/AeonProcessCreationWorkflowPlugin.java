@@ -69,6 +69,14 @@ import ugh.dl.Prefs;
 @Log4j2
 public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlugin {
 
+    // test identifier
+    // 284994 (DRMS) Book & Paper
+    // 286670 (DRMS) Book & Paper
+    // 286528 - Audio Recording (DRMS)
+    // 287365 - Video (DRMS)
+    // 287366 - Film (DRMS)
+    // 287367 - Transmissives
+
     @Getter
     private String title = "intranda_workflow_aeon_process_creation";
 
@@ -207,16 +215,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 // validate if required fields are available
                 for (String fieldname : requiredFields) {
                     if (map.get(fieldname) == null) {
-                        Helper.setFehlerMeldung("null field " + fieldname); // TODO
+                        Helper.setFehlerMeldung("null field " + fieldname); // TODO usefull error message
                     }
                 }
-
-                //                284994 (DRMS) Book & Paper
-                //                286670 (DRMS) Book & Paper
-                //                286528 - Audio Recording (DRMS)
-                //                287365 - Video (DRMS)
-                //                287366 - Film (DRMS)
-                //                287367 - Transmissives
 
                 shippingOption = (String) map.get("shippingOption");
                 for (AeonProperty property : transactionFields) {
@@ -301,6 +302,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                             prop.setValue(overview.get(prop.getAeonField()));
                             record.getProperties().add(prop);
                         }
+
+                        // TODO
+                        //                        Process title: Job#-repository-AeonTN e.g 999-music-12345. The job# is an auto generated one-up number.
+                        //                        Repository pulled from Aeon field - Site
+                        //                        AeonTN pulled from Aeon field - transactionNumber
+
                         String generatedTitle = overview.get("uri").replaceAll("[\\W]", "");
                         record.setProcessTitle(generatedTitle);
 
@@ -319,6 +326,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         //  check for duplicates in active projects, load the latest active process
                         List<Process> processes = ProcessManager.getProcesses("prozesse.erstellungsdatum desc",
                                 "prozesse.titel like \"" + generatedTitle + "%\"", 0, 1);
+                        // TODO
+                        //                        Change logic to no longer use process titles for this comparison, but instead use:
+                        //                            ASpace resource ID brought back from Metadata Cloud for ASpace objects
+                        //                            Bib ID and Volume number brought back from Metadata Cloud for ILS objects
+
                         for (Process other : processes) {
                             //                 Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
                             if (!other.getProjekt().getProjectIsArchived()) {
@@ -445,9 +457,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         for (AeonRecord rec : recordList) {
             if (rec.isAccepted()) {
                 // create process
-                // TODO generate different title, if its a duplicate
 
                 if (rec.isDuplicate()) {
+                    // generate different title, if its a duplicate
                     rec.setProcessTitle(rec.getProcessTitle() + "_" + dateFormat.format(new Date()));
                 }
 
@@ -685,7 +697,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     }
 
     public void setSelectedWorkflow(String selectedWorkflow) {
-        // TODO check, if records needs to be disabled/enabled, when workflow is changed
         this.selectedWorkflow = selectedWorkflow;
     }
 

@@ -1,4 +1,3 @@
-
 <!-- this is all just examplary data: works only with RestTest.java as rest api -->
 
 <config_plugin>
@@ -16,12 +15,32 @@
     <opacName>SearchApiTest</opacName>
   </processCreation>
 
-    <processCancellation>
-        <transactionFieldName>Transaction Identifier</transactionFieldName>
-        <propertyName>Cancellation allowed</propertyName>
-        <propertyValue>yes</propertyValue>
-        <projectName>Manuscript_Project</projectName>
-    </processCancellation>
+
+  <processCancellation>
+    <transactionFieldName>Transaction Identifier</transactionFieldName>
+    <propertyName>Cancellation allowed</propertyName>
+    <propertyValue>yes</propertyValue>
+    <projectName>Manuscript_Project</projectName>
+  </processCancellation>
+
+  <requiredFields>
+    <field>lastName</field>
+    <field>eMailAddress</field>
+    <field>username</field>
+    <field>site</field>
+    <field>transactionNumber</field>
+    <field>creationDate</field>
+    <field>callNumber</field>
+    <field>itemTitle</field>
+    <field>itemIssue</field>
+    <field>itemVolume</field>
+    <field>itemEdition</field>
+    <field>shippingOption</field>
+    <field>referenceNumber</field>
+    <field>location</field>
+    <field>itemPages</field>
+    <field>itemInfo5</field>
+  </requiredFields>
 
 
   <!-- the transmission details are configured here;
@@ -37,191 +56,486 @@
       <validation strict="true">\d+</validation>
       <message>Your content does not follow our validation guidelines</message>
     </field>
-
-    <field aeon="creationDate">
-      <title>Creation Date</title>
-      <type readonly="false">input</type>
-      <variable place="process">Creation Date</variable>
-      <value></value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-
-      <message>Your content does not follow our validation guidelines</message>
-    </field>
-
-    <field aeon="itemTitle">
-      <title>Title</title>
-      <type readonly="false">input</type>
-      <variable place="process">Title field</variable>
-      <value>Transmission</value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
-
-    <field aeon="documentType">
-      <title>Document type</title>
-      <type readonly="false">input</type>
-      <variable place="process">Document type</variable>
-      <value></value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
-
-	<field aeon="shippingOption">
-      <title>Shipping option</title>
+    <field aeon="lastName">
+      <title>Lastname</title>
       <type readonly="true">input</type>
-      <variable place="process">Shipping option</variable>
+      <variable place="process">Lastname</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-
     <field aeon="username">
       <title>User Name</title>
-      <type readonly="false">input</type>
+      <type readonly="true">input</type>
       <variable place="process">User Name</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-
+    <field aeon="shippingOption">
+      <title>Material type</title>
+      <type readonly="true">input</type>
+      <variable place="process">Material type</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field aeon="callNumber">
+      <title>Call number</title>
+      <type readonly="true">input</type>
+      <variable place="process">Call number</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field aeon="referenceNumber">
+      <title>Reference number</title>
+      <type readonly="true">input</type>
+      <variable place="process">Reference number</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field aeon="itemInfo5">
+      <title>Restriction note</title>
+      <type readonly="true">input</type>
+      <variable place="process">Restriction note</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field aeon="itemVolume">
+      <title>Item volume</title>
+      <type readonly="true">input</type>
+      <variable place="process">Item volume</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field aeon="itemEdition">
+      <title>Item edition</title>
+      <type readonly="true">input</type>
+      <variable place="process">Item edition</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field aeon="itemPages">
+      <title>Item pages</title>
+      <type readonly="true">input</type>
+      <variable place="process">Item pages</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
   </transaction>
-
 
   <!-- the properties are configured the same way as the aeon fields above. The only difference is
   here that there is no content from aeon to be mapped so that there needs no 'aeon' to be defined;
   the values here are stored for all created processes; -->
   <properties>
-
-    <field>
-      <title>Strict validation</title>
-      <type readonly="false">input</type>
-      <variable place="process">Strict validation</variable>
-      <value></value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-      <validation strict="true">\d+</validation>
-      <message>Value is no number</message>
-    </field>
-
-    <field>
-      <title>loose validation</title>
-      <type readonly="false">input</type>
-      <variable place="process">loose validation</variable>
-      <value></value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-      <validation strict="false">\d+</validation>
-      <message>Value is no number</message>
-    </field>
-
+    <!-- audio -->
+    <!-- Payment by (dropdown - default patron)
+Patron
+Department
+ -->
     <field type="Audio Recording (DRMS)">
-      <title>no validation</title>
-      <type readonly="false">input</type>
-      <variable place="process">no validation</variable>
-      <value>default value</value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-      <message>Your content does not follow our validation guidelines</message>
-    </field>
-
-    <field>
-      <title>F Dropdown</title>
+      <title>Payment by</title>
+      <variable place="process">Payment by</variable>
       <type readonly="false">select</type>
-      <variable place="work">CoWorker</variable>
-      <value>Steffen</value>
-      <select>Steffen</select>
-      <select>Oliver</select>
-      <select>Robert</select>
+      <value>Patron</value>
+      <select>Patron</select>
+      <select>Department</select>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-<!--
-    <field>
-      <title>G Vokabularwert</title>
-      <type readonly="false">vocabulary</type>
-      <variable place="work">DocLanguage</variable>
-      <vocabularyName>selections</vocabularyName>
 
-      <vocabularyName>Subject terms</vocabularyName>
-      <vocabularyField>type=AccessLocations</vocabularyField>
-
-      <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
--->
-    <field>
-      <title>H Boolean</title>
+    <!-- Include masters (.wav) (checkbox - default not checked) -->
+    <field type="Audio Recording (DRMS)">
+      <title>Include masters (.wav)</title>
       <type readonly="false">checkbox</type>
-      <variable place="process">Status ok</variable>
+      <variable place="process">Include masters (.wav)</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <!-- Include images of original container/object (checkbox - default not checked) -->
+    <field type="Audio Recording (DRMS)">
+      <title>Include images of original container/object</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Include images of original container/object</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <!--
+Patron type (Radio buttons - select one. Default is blank)* 
+Yale
+Non-Yale
+  -->
+    <field type="Audio Recording (DRMS)">
+      <title>Patron type</title>
+      <type readonly="false">radio</type>
+      <variable place="process">Patron type</variable>
+      <value></value>
+      <select>Yale</select>
+      <select>Non-Yale</select>
+      <validation strict="true">(Yale|Non-Yale)</validation>
+      <message>The field cannot be empty.</message>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <!--
+Type of request (checkboxes - default all unchecked)
+Classroom use
+Throwaway
+  -->
+    <field type="Audio Recording (DRMS)">
+      <title>Type of request</title>
+      <type readonly="false">select</type>
+      <variable place="process">Type of request</variable>
+      <value></value>
+      <select></select>
+      <select>Classroom use</select>
+      <select>Throwaway</select>
+      <message>The field cannot be empty.</message>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+
+    <!--
+Video (displays when Video- DRMS MaterialType from Aeon is selected)
+-->
+    <field type="Video (DRMS)">
+      <title>Payment by</title>
+      <variable place="process">Payment by</variable>
+      <type readonly="false">select</type>
+      <value>Patron</value>
+      <select>Patron</select>
+      <select>Department</select>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Video (DRMS)">
+      <title>Include masters (.mxf or .mov)</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Include masters (.mxf or .mov)</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Video (DRMS)">
+      <title>Patron type</title>
+      <type readonly="false">radio</type>
+      <variable place="process">Patron type</variable>
+      <value></value>
+      <select>Yale</select>
+      <select>Non-Yale</select>
+      <validation strict="true">(Yale|Non-Yale)</validation>
+      <message>The field cannot be empty.</message>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Video (DRMS)">
+      <title>Type of request</title>
+      <type readonly="false">select</type>
+      <variable place="process">Type of request</variable>
+      <value></value>
+      <select></select>
+      <select>Classroom use</select>
+      <select>Throwaway</select>
+      <message>The field cannot be empty.</message>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <!--
+Film (displays when Film- DRMS MaterialType from Aeon is selected)
+-->
+    <field type="Film (DRMS)">
+      <title>Payment by</title>
+      <variable place="process">Payment by</variable>
+      <type readonly="false">select</type>
+      <value>Patron</value>
+      <select>Patron</select>
+      <select>Department</select>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Film (DRMS)">
+      <title>Include masters (.mov)</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Include masters (.mov)</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Film (DRMS)">
+      <title>Patron type</title>
+      <type readonly="false">radio</type>
+      <variable place="process">Patron type</variable>
+      <value></value>
+      <select>Yale</select>
+      <select>Non-Yale</select>
+      <validation strict="true">(Yale|Non-Yale)</validation>
+      <message>The field cannot be empty.</message>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Film (DRMS)">
+      <title>Type of request</title>
+      <type readonly="false">select</type>
+      <variable place="process">Type of request</variable>
+      <value></value>
+      <select></select>
+      <select>Classroom use</select>
+      <select>Throwaway</select>
+      <message>The field cannot be empty.</message>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+
+    <!--
+TODO duplicate for Transmisives and Book and Paper (Local)
+-->
+
+    <field type="(DRMS) Book &amp; Paper">
+      <title>PPI</title>
+      <type readonly="false">select+text</type>
+      <variable place="process">PPI</variable>
+      <value>400PPI</value>
+      <select text="false">400PPI</select>
+      <select text="false">600PPI</select>
+      <select text="false">800PPI</select>
+      <select text="true">Other</select>
+      <validation strict="true">(400PPI|600PPI|800PPI|\d+)</validation>
+      <help>The field cannot be empty.</help>
+    </field>
+
+
+    <field type="(DRMS) Book &amp; Paper">
+      <title>Output PDF</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Output PDF</variable>
       <value>true</value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-  </properties>
+    <field type="(DRMS) Book &amp; Paper">
+      <title>Output JPEG</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Output JPEG</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="(DRMS) Book &amp; Paper">
+      <title>Output TIFF</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Output TIFF</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
 
+    <field type="(DRMS) Book &amp; Paper">
+      <title>Output Special</title>
+      <type readonly="false">input</type>
+      <variable place="process">Output Special</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+
+    <!--
+Processing (checkboxes - default all unchecked.)
+-->
+    <field type="(DRMS) Book &amp; Paper">
+      <title>OCR as separate text files</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">OCR as separate text files</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <field type="(DRMS) Book &amp; Paper">
+      <title>OCR embedded in PDF</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">OCR embedded in PDF</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <field type="(DRMS) Book &amp; Paper">
+      <title>OCR as XML</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">OCR as XML</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+
+    <field type="(DRMS) Book &amp; Paper">
+      <title>Patron type</title>
+      <type readonly="false">radio</type>
+      <variable place="process">Patron type</variable>
+      <value></value>
+      <select>Yale</select>
+      <select>Non-Yale</select>
+      <validation strict="true">(Yale|Non-Yale)</validation>
+      <message>The field cannot be empty.</message>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+    <!--
+Type of request
+  -->
+    <field type="(DRMS) Book &amp; Paper">
+      <title>Type of request</title>
+      <type readonly="false">select</type>
+      <variable place="process">Type of request</variable>
+      <value></value>
+      <select></select>
+      <select>Classroom use</select>
+      <select>Throwaway</select>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <!--Return location (freetext field)* -->
+    <field aeon="location" type="(DRMS) Book &amp; Paper">
+      <title>Return location</title>
+      <type readonly="false">input</type>
+      <variable place="process">Return location</variable>
+      <value></value>
+      <validation strict="true">\w+</validation>
+      <message>The field cannot be empty.</message>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+
+    <!-- Transmissives -->
+
+    <field type="Transmissives">
+      <title>PPI</title>
+      <type readonly="false">select+text</type>
+      <variable place="process">PPI</variable>
+      <value>400PPI</value>
+      <select text="false">400PPI</select>
+      <select text="false">600PPI</select>
+      <select text="false">800PPI</select>
+      <select text="true">Other</select>
+      <validation strict="true">(400PPI|600PPI|800PPI|\d+)</validation>
+      <help>The field cannot be empty.</help>
+    </field>
+    <field type="Transmissives">
+      <title>Output PDF</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Output PDF</variable>
+      <value>true</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Transmissives">
+      <title>Output JPEG</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Output JPEG</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Transmissives">
+      <title>Output TIFF</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Output TIFF</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Transmissives">
+      <title>Output Special</title>
+      <type readonly="false">input</type>
+      <variable place="process">Output Special</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Transmissives">
+      <title>OCR as separate text files</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">OCR as separate text files</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Transmissives">
+      <title>OCR embedded in PDF</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">OCR embedded in PDF</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Transmissives">
+      <title>OCR as XML</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">OCR as XML</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Transmissives">
+      <title>Patron type</title>
+      <type readonly="false">radio</type>
+      <variable place="process">Patron type</variable>
+      <value></value>
+      <select>Yale</select>
+      <select>Non-Yale</select>
+      <validation strict="true">(Yale|Non-Yale)</validation>
+      <message>The field cannot be empty.</message>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field type="Transmissives">
+      <title>Type of request</title>
+      <type readonly="false">select</type>
+      <variable place="process">Type of request</variable>
+      <value></value>
+      <select></select>
+      <select>Classroom use</select>
+      <select>Throwaway</select>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field aeon="location" type="Transmissives">
+      <title>Return location</title>
+      <type readonly="false">input</type>
+      <variable place="process">Return location</variable>
+      <value></value>
+      <validation strict="true">\w+</validation>
+      <message>The field cannot be empty.</message>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+  </properties>
 
   <!-- the process fields are configured differently -->
   <processes>
-<!--
-{
-        "title": "Marcheￌﾁ de Saint-Pierre : meￌﾁlodrame en cinq actes / par Benjamin Antier et Alexis de Comberousse. ",
-        "recordType": "ils",
-        "barcode": "39002001054627",
-        "uri": "/ils/item/4168081?bib=1848655",
-        "bibId": "1848655",
-        "itemId": "4168081",
-        "holdingId": "3055899",
-        "author": "Antier, Benjamin, 1787-1870. ",
-        "callNumber": "Hf75 3 19-20",
-        "volume": "19-20",
-        "pubDate": "1839"
-    }
--->
-    <field aeon="bibId" displayAlways="true" displayInTitle="false">
-      <title>Bib Identifier</title>
-      <type readonly="true">input</type>
-      <variable place="process">Bib Identifier</variable>
+
+    <field aeon="callNumber" displayAlways="false" displayInTitle="false">
+      <title>Call Number</title>
+      <type readonly="false">input</type>
+      <variable place="process">Call Number</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
     <field aeon="title" displayAlways="true" displayInTitle="true">
-      <title>Item Title</title>
+      <title>Title</title>
       <type readonly="false">input</type>
-      <variable place="process">Item Title</variable>
+      <variable place="process">Title</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-    <field aeon="itemId" displayAlways="false" displayInTitle="false">
-      <title>Item Identifier</title>
+    <field aeon="containerGrouping" displayAlways="true" displayInTitle="true">
+      <title>Box and Folder</title>
+      <type readonly="false">input</type>
+      <variable place="process">Box and Folder</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
+
+
+    <field aeon="bibId" displayAlways="true" displayInTitle="false">
+      <title>Bib ID</title>
       <type readonly="true">input</type>
-      <variable place="process">Item Identifier</variable>
+      <variable place="process">Bib ID</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-    <field aeon="holdingId" displayAlways="false" displayInTitle="false">
-      <title>Holding Identifier</title>
+    <field aeon="uri" displayAlways="true" displayInTitle="false">
+      <title>resource ID</title>
       <type readonly="true">input</type>
-      <variable place="process">Holding Identifier</variable>
+      <variable place="process">resource ID</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-    <field aeon="recordType" displayAlways="false" displayInTitle="false">
-      <title>Record type</title>
-      <type readonly="false">select</type>
-      <variable place="work">publication</variable>
-      <value></value>
-      <select>ils</select>
-      <select>aspace</select>
-      <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
-
-    <field aeon="author" displayAlways="false" displayInTitle="false">
-      <title>Author</title>
+    <field aeon="chron" displayAlways="false" displayInTitle="false">
+      <title>Issue Number</title>
       <type readonly="false">input</type>
-      <variable place="work">Author</variable>
-      <value></value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
-
-    <field aeon="callNumber" displayAlways="false" displayInTitle="false">
-      <title>Shelfmark</title>
-      <type readonly="false">input</type>
-      <variable place="work">Shelfmark</variable>
+      <variable place="process">Issue Number</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
@@ -229,26 +543,24 @@
     <field aeon="volume" displayAlways="false" displayInTitle="false">
       <title>Volume</title>
       <type readonly="false">input</type>
-      <variable place="work">Volume</variable>
+      <variable place="process">Volume</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-    <field aeon="collection" displayAlways="false" displayInTitle="false">
-      <title>Collection</title>
-      <type readonly="false">input</type>
-      <variable place="work">Collection</variable>
+    <field aeon="recordType" displayAlways="false" displayInTitle="false">
+      <title>Record type</title>
+      <type readonly="false">select</type>
+      <variable place="process">Record type</variable>
       <value></value>
+      <select>ils</select>
+      <select>aspace</select>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-    <field aeon="series" displayAlways="false" displayInTitle="false">
-      <title>Series</title>
-      <type readonly="false">input</type>
-      <variable place="work">Series</variable>
-      <value></value>
-      <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
-
+<!-- TODO
+    Additional Add a partial checkbox to metadata cloud response results. Above the fold. 
+    Would be checked when folders required (outlined in Aeon) are less than those described in archival object
+-->
   </processes>
 </config_plugin>
