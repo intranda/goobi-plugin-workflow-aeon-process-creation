@@ -3,6 +3,8 @@ package de.intranda.goobi.plugins;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
+import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.lang3.StringUtils;
 import org.goobi.aeon.LoginResponse;
 import org.goobi.aeon.User;
@@ -53,6 +56,7 @@ import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.ScriptThreadWithoutHibernate;
 import de.sub.goobi.helper.enums.StepStatus;
 import de.sub.goobi.helper.exceptions.DAOException;
+import de.sub.goobi.persistence.managers.MySQLHelper;
 import de.sub.goobi.persistence.managers.ProcessManager;
 import de.sub.goobi.persistence.managers.ProjectManager;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
@@ -308,6 +312,23 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 } catch (Exception e) {
                     log.error(e);
                 }
+                int nextFreeId = getNextProcessId() + 1;
+
+                // Bib ID and Volume number (bibId, volume)
+                // ASpace resource ID (uri)
+                // preparation for duplicate checks
+                String aspaceResourceIDProperty = "";
+                String ilsBibId = "";
+                String ilsVolumeNumber = "";
+                for (AeonProperty ap : recordFields) {
+                    if ("bibId".equals(ap.getAeonField())) {
+                        ilsBibId = ap.getPropertyName();
+                    } else if ("volume".equals(ap.getAeonField())) {
+                        ilsVolumeNumber = ap.getPropertyName();
+                    } else if ("uri".equals(ap.getAeonField())) {
+                        aspaceResourceIDProperty = ap.getPropertyName();
+                    }
+                }
 
                 if (opacPlugin.getOverviewList() != null) {
                     for (Map<String, String> overview : opacPlugin.getOverviewList()) {
@@ -317,15 +338,20 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         for (AeonProperty p : recordFields) {
                             AeonProperty prop = p.cloneProperty();
                             prop.setValue(overview.get(prop.getAeonField()));
-                            record.getProperties().add(prop);
+                            if (StringUtils.isNotBlank(prop.getValue())) {
+                                record.getProperties().add(prop);
+                            }
                         }
 
-                        // TODO
                         //                        Process title: Job#-repository-AeonTN e.g 999-music-12345. The job# is an auto generated one-up number.
                         //                        Repository pulled from Aeon field - Site
                         //                        AeonTN pulled from Aeon field - transactionNumber
 
-                        String generatedTitle = overview.get("uri").replaceAll("[\\W]", "");
+                        // get next free id
+                        String repository = (String) map.get("site");
+                        int transactionNumber = (int) map.get("transactionNumber");
+
+                        String generatedTitle = (nextFreeId + 1) + "_" + repository + "_" + transactionNumber;
                         record.setProcessTitle(generatedTitle);
 
                         // copy properties
@@ -340,30 +366,52 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                             }
                         }
 
-                        //  check for duplicates in active projects, load the latest active process
+                        //  check for duplicates in active projects, load the processes with the same transaction number
                         List<Process> processes = ProcessManager.getProcesses("prozesse.erstellungsdatum desc",
-                                "prozesse.titel like \"" + generatedTitle + "%\"", 0, 1);
-                        // TODO
-                        //                        Change logic to no longer use process titles for this comparison, but instead use:
-                        //                            ASpace resource ID brought back from Metadata Cloud for ASpace objects
-                        //                            Bib ID and Volume number brought back from Metadata Cloud for ILS objects
+                                "prozesse.titel like \"%" + repository + "_" + transactionNumber + "%\"");
 
                         for (Process other : processes) {
-                            //                 Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
                             if (!other.getProjekt().getProjectIsArchived()) {
-                                record.setDuplicate(true);
+                                // check if properties matches
+                                boolean isDuplicate = false;
+                                if ("ils".matches(overview.get("recordType"))) {
+                                    String bib = "";
+                                    String vol = "";
 
-                                for (AeonProperty property : record.getProperties()) {
-                                    AeonProperty aeonProperty = property.cloneProperty();
-                                    aeonProperty.setValue("");
-                                    record.getDuplicateProperties().add(aeonProperty);
-                                    extractProcessValues(other, aeonProperty);
+                                    for (Processproperty pp : other.getEigenschaften()) {
+                                        if (ilsBibId.equals(pp.getTitel())) {
+                                            bib = pp.getWert();
+                                        } else if (ilsVolumeNumber.equals(pp.getTitel())) {
+                                            vol = pp.getWert();
+                                        }
+                                    }
+                                    if (bib.equals(overview.get("bibId")) && vol.equals(overview.get("volume"))) {
+                                        isDuplicate = true;
+                                    }
+                                } else {
+                                    for (Processproperty pp : other.getEigenschaften()) {
+                                        if (aspaceResourceIDProperty.equals(pp.getTitel())) {
+                                            if (pp.getWert().equals(overview.get("uri"))) {
+                                                isDuplicate = true;
+                                            }
+                                        }
+                                    }
                                 }
-                                for (AeonProperty property : record.getProcessProperties()) {
-                                    AeonProperty aeonProperty = property.cloneProperty();
-                                    aeonProperty.setValue("");
-                                    record.getDuplicateProperties().add(aeonProperty);
-                                    extractProcessValues(other, aeonProperty);
+
+                                if (isDuplicate) {
+                                    record.setDuplicate(true);
+                                    for (AeonProperty property : record.getProperties()) {
+                                        AeonProperty aeonProperty = property.cloneProperty();
+                                        aeonProperty.setValue("");
+                                        record.getDuplicateProperties().add(aeonProperty);
+                                        extractProcessValues(other, aeonProperty);
+                                    }
+                                    for (AeonProperty property : record.getProcessProperties()) {
+                                        AeonProperty aeonProperty = property.cloneProperty();
+                                        aeonProperty.setValue("");
+                                        record.getDuplicateProperties().add(aeonProperty);
+                                        extractProcessValues(other, aeonProperty);
+                                    }
                                 }
                             }
                         }
@@ -378,6 +426,26 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         } else {
             searchForDeactivateProcess();
         }
+    }
+
+    private int getNextProcessId() {
+        String sql = "SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
+        Connection connection = null;
+        try {
+            connection = MySQLHelper.getInstance().getConnection();
+            int value = new QueryRunner().query(connection, sql, MySQLHelper.resultSetToIntegerHandler, connection.getCatalog(), "prozesse");
+            return value;
+        } catch (SQLException e) {
+            log.error(e);
+        } finally {
+            if (connection != null) {
+                try {
+                    MySQLHelper.closeConnection(connection);
+                } catch (SQLException e) {
+                }
+            }
+        }
+        return 0;
     }
 
     private void extractProcessValues(Process other, AeonProperty aeonProperty) {
