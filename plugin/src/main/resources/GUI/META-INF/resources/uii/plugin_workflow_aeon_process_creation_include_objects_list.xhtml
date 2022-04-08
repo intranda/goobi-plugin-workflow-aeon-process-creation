@@ -61,7 +61,7 @@
                                 <button
                                     class="btn toggle margin-right-5"
                                     title="#{msgs.plugin_workflow_aeon_accept}"
-                                    jsf:rendered="#{not item.disabled}"
+                                    jsf:rendered="#{not item.disabled or LoginForm.hasRole(NavigationForm.workflowPlugin.cancellationSepcialRights)}"
                                     jsf:id="toggle-accept">
                                     <i class="fa #{item.accepted == false?'fa fa-toggle-off':'fa fa-toggle-on toggle-on'}
                                     #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}

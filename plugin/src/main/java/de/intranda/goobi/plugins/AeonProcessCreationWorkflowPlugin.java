@@ -171,6 +171,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     private String cancellationPropertyValue;
     private String cancellationProjectName;
 
+    private String cancellationStepName;
+    @Getter @Setter
+    private String cancellationSepcialRights;
+
     /*
      * Sends a Request to the goobi api (RestTest.java) and
      * recieves JSON String as response which is parsed into the AeonTransaction object
@@ -681,7 +685,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
      * Constructor try to use empty constructor, remove configuration from here
      */
     public AeonProcessCreationWorkflowPlugin() {
-        log.info("AeonProcessCreation workflow plugin started");
+        log.debug("AeonProcessCreation workflow plugin started");
         initializeConfiguration();
     }
 
@@ -709,6 +713,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         cancellationPropertyName = config.getString("/processCancellation/propertyName");
         cancellationPropertyValue = config.getString("/processCancellation/propertyValue");
         cancellationProjectName = config.getString("/processCancellation/projectName");
+        cancellationStepName=config.getString("/processCancellation/stepName");
+        cancellationSepcialRights=config.getString("/processCancellation/specialRights");
+
+
 
         //read <transaction> and <processes>
         transactionFields.clear();
@@ -806,23 +814,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     public void searchForDeactivateProcess() {
 
         StringBuilder sql = new StringBuilder();
-        //        sql.append("SELECT ");
-        //        sql.append("p1.prozesseID ");
-        //        sql.append(", p2.wert ");
-        //        sql.append("FROM ");
-        //        sql.append("prozesseeigenschaften p1 ");
-        //        sql.append("LEFT JOIN ");
-        //        sql.append("prozesseeigenschaften p2 ON p1.prozesseID = p2.prozesseID ");
-        //        sql.append("AND p1.titel = '");
-        //        sql.append(transactionFieldName);
-        //        sql.append("' AND p2.titel = '");
-        //        sql.append(cancelationPropertyName);
-        //        sql.append("' WHERE ");
-        //        sql.append("p1.wert = '");
-        //        sql.append(transactionNumber);
-        //        sql.append("' ");
-        // first value: process id
-        // second value: cancelation allowed value:
 
         sql.append("(prozesse.ProzesseID in (select prozesseID from prozesseeigenschaften where prozesseeigenschaften.Titel = '");
         sql.append(transactionFieldName);
@@ -855,16 +846,35 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 record.getProcessProperties().add(aeonProperty);
             }
 
-            // TODO check if property is set, mark it as cancellable
+
+            //            Orders that are before condition assessment step - cancel and don’t retain in Goobi.
+            //            Anything after Condition Assessment cancel and retain in Goobi.
+            //            Public Services could cancel through Aeon TN plugin before condition assessment.
+            //            Only Preservation can cancel after condition assessment
+
             record.setDisabled(true);
-            if (process.getEigenschaften() != null) {
-                for (Processproperty pp : process.getEigenschaften()) {
-                    if (pp.getTitel().equals(cancellationPropertyName) && cancellationPropertyValue.equals(pp.getWert())) {
-                        record.setDisabled(false);
-                        break;
-                    }
+
+            for (Step step : process.getSchritte())  {
+                if (step.getTitel().equals(cancellationStepName) && step.getBearbeitungsstatusEnum() != StepStatus.DONE) {
+                    record.setDisabled(false);
+                    break;
                 }
             }
+
+            // old implementation checks, if a property is set
+            //            if (process.getEigenschaften() != null) {
+            //                for (Processproperty pp : process.getEigenschaften()) {
+            //                    if (pp.getTitel().equals(cancellationPropertyName) && cancellationPropertyValue.equals(pp.getWert())) {
+            //                        record.setDisabled(false);
+            //                        break;
+            //                    }
+            //                }
+            //            }
+
+            // new implementation checks, if a certain step is finished
+            // if yes, only a special user group is allowed to cancel items
+
+            // TODO
 
             recordList.add(record);
 
