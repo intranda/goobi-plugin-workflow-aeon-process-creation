@@ -32,7 +32,7 @@ public class AeonProperty {
 
     private String defaultValue;
     private String value; // /value
-    private String additionalValue; // second field for select+text fields
+    private String additionalValue = ""; // second field for select+text fields
     private List<String> selectValues; // /select
 
     private Map<String, Boolean> displayMap; // store whether additional fields should be displayed for a selected value or not
@@ -190,19 +190,19 @@ public class AeonProperty {
     }
 
     public boolean isValid() {
-        if (overwriteMainField) {
-            // null value is always valid, when we overwrite main fields
-            if (StringUtils.isBlank(value)) {
-                return true;
-            }
-        }
+        //        if (overwriteMainField) {
+        //            // null value is always valid, when we overwrite main fields
+        //            if (StringUtils.isBlank(value)) {
+        //                return true;
+        //            }
+        //        }
 
         if (StringUtils.isNotBlank(validationExpression)) {
             if (!displayMap.isEmpty() && StringUtils.isNotBlank(value) && displayMap.get(value)) {
-                if (overwriteMainField && StringUtils.isBlank(additionalValue)) {
-                    return true;
-                }
-                if(!additionalValue.matches(validationExpression)) {
+                //                if (overwriteMainField && StringUtils.isBlank(additionalValue)) {
+                //                    return true;
+                //                }
+                if (!additionalValue.matches(validationExpression)) {
                     return false;
                 }
             } else {

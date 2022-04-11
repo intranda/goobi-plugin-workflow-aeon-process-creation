@@ -131,11 +131,61 @@
   here that there is no content from aeon to be mapped so that there needs no 'aeon' to be defined;
   the values here are stored for all created processes; -->
   <properties>
+  
+<!-- test fields to check field validation -->
+ <!-- 
+ <field>
+  <title>Validation select</title>
+  <variable place="process">Validation 1</variable>
+  <type readonly="false">select</type>
+  <value></value>
+  <select>1</select>
+  <select>2</select>
+  <validation strict="true">(1|2)</validation>
+  <message>Validation message select field.</message>
+  <help>This is my description for the field so that everyone gets some help.</help>
+</field>
+<field>
+  <title>Validation input</title>
+  <type readonly="false">input</type>
+  <variable place="process">Item pages</variable>
+  <value></value>
+  <validation strict="true">\w+</validation>
+  <message>Validation message input field.</message>
+  <help>This is my description for the field so that everyone gets some help.</help>
+</field>
+<field>
+  <title>Validation checkbox</title>
+  <type readonly="false">checkbox</type>
+  <variable place="process">Include masters (.wav)</variable>
+  <value>false</value>
+  <validation strict="true">true</validation>
+  <message>Validation message checkbox field.</message>
+  <help>This is my description for the field so that everyone gets some help.</help>
+</field>
+<field>
+  <title>Validation radio</title>
+  <type readonly="false">radio</type>
+  <variable place="process">Patron type</variable>
+  <value></value>
+  <select>Yale</select>
+  <select>Non-Yale</select>
+  <validation strict="true">(Yale|Non-Yale)</validation>
+  <message>Validation message radio button.</message>
+  <help>This is my description for the field so that everyone gets some help.</help>
+</field>
+-->  
+  
+  
     <!-- audio -->
     <!-- Payment by (dropdown - default patron)
 Patron
 Department
  -->
+ 
+ 
+
+ 
     <field type="Audio Recording (DRMS)">
       <title>Payment by</title>
       <variable place="process">Payment by</variable>

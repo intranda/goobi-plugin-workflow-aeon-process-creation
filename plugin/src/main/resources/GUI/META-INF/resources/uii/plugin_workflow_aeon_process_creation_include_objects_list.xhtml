@@ -44,8 +44,8 @@
                     <!-- iterate through items from transaction -->
                     <div class="box box-bordered">
                         <div
-                            class="box-title"
-                            style="border-color: #666;">
+                            class="box-title #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}"
+                            >
                             <h2 style="color: #333; max-width: 85%">
                                 <ui:repeat
                                     var="p"
@@ -65,7 +65,7 @@
                                     jsf:id="toggle-accept">
                                     <i class="fa #{item.accepted == false?'fa fa-toggle-off':'fa fa-toggle-on toggle-on'}
                                     #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}
-                                    " />
+                                    " style="font-size: 25px"/>
                                     <f:ajax render=":itemForm" />
                                     <f:setPropertyActionListener
                                         target="#{item.accepted}"
@@ -89,8 +89,8 @@
                         </div>
                         <h:panelGroup
                             layout="block"
-                            styleClass="box-content nopadding"
-                            style="border-color: #666">
+                            styleClass="box-content nopadding #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}"
+                            >
 
                             <h:outputFormat
                                 id="titleInUse"
