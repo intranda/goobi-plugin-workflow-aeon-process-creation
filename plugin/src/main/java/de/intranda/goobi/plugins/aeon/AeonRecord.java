@@ -27,6 +27,8 @@ public class AeonRecord {
 
     private boolean disabled;
 
+    private boolean deletable = false;
+
     private List<AeonProperty> processProperties = new ArrayList<>();
 
     private List<AeonProperty> duplicateProperties = new ArrayList<>();

@@ -12,15 +12,21 @@
   <processCreation>
     <defaultWorkflowName>Paper workflow</defaultWorkflowName>
     <workflowName type="Audio Recording (DRMS)">Audio files</workflowName>
-    <opacName>SearchApiTest</opacName>
+    <opacName>Metadata cloud</opacName>
   </processCreation>
 
 
   <processCancellation>
     <transactionFieldName>Transaction Identifier</transactionFieldName>
+    <!-- unused at the moment
     <propertyName>Cancellation allowed</propertyName>
     <propertyValue>yes</propertyValue>
-    <projectName>Manuscript_Project</projectName>
+-->
+    <!-- when this step is finished, cancellation is not allowed any more -->
+    <stepName>Edition</stepName>
+    <!-- if the user has this right, cancellation is still possible even if the step is finished -->
+    <specialRights>aeon_allow_disable</specialRights>
+    <projectName>Disabled_Project</projectName>
   </processCancellation>
 
   <requiredFields>

@@ -167,12 +167,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     private String operationType = "creation";
 
     private String transactionFieldName;
-    private String cancellationPropertyName;
-    private String cancellationPropertyValue;
+    //    private String cancellationPropertyName;
+    //    private String cancellationPropertyValue;
     private String cancellationProjectName;
 
     private String cancellationStepName;
-    @Getter @Setter
+    @Getter
+    @Setter
     private String cancellationSepcialRights;
 
     /*
@@ -710,13 +711,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         // process cancellation
         transactionFieldName = config.getString("/processCancellation/transactionFieldName");
-        cancellationPropertyName = config.getString("/processCancellation/propertyName");
-        cancellationPropertyValue = config.getString("/processCancellation/propertyValue");
+        //        cancellationPropertyName = config.getString("/processCancellation/propertyName");
+        //        cancellationPropertyValue = config.getString("/processCancellation/propertyValue");
         cancellationProjectName = config.getString("/processCancellation/projectName");
-        cancellationStepName=config.getString("/processCancellation/stepName");
-        cancellationSepcialRights=config.getString("/processCancellation/specialRights");
-
-
+        cancellationStepName = config.getString("/processCancellation/stepName");
+        cancellationSepcialRights = config.getString("/processCancellation/specialRights");
 
         //read <transaction> and <processes>
         transactionFields.clear();
@@ -846,7 +845,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 record.getProcessProperties().add(aeonProperty);
             }
 
-
             //            Orders that are before condition assessment step - cancel and don’t retain in Goobi.
             //            Anything after Condition Assessment cancel and retain in Goobi.
             //            Public Services could cancel through Aeon TN plugin before condition assessment.
@@ -854,11 +852,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
             record.setDisabled(true);
 
-            for (Step step : process.getSchritte())  {
-                if (step.getTitel().equals(cancellationStepName) && step.getBearbeitungsstatusEnum() != StepStatus.DONE) {
-                    record.setDisabled(false);
-                    break;
+            try {
+                org.goobi.beans.User user = Helper.getCurrentUser();
+                if (user != null) {
+                    if (user.getAllUserRoles().contains(cancellationSepcialRights)) {
+                        record.setDisabled(false);
+                    }
                 }
+
+            } catch (Exception e) {
+                log.error(e);
             }
 
             // old implementation checks, if a property is set
@@ -874,7 +877,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             // new implementation checks, if a certain step is finished
             // if yes, only a special user group is allowed to cancel items
 
-            // TODO
+            for (Step step : process.getSchritte()) {
+                if (step.getTitel().equals(cancellationStepName) && step.getBearbeitungsstatusEnum() != StepStatus.DONE) {
+                    record.setDisabled(false);
+                    record.setDeletable(true);
+                    break;
+                }
+            }
 
             recordList.add(record);
 
@@ -897,6 +906,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     public void cancelProcesses() {
         for (AeonRecord record : recordList) {
+
             Project project = null;
             try {
                 project = ProjectManager.getProjectByName(cancellationProjectName);
@@ -909,9 +919,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             // move selected processes to configured project
             if (!record.isDisabled() && record.isAccepted()) {
                 Process process = record.getExistingProcess();
-                process.setProjekt(project);
-                process.setProjectId(project.getId());
-                ProcessManager.saveProcessInformation(process);
+                if (record.isDeletable()) {
+                    ProcessManager.deleteProcess(process);
+                } else {
+                    process.setProjekt(project);
+                    process.setProjectId(project.getId());
+                    ProcessManager.saveProcessInformation(process);
+                }
             }
         }
         resetRequest();
