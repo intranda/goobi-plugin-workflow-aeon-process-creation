@@ -46,7 +46,7 @@
                         <div
                             class="box-title #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}"
                             >
-                            <h2 style="color: #333; max-width: 80%">
+                            <h2 style="color: #{item.accepted?'white':'#333'}; max-width: 80%">
                                 <ui:repeat
                                     var="p"
                                     value="#{item.properties}">
@@ -63,7 +63,7 @@
                                     title="#{msgs.plugin_workflow_aeon_accept}"
                                     jsf:rendered="#{not item.disabled or LoginForm.hasRole(NavigationForm.workflowPlugin.cancellationSepcialRights)}"
                                     jsf:id="toggle-accept">
-                                    <i class="fa #{item.accepted == false?'fa fa-toggle-off':'fa fa-toggle-on toggle-on'}
+                                    <i class="fa #{item.accepted == false?'fa fa-toggle-off':'fa fa-toggle-on'}
                                     #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}" 
                                     style="font-size: 25px"/>
                                     <f:ajax render=":itemForm" />
@@ -79,7 +79,7 @@
                                     style="background: transparent"
                                     title="#{(item.showDetails) ? 'hide details' : 'show details'}"
                                     jsf:id="details">
-                                    <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
+                                    <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'} #{item.accepted?'accepted':'notaccepted'}"></i>
                                     <f:setPropertyActionListener
                                         target="#{item.showDetails}"
                                         value="#{!item.showDetails}" />
