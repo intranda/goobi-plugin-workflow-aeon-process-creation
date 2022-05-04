@@ -46,7 +46,7 @@
                         <div
                             class="box-title #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}"
                             >
-                            <h2 style="color: #333; max-width: 85%">
+                            <h2 style="color: #333; max-width: 80%">
                                 <ui:repeat
                                     var="p"
                                     value="#{item.properties}">
@@ -64,8 +64,8 @@
                                     jsf:rendered="#{not item.disabled or LoginForm.hasRole(NavigationForm.workflowPlugin.cancellationSepcialRights)}"
                                     jsf:id="toggle-accept">
                                     <i class="fa #{item.accepted == false?'fa fa-toggle-off':'fa fa-toggle-on toggle-on'}
-                                    #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}
-                                    " style="font-size: 25px"/>
+                                    #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}" 
+                                    style="font-size: 25px"/>
                                     <f:ajax render=":itemForm" />
                                     <f:setPropertyActionListener
                                         target="#{item.accepted}"
@@ -314,14 +314,14 @@
                                                 class="fa fa-exclamation warning-icon error"
                                                 jsf:rendered="#{!property.valid and property.strictValidation}" />
                                             <i
-                                                class="fa-pencil-square warning-icon check"
+                                                class="fa fa-pencil warning-icon check"
                                                 jsf:rendered="#{property.valid and property.differFromDefault}" />
                                             <ui:fragment rendered="#{property.type == 'input'}">
                                                 <x:inputText
                                                     id="input"
                                                     forceId="false"
                                                     name="input"
-                                                    styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                    styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
                                                     value="#{property.value}"
                                                     required="false"
                                                     readonly="#{property.readonly}">
@@ -335,7 +335,7 @@
                                             <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary'}">
 
                                                 <h:selectOneMenu
-                                                    styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                    styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
                                                     value="#{property.value}">
                                                     <f:ajax
                                                         event="change"
@@ -368,7 +368,7 @@
                                             <ui:fragment rendered="#{property.type == 'radio'}">
                                                 <h:selectOneRadio
                                                     id="radio"
-                                                    styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                    styleClass="#{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
                                                     value="#{property.value}">
                                                     <f:ajax
                                                         execute="@this"
@@ -387,7 +387,7 @@
                                         <ui:fragment rendered="#{property.type == 'select+text'}">
                                             <h:selectOneMenu
                                                 id="selection"
-                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
                                                 value="#{property.value}">
                                                 <f:ajax
                                                     execute="@this"
@@ -408,7 +408,7 @@
                                                 id="additionalInput"
                                                 forceId="false"
                                                 rendered="#{property.displayMap[property.value]}"
-                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
                                                 value="#{property.additionalValue}"
                                                 required="false"
                                                 readonly="#{property.readonly}">
@@ -444,56 +444,60 @@
                     </div>
                 </ui:repeat>
                 <!-- accept all / decline all buttons -->
-                <div class="margin-top-10">
-
-                    <button
-                        jsf:id="declineAll"
-                        class="btn btn-lightgrey margin-right-10 font-size-s"
-                        jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
-                        <i class="fa fa-times margin-right-5"></i>
-                        <h:outputText
-                            styleClass="font-size-s"
-                            value="#{msgs.plugin_workflow_aeon_declineAll}" />
-                        <f:ajax render=":itemForm" />
-                    </button>
-
-                    <button
-                        jsf:id="acceptAll"
-                        class="btn btn-success margin-right-10 font-size-s"
-                        jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
-                        <i class="fa #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'fa-check' : 'fa-trash'} margin-right-5"></i>
-                        <h:outputText
-                            styleClass="font-size-s"
-                            value="#{msgs.plugin_workflow_aeon_acceptAll}" />
-
-                        <f:ajax render=":itemForm" />
-                    </button>
-
-                </div>
-                <div class="margin-top-10 pull-right">
-
-                    <button
-                        class="btn btn-blue font-size-s pull-right"
-                        jsf:id="absenden"
-                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
-                        jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
-                        <i class="fa fa-save margin-right-5"></i>
-                        <h:outputText
-                            styleClass="font-size-s"
-                            value="#{msgs.plugin_workflow_aeon_createProcesses}" />
-                    </button>
-
-                    <button
-                        class="btn btn-blue font-size-s pull-right"
-                        jsf:id="disable"
-                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
-                        jsf:action="#{NavigationForm.workflowPlugin.cancelProcesses}">
-                        <i class="fa fa-trash margin-right-5"></i>
-                        <h:outputText
-                            styleClass="font-size-s"
-                            value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
-                    </button>
-                </div>
+                
+                <ui:fragment rendered="#{NavigationForm.workflowPlugin.recordList != null and NavigationForm.workflowPlugin.recordList.size() > 0}">
+	                <div class="margin-top-10">
+	                
+	                    <button
+	                        jsf:id="declineAll"
+	                        class="btn btn-lightgrey margin-right-10 font-size-s"
+	                        jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
+	                        <i class="fa fa-times margin-right-5"></i>
+	                        <h:outputText
+	                            styleClass="font-size-s"
+	                            value="#{msgs.plugin_workflow_aeon_declineAll}" />
+	                        <f:ajax render=":itemForm" />
+	                    </button>
+	
+	                    <button
+	                        jsf:id="acceptAll"
+	                        class="btn #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'btn-success' : 'btn-danger'} margin-right-10 font-size-s"
+	                        jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
+	                        <i class="fa #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'fa-check' : 'fa-trash'} margin-right-5"></i>
+	                        <h:outputText
+	                            styleClass="font-size-s"
+	                            value="#{msgs.plugin_workflow_aeon_acceptAll}" />
+	
+	                        <f:ajax render=":itemForm" />
+	                    </button>
+	
+	                </div>
+	                <div class="margin-top-10 pull-right">
+	
+	                    <button
+	                        class="btn btn-blue font-size-s pull-right"
+	                        jsf:id="absenden"
+	                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
+	                        jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
+	                        <i class="fa fa-save margin-right-5"></i>
+	                        <h:outputText
+	                            styleClass="font-size-s"
+	                            value="#{msgs.plugin_workflow_aeon_createProcesses}" />
+	                    </button>
+	
+	                    <button
+	                        class="btn btn-blue font-size-s pull-right"
+	                        jsf:id="disable"
+	                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
+	                        jsf:action="#{NavigationForm.workflowPlugin.cancelProcesses}">
+	                        <i class="fa fa-trash margin-right-5"></i>
+	                        <h:outputText
+	                            styleClass="font-size-s"
+	                            value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
+	                    </button>
+	                    
+	                </div>
+                </ui:fragment>
             </h:form>
         </div>
     </composite:implementation>

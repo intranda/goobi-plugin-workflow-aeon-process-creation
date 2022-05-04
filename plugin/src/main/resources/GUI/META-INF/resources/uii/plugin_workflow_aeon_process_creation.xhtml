@@ -24,6 +24,10 @@
     border-color: #ff4433;
 }
 
+.form-control.differFromDefault {
+    border: 1px solid #368ee0;
+}
+
 .warning-icon {
     position: absolute;
     right: 2px;
@@ -115,8 +119,8 @@ input[type="radio"] {
                                                 id="typeSelection"
                                                 value="#{NavigationForm.workflowPlugin.operationType}"
                                                 styleClass="inline-table focusableChild"
-                                                disabledClass="margin-sides-10"
-                                                enabledClass="margin-sides-10">
+                                                disabledClass="margin-right-10"
+                                                enabledClass="margin-right-10">
                                                 <f:selectItem
                                                     pt:styleClass="focusable"
                                                     itemLabel="#{msgs.plugin_workflow_aeon_processCreation}"
