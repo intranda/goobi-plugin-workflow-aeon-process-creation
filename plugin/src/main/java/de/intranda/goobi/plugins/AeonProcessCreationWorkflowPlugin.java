@@ -355,8 +355,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         // get next free id
                         String repository = (String) map.get("site");
                         int transactionNumber = (int) map.get("transactionNumber");
-
-                        String generatedTitle = (nextFreeId + 1) + "_" + repository + "_" + transactionNumber;
+                        nextFreeId = nextFreeId + 1;
+                        String generatedTitle = (nextFreeId) + "_" + repository + "_" + transactionNumber;
                         record.setProcessTitle(generatedTitle);
 
                         // copy properties
