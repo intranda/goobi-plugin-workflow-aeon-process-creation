@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -404,6 +403,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                                 }
 
                                 if (isDuplicate) {
+                                    record.setDuplicateTitle(other.getTitel());
                                     record.setDuplicate(true);
                                     for (AeonProperty property : record.getProperties()) {
                                         AeonProperty aeonProperty = property.cloneProperty();
@@ -548,10 +548,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             if (rec.isAccepted()) {
                 // create process
 
-                if (rec.isDuplicate()) {
-                    // generate different title, if its a duplicate
-                    rec.setProcessTitle(rec.getProcessTitle() + "_" + dateFormat.format(new Date()));
-                }
+                //                if (rec.isDuplicate()) {
+                //                    // generate different title, if its a duplicate
+                //                    rec.setProcessTitle(rec.getProcessTitle() + "_" + dateFormat.format(new Date()));
+                //                }
 
                 Process process = new Process();
                 if (batch == null) {

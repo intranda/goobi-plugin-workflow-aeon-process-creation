@@ -23,6 +23,8 @@ public class AeonRecord {
 
     private String processTitle;
 
+    private String duplicateTitle;
+
     private boolean duplicate;
 
     private boolean disabled;

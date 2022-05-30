@@ -91,6 +91,7 @@
                             layout="block"
                             styleClass="box-content nopadding #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}"
                             >
+                            <h:outputText style="padding: 10px;margin-bottom:0;display: block;" value="#{msgs.prozessTitel}: #{item.processTitle}" />
 
                             <h:outputFormat
                                 id="titleInUse"
@@ -98,7 +99,7 @@
                                 styleClass="alert alert-danger"
                                 value="#{msgs['plugin_workflow_aeon_titleInUse']}"
                                 rendered="#{item.duplicate}">
-                                <f:param value="#{item.processTitle}" />
+                                <f:param value="#{item.duplicateTitle}" />
                                 <f:passThroughAttribute
                                     name="data-trigger"
                                     value="hover" />
@@ -116,6 +117,7 @@
                                     name="data-content"
                                     value="#{item.duplicationPopup}" />
                             </h:outputFormat>
+
 
 
                             <h:outputText
