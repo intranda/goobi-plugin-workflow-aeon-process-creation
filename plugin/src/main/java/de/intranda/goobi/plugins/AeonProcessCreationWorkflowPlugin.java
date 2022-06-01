@@ -44,7 +44,9 @@ import org.goobi.production.flow.statistics.hibernate.FilterHelper;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
+import org.primefaces.event.CloseEvent;
 
+import de.intranda.goobi.plugins.aeon.AeonExistingProcess;
 import de.intranda.goobi.plugins.aeon.AeonProperty;
 import de.intranda.goobi.plugins.aeon.AeonRecord;
 import de.sub.goobi.config.ConfigPlugins;
@@ -88,6 +90,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     //    //this will contain all fields inside <transaction> defined in config
     //    private List<HierarchicalConfiguration> transactionFields;
 
+    @Getter
+    @Setter
+    private boolean displayPopup = false;
+    
     @Getter
     @Setter
     //this will contain all fields inside <processes> defined in config
@@ -416,18 +422,22 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                                 if (isDuplicate) {
                                     record.setDuplicateTitle(other.getTitel());
                                     record.setDuplicate(true);
+                                    
+                                    AeonExistingProcess aep = new AeonExistingProcess();
+                                    aep.setTitle(other.getTitel());
                                     for (AeonProperty property : record.getProperties()) {
                                         AeonProperty aeonProperty = property.cloneProperty();
                                         aeonProperty.setValue("");
-                                        record.getDuplicateProperties().add(aeonProperty);
+                                        aep.getDuplicateProperties().add(aeonProperty);
                                         extractProcessValues(other, aeonProperty);
                                     }
                                     for (AeonProperty property : record.getProcessProperties()) {
                                         AeonProperty aeonProperty = property.cloneProperty();
                                         aeonProperty.setValue("");
-                                        record.getDuplicateProperties().add(aeonProperty);
+                                        aep.getDuplicateProperties().add(aeonProperty);
                                         extractProcessValues(other, aeonProperty);
                                     }
+                                    record.getExistingProcesses().add(aep);
                                 }
                             }
                         }
@@ -940,5 +950,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             }
         }
         resetRequest();
+    }
+    
+    private AeonRecord popupItem;
+    public AeonRecord getPopupItem() {
+        return popupItem;
+    }
+    public void setPopupItem(AeonRecord popupItem) {
+        this.popupItem = popupItem;
     }
 }

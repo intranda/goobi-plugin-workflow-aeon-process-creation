@@ -8,7 +8,8 @@
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:jsf="http://xmlns.jcp.org/jsf"
     xmlns:c="http://java.sun.com/jstl/core"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites">
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
+    xmlns:p="http://primefaces.org/ui">
 
     <composite:interface>
     </composite:interface>
@@ -93,31 +94,82 @@
                             styleClass="box-content nopadding #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}"
                             >
                             
-                            <!-- waning when title in use already -->
-                            <h:outputFormat
-                                id="titleInUse"
-                                style="padding: 10px;margin-bottom:0;display: block;"
-                                styleClass="alert alert-warning"
-                                value="#{msgs['plugin_workflow_aeon_titleInUse']}"
+                            <!--  render modal with existing processes and their details  -->
+                            <h:panelGroup
                                 rendered="#{item.duplicate}">
-                                <f:param value="#{item.duplicateTitle}" />
-                                <f:passThroughAttribute
-                                    name="data-trigger"
-                                    value="hover" />
-                                <!-- f:passThroughAttribute name="data-container" value="#titleInUse" /> -->
-                                <f:passThroughAttribute
-                                    name="data-toggle"
-                                    value="popover" />
-                                <f:passThroughAttribute
-                                    name="data-placement"
-                                    value="bottom" />
-                                <f:passThroughAttribute
-                                    name="data-html"
-                                    value="true" />
-                                <f:passThroughAttribute
-                                    name="data-content"
-                                    value="#{item.duplicationPopup}" />
-                            </h:outputFormat>
+                                <a href="#"
+                                    data-toggle="modal"
+                                    data-target="#myModal-#{item.id}"> 
+                                    <h:outputFormat
+                                        id="titleInUse"
+                                        style="padding: 10px;margin-bottom:0;display: block;"
+                                        styleClass="alert alert-warning"
+                                        value="#{msgs['plugin_workflow_aeon_titleInUse']}"
+                                        rendered="#{item.duplicate}">
+                                        <f:param value="#{item.duplicateTitle}" />
+                                    </h:outputFormat>
+                                </a>
+                            </h:panelGroup>
+                            <div
+                                class="modal fade"
+                                id="myModal-#{item.id}"
+                                tabindex="-1"
+                                role="dialog"
+                                pt:aria-label="myModalLabel">
+                                <div
+                                    class="modal-dialog" style="width:800px;"
+                                    role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <a
+                                                href="#"
+                                                class="btn btn-blue pull-right"
+                                                title="#{msgs.cancel}"
+                                                data-dismiss="modal"> <i class="fa fa-times"></i>
+                                            </a>
+                                            <h4 class="modal-title"
+                                                id="#{msgs.metseditorOpen}-#{item.processTitle}">
+                                               <ui:repeat
+                                                    var="p"
+                                                    value="#{item.properties}">
+                                                    <h:outputText
+                                                        value="#{p.value} "
+                                                        rendered="#{p.displayInTitle}" />
+                                                </ui:repeat>
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body">
+                                        
+                                            <ui:repeat var="proc" value="#{item.existingProcesses}">
+                                        
+                                                <h3>#{proc.title}</h3>
+                                        
+                                                <h:dataTable id="props" 
+                                                    styleClass="table table-hover table-nomargin dataTable table-bordered responsive" 
+                                                    var="prop"
+                									value="#{proc.duplicateProperties}">
+                
+                                                    <h:column>
+                                                        <f:facet name="header">
+                                                            <h:outputText value="#{msgs.titel}" />
+                                                        </f:facet>
+                                                        <h:outputText value="#{prop.title}"/>
+                                                    </h:column>
+                
+                									<h:column>
+                										<f:facet name="header">
+                											<h:outputText value="#{msgs.wert}" />
+                										</f:facet>
+                										<h:outputText value="#{prop.value}"/>
+                									</h:column>
+                									
+                								</h:dataTable>
+                                            </ui:repeat>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- waning when cancel not allowed -->
                             <h:outputText
@@ -509,7 +561,10 @@
 	                    
 	                </div>
                 </ui:fragment>
+                
             </h:form>
         </div>
+        
+        
     </composite:implementation>
 </ui:composition>
