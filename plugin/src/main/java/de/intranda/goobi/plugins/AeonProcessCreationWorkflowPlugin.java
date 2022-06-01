@@ -182,6 +182,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @SuppressWarnings("unchecked")
     public void sendRequest() {
         recordList.clear();
+        
+        if (StringUtils.isBlank(this.input)) {
+            Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_no_identifier_given"));
+            return;
+        }
+        
         if ("creation".equals(operationType)) {
 
             Map<String, Object> map = null;
@@ -200,12 +206,17 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
             } else {
                 if (StringUtils.isNotBlank(apiKey)) {
-                    map = client.target(apiUrl)
-                            .path("Requests")
-                            .path(input)
-                            .request(MediaType.APPLICATION_JSON)
-                            .header("X-AEON-API-KEY", apiKey)
-                            .get(Map.class);
+                    try {
+                        map = client.target(apiUrl)
+                                .path("Requests")
+                                .path(input)
+                                .request(MediaType.APPLICATION_JSON)
+                                .header("X-AEON-API-KEY", apiKey)
+                                .get(Map.class);
+                    } catch (Exception e) {
+                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_identifier_not_found") + ": " + e.getMessage());
+                        return;
+                    }
                 } else {
                     LoginResponse res = client.target(apiUrl)
                             .path("Token")
@@ -240,7 +251,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 // validate if required fields are available
                 for (String fieldname : requiredFields) {
                     if (map.containsKey(fieldname) && map.get(fieldname) == null) {
-                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldNull", fieldname));
+                        Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldNull", fieldname));
                     }
                 }
 

@@ -63,7 +63,7 @@
                                     title="#{msgs.plugin_workflow_aeon_accept}"
                                     jsf:rendered="#{not item.disabled or LoginForm.hasRole(NavigationForm.workflowPlugin.cancellationSepcialRights)}"
                                     jsf:id="toggle-accept">
-                                    <i class="fa #{item.accepted == false?'fa fa-toggle-off':'fa fa-toggle-on'}
+                                    <i class="fa #{item.accepted == false?'fa-toggle-off':'fa-toggle-on'}
                                     #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}" 
                                     style="font-size: 25px"/>
                                     <f:ajax render=":itemForm" />
@@ -78,6 +78,7 @@
                                     class="btn margin-right-5"
                                     style="background: transparent"
                                     title="#{(item.showDetails) ? 'hide details' : 'show details'}"
+                                    jsf:rendered="#{NavigationForm.workflowPlugin.operationType eq 'creation'}"
                                     jsf:id="details">
                                     <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'} #{item.accepted?'accepted':'notaccepted'}"></i>
                                     <f:setPropertyActionListener
@@ -91,19 +92,19 @@
                             layout="block"
                             styleClass="box-content nopadding #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}"
                             >
-                            <h:outputText style="padding: 10px;margin-bottom:0;display: block;" value="#{msgs.prozessTitel}: #{item.processTitle}" />
-
+                            
+                            <!-- waning when title in use already -->
                             <h:outputFormat
                                 id="titleInUse"
                                 style="padding: 10px;margin-bottom:0;display: block;"
-                                styleClass="alert alert-danger"
+                                styleClass="alert alert-warning"
                                 value="#{msgs['plugin_workflow_aeon_titleInUse']}"
                                 rendered="#{item.duplicate}">
                                 <f:param value="#{item.duplicateTitle}" />
                                 <f:passThroughAttribute
                                     name="data-trigger"
                                     value="hover" />
-                                <!--                                 <f:passThroughAttribute name="data-container" value="#titleInUse" /> -->
+                                <!-- f:passThroughAttribute name="data-container" value="#titleInUse" /> -->
                                 <f:passThroughAttribute
                                     name="data-toggle"
                                     value="popover" />
@@ -118,8 +119,7 @@
                                     value="#{item.duplicationPopup}" />
                             </h:outputFormat>
 
-
-
+                            <!-- waning when cancel not allowed -->
                             <h:outputText
                                 id="item-disabled"
                                 style="padding: 10px;margin-bottom:0;display: block;"
@@ -127,7 +127,13 @@
                                 value="#{msgs.plugin_workflow_aeon_deletionDisabled}"
                                 rendered="#{item.disabled and NavigationForm.workflowPlugin.operationType == 'cancel'}" />
 
-
+                            <!-- future process title -->
+                            <intranda:formOutputText
+                                rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
+                                label="#{msgs.prozessTitel}" 
+                                field="#{item.processTitle}" 
+                                name="futureTitle" 
+                                fieldStyle="form-control"/>
 
                             <x:dataList
                                 value="#{item.properties}"
@@ -150,7 +156,7 @@
                                                 styleClass="form-control"
                                                 value="#{property.value}"
                                                 required="false"
-                                                readonly="#{property.readonly}">
+                                                readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                                 <!--                                                 validator="#{property.validateProperty}" -->
                                                 <f:ajax
                                                     execute="@this"
@@ -179,7 +185,7 @@
                                     help="#{property.helpMessage}"
                                     selectItems="#{property.selectValues}"
                                     fieldStyle="form-control"
-                                    readonly="#{property.readonly}"
+                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}"
                                     required="false"
                                     ajaxEvent="change"
                                     ajaxRender="@this"
@@ -195,7 +201,7 @@
                                     field="#{property.value}"
                                     help="#{property.helpMessage}"
                                     fieldStyle="form-control"
-                                    readonly="#{property.readonly}"
+                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}"
                                     required="false"
                                     ajaxEvent="change"
                                     ajaxRender="@this" />
@@ -213,7 +219,7 @@
                                         <h:selectOneRadio
                                             id="radio"
                                             styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                            value="#{property.value}">
+                                            value="#{property.value}" readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                             <f:ajax
                                                 execute="@this"
                                                 render="@all"
@@ -250,7 +256,8 @@
                                             <h:selectOneMenu
                                                 id="selection"
                                                 styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.value}">
+                                                value="#{property.value}"
+                                                readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                                 <f:ajax
                                                     execute="@this"
                                                     render="@all"
@@ -273,7 +280,7 @@
                                                 styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
                                                 value="#{property.additionalValue}"
                                                 required="false"
-                                                readonly="#{property.readonly}">
+                                                readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                                 <f:ajax
                                                     execute="@this"
                                                     render="@all"
@@ -294,7 +301,7 @@
 
                             </x:dataList>
 
-                            <ui:fragment rendered="#{item.showDetails}">
+                            <ui:fragment rendered="#{item.showDetails and NavigationForm.workflowPlugin.operationType eq 'creation'}">
                                 <x:dataList
                                     value="#{item.processProperties}"
                                     var="property">
@@ -326,7 +333,7 @@
                                                     styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
                                                     value="#{property.value}"
                                                     required="false"
-                                                    readonly="#{property.readonly}">
+                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                                     <!--                                                     validator="#{property.validateProperty}" -->
                                                     <f:ajax
                                                         execute="@this"
@@ -338,7 +345,7 @@
 
                                                 <h:selectOneMenu
                                                     styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                    value="#{property.value}">
+                                                    value="#{property.value}" readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                                     <f:ajax
                                                         event="change"
                                                         render="group"
@@ -359,7 +366,8 @@
                                                 <h:selectBooleanCheckbox
                                                     styleClass="checkbox-height-fix"
                                                     style="margin-left: 0px;"
-                                                    value="#{property.value}">
+                                                    value="#{property.value}"
+                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                                     <f:ajax
                                                         event="change"
                                                         render="group"
@@ -371,7 +379,8 @@
                                                 <h:selectOneRadio
                                                     id="radio"
                                                     styleClass="#{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                    value="#{property.value}">
+                                                    value="#{property.value}"
+                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                                     <f:ajax
                                                         execute="@this"
                                                         render="@all"
@@ -390,7 +399,7 @@
                                             <h:selectOneMenu
                                                 id="selection"
                                                 styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.value}">
+                                                value="#{property.value}" readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                                 <f:ajax
                                                     execute="@this"
                                                     render="@all"
@@ -413,7 +422,7 @@
                                                 styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
                                                 value="#{property.additionalValue}"
                                                 required="false"
-                                                readonly="#{property.readonly}">
+                                                readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                                 <f:ajax
                                                     execute="@this"
                                                     render="@all"
@@ -454,7 +463,7 @@
 	                        jsf:id="declineAll"
 	                        class="btn btn-lightgrey margin-right-10 font-size-s"
 	                        jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
-	                        <i class="fa fa-times margin-right-5"></i>
+	                        <i class="fa fa-toggle-off margin-right-5"></i>
 	                        <h:outputText
 	                            styleClass="font-size-s"
 	                            value="#{msgs.plugin_workflow_aeon_declineAll}" />
@@ -465,7 +474,7 @@
 	                        jsf:id="acceptAll"
 	                        class="btn #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'btn-success' : 'btn-danger'} margin-right-10 font-size-s"
 	                        jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
-	                        <i class="fa #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'fa-check' : 'fa-trash'} margin-right-5"></i>
+	                        <i class="fa fa-toggle-on margin-right-5"></i>
 	                        <h:outputText
 	                            styleClass="font-size-s"
 	                            value="#{msgs.plugin_workflow_aeon_acceptAll}" />

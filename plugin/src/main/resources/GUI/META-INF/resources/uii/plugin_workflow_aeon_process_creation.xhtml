@@ -203,7 +203,7 @@ input[type="radio"] {
                                     <button
                                         jsf:id="sendRequest"
                                         class="btn btn-primary font-size-s"
-                                        jsf:action="#{NavigationForm.workflowPlugin.sendRequest}">#{msgs.plugin_workflow_aeon_startRequest}</button>
+                                        jsf:action="#{NavigationForm.workflowPlugin.sendRequest}">#{NavigationForm.workflowPlugin.operationType == 'creation' ? msgs.plugin_workflow_aeon_startRequest : msgs.plugin_workflow_aeon_cancelRequest}</button>
                                 </div>
                             </h:form>
                         </div>

@@ -13,7 +13,7 @@
     </composite:interface>
 
     <composite:implementation>
-        <!-- Properties Box (NO REQUEST)-->
+        <!-- Properties Box (NO REQUEST)
         <div
             jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false or NavigationForm.workflowPlugin.operationType != 'creation'}"
             class="box thin-margin lightgrey box-bordered">
@@ -32,6 +32,8 @@
                 </div>
             </div>
         </div>
+        -->
+        
         <!-- Properties Box (REQUEST SENT) ++++ STILL EMPTY +++++  -->
         <div
             jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess and NavigationForm.workflowPlugin.operationType == 'creation'}"
