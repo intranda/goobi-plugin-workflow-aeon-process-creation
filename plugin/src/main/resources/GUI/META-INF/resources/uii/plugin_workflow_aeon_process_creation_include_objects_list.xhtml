@@ -100,14 +100,12 @@
                                 <a href="#"
                                     data-toggle="modal"
                                     data-target="#myModal-#{item.id}"> 
-                                    <h:outputFormat
+                                    <h:outputText
                                         id="titleInUse"
-                                        style="padding: 10px;margin-bottom:0;display: block;"
+                                        style="padding: 10px;margin-bottom:0;display: block;border-bottom:1px solid #ddd"
                                         styleClass="alert alert-warning"
-                                        value="#{msgs['plugin_workflow_aeon_titleInUse']}"
-                                        rendered="#{item.duplicate}">
-                                        <f:param value="#{item.duplicateTitle}" />
-                                    </h:outputFormat>
+                                        value="#{msgs['plugin_workflow_aeon_titleInUse']}">
+                                    </h:outputText>
                                 </a>
                             </h:panelGroup>
                             <div
@@ -128,7 +126,7 @@
                                                 data-dismiss="modal"> <i class="fa fa-times"></i>
                                             </a>
                                             <h4 class="modal-title"
-                                                id="#{msgs.metseditorOpen}-#{item.processTitle}">
+                                                id="head-#{item.id}">
                                                <ui:repeat
                                                     var="p"
                                                     value="#{item.properties}">
@@ -141,8 +139,10 @@
                                         <div class="modal-body">
                                         
                                             <ui:repeat var="proc" value="#{item.existingProcesses}">
-                                        
-                                                <h3>#{proc.title}</h3>
+                                                <h4 style="font-size:15px; margin-top:20px;">
+                                                    <span>#{proc.title}</span>
+                                                    <span class="font-light pull-right">#{proc.date}</span>
+                                                </h4>
                                         
                                                 <h:dataTable id="props" 
                                                     styleClass="table table-hover table-nomargin dataTable table-bordered responsive" 
@@ -513,7 +513,7 @@
 	                
 	                    <button
 	                        jsf:id="declineAll"
-	                        class="btn btn-lightgrey margin-right-10 font-size-s"
+	                        class="btn margin-right-10 font-size-s"
 	                        jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
 	                        <i class="fa fa-toggle-off margin-right-5"></i>
 	                        <h:outputText
@@ -524,9 +524,9 @@
 	
 	                    <button
 	                        jsf:id="acceptAll"
-	                        class="btn #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'btn-success' : 'btn-danger'} margin-right-10 font-size-s"
+	                        class="btn margin-right-10 font-size-s"
 	                        jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
-	                        <i class="fa fa-toggle-on margin-right-5"></i>
+	                        <i class="fa fa-toggle-on margin-right-5 #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'bcolor-creation' : 'bcolor-deletion'}"></i>
 	                        <h:outputText
 	                            styleClass="font-size-s"
 	                            value="#{msgs.plugin_workflow_aeon_acceptAll}" />
@@ -538,7 +538,7 @@
 	                <div class="margin-top-10 pull-right">
 	
 	                    <button
-	                        class="btn btn-blue font-size-s pull-right"
+	                        class="btn btn-success font-size-s pull-right border-creation"
 	                        jsf:id="absenden"
 	                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
 	                        jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
@@ -549,7 +549,7 @@
 	                    </button>
 	
 	                    <button
-	                        class="btn btn-blue font-size-s pull-right"
+	                        class="btn btn-danger font-size-s pull-right border-deletion"
 	                        jsf:id="disable"
 	                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
 	                        jsf:action="#{NavigationForm.workflowPlugin.cancelProcesses}">

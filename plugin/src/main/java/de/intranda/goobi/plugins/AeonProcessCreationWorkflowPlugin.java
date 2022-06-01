@@ -425,6 +425,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                                     
                                     AeonExistingProcess aep = new AeonExistingProcess();
                                     aep.setTitle(other.getTitel());
+                                    aep.setDate(other.getErstellungsdatumAsString());
                                     for (AeonProperty property : record.getProperties()) {
                                         AeonProperty aeonProperty = property.cloneProperty();
                                         aeonProperty.setValue("");

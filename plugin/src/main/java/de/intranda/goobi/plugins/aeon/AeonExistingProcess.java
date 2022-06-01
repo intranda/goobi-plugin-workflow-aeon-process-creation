@@ -8,5 +8,6 @@ import lombok.Data;
 @Data
 public class AeonExistingProcess {
     private String title = "";
+    private String date = "";
     private List<AeonProperty> duplicateProperties = new ArrayList<>();
 }
