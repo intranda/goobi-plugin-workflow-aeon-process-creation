@@ -14,7 +14,7 @@ public class AeonRecord {
     private List<AeonProperty> properties = new ArrayList<>();
 
     private long id = System.currentTimeMillis();
-    
+
     private boolean accepted = false;
 
     private boolean showDetails = false;
@@ -36,7 +36,7 @@ public class AeonRecord {
     private Process existingProcess;
 
     private List<AeonExistingProcess> existingProcesses = new ArrayList<>();
-    
+
 
 }
 

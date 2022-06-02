@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,7 +43,6 @@ import org.goobi.production.flow.statistics.hibernate.FilterHelper;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
-import org.primefaces.event.CloseEvent;
 
 import de.intranda.goobi.plugins.aeon.AeonExistingProcess;
 import de.intranda.goobi.plugins.aeon.AeonProperty;
@@ -93,7 +91,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @Getter
     @Setter
     private boolean displayPopup = false;
-    
+
     @Getter
     @Setter
     //this will contain all fields inside <processes> defined in config
@@ -159,7 +157,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         return PluginType.Workflow;
     }
 
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
+    //    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
 
     @Override
     public String getGui() {
@@ -188,12 +186,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @SuppressWarnings("unchecked")
     public void sendRequest() {
         recordList.clear();
-        
+
         if (StringUtils.isBlank(this.input)) {
             Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_no_identifier_given"));
             return;
         }
-        
+
         if ("creation".equals(operationType)) {
 
             Map<String, Object> map = null;
@@ -333,7 +331,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 } catch (Exception e) {
                     log.error(e);
                 }
-                int nextFreeId = getNextProcessId() + 1;
 
                 // Bib ID and Volume number (bibId, volume)
                 // ASpace resource ID (uri)
@@ -371,8 +368,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         // get next free id
                         String repository = (String) map.get("site");
                         int transactionNumber = (int) map.get("transactionNumber");
-                        nextFreeId = nextFreeId + 1;
-                        String generatedTitle = (nextFreeId) + "_" + repository + "_" + transactionNumber;
+
+                        String generatedTitle = repository + "_" + transactionNumber;
                         record.setProcessTitle(generatedTitle);
 
                         // copy properties
@@ -422,7 +419,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                                 if (isDuplicate) {
                                     record.setDuplicateTitle(other.getTitel());
                                     record.setDuplicate(true);
-                                    
+
                                     AeonExistingProcess aep = new AeonExistingProcess();
                                     aep.setTitle(other.getTitel());
                                     aep.setDate(other.getErstellungsdatumAsString());
@@ -455,13 +452,17 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
     }
 
-    private int getNextProcessId() {
-        String sql = "SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
+    private int getNextId() {
+        int value = 0;
+
+        String sql = "SELECT max(WERT) FROM prozesseeigenschaften where titel = 'OrderNumber'";
         Connection connection = null;
         try {
             connection = MySQLHelper.getInstance().getConnection();
-            int value = new QueryRunner().query(connection, sql, MySQLHelper.resultSetToIntegerHandler, connection.getCatalog(), "prozesse");
-            return value;
+            String s = new QueryRunner().query(connection, sql, MySQLHelper.resultSetToStringHandler);
+            if (StringUtils.isNotBlank(s)) {
+                value = Integer.valueOf(s).intValue();
+            }
         } catch (SQLException e) {
             log.error(e);
         } finally {
@@ -472,7 +473,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
             }
         }
-        return 0;
+
+        return value + 1;
     }
 
     private void extractProcessValues(Process other, AeonProperty aeonProperty) {
@@ -674,13 +676,20 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     Fileformat fileformat = opacPlugin.search("", "", coc, prefs); // get metadata for selected record
                     // is additional metadata neeeded?
 
-                    process.setTitel(rec.getProcessTitle());
+                    int nextFreeId = getNextId();
+                    String orderNumber;
+                    if (nextFreeId > 999) {
+                        orderNumber = String.valueOf(nextFreeId);
+                    } else if (nextFreeId > 99) {
+                        orderNumber = "0" +  String.valueOf(nextFreeId);
+                    } else if (nextFreeId > 9) {
+                        orderNumber = "00" +  String.valueOf(nextFreeId);
+                    } else {
+                        orderNumber = "000" +  String.valueOf(nextFreeId);
+                    }
 
-                    //                    if (ProcessManager.countProcessTitle(generatedTitle, null) > 0) {
-                    //                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_titleInUse", generatedTitle));
-                    //                        rec.setAccepted(false);
-                    //                        continue;
-                    //                    }
+                    process.setTitel(orderNumber+ "_" + rec.getProcessTitle());
+                    bhelp.EigenschaftHinzufuegen(process, "OrderNumber", orderNumber);
 
                     // save process
                     ProcessManager.saveProcess(process);
@@ -952,11 +961,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
         resetRequest();
     }
-    
+
     private AeonRecord popupItem;
+
     public AeonRecord getPopupItem() {
         return popupItem;
     }
+
     public void setPopupItem(AeonRecord popupItem) {
         this.popupItem = popupItem;
     }
