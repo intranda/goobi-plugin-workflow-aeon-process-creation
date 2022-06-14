@@ -369,7 +369,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         String repository = (String) map.get("site");
                         int transactionNumber = (int) map.get("transactionNumber");
 
-                        String generatedTitle = repository + "_" + transactionNumber;
+                        String generatedTitle = transactionNumber + "_" + repository ;
                         record.setProcessTitle(generatedTitle);
 
                         // copy properties
@@ -688,7 +688,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         orderNumber = "000" +  String.valueOf(nextFreeId);
                     }
 
-                    process.setTitel(orderNumber+ "_" + rec.getProcessTitle());
+                    process.setTitel( rec.getProcessTitle()+ "_" + orderNumber);
                     bhelp.EigenschaftHinzufuegen(process, "OrderNumber", orderNumber);
 
                     // save process
