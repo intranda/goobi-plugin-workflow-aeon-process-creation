@@ -50,7 +50,7 @@
                     <x:dataList
                         value="#{NavigationForm.workflowPlugin.transactionFields}"
                         var="property">
-                        <ui:fragment rendered="#{property.type == 'input'}">
+                        <ui:fragment rendered="#{property.type == 'input' or property.type == 'input-dont-overwrite'}">
                             <h:panelGroup
                                 layout="block"
                                 styleClass="form-group"

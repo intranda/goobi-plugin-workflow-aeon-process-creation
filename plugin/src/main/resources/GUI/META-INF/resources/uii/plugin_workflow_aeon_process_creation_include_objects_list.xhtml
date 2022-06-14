@@ -481,7 +481,19 @@
                                                     event="blur" />
                                             </x:inputText>
                                         </ui:fragment>
-
+                                        
+                                            <ui:fragment rendered="#{property.type == 'input-dont-overwrite'}">
+                                                <x:outputText
+                                                    id="output"
+                                                    forceId="false"
+                                                    name="input"
+                                                    styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                    value="#{property.value}"
+                                                    required="false"
+                                                   >
+                                            
+                                                </x:outputText>
+                                            </ui:fragment>
 
 
                                             <h:panelGroup

@@ -72,7 +72,7 @@
                                             jsf:rendered="#{!property.valid and property.strictValidation}" />
 
                                         <!-- input field -->
-                                        <ui:fragment rendered="#{property.type == 'input'}">
+                                        <ui:fragment rendered="#{property.type == 'input' or property.type == 'input-dont-overwrite'}">
                                             <x:inputText
                                                 id="input"
                                                 forceId="false"
