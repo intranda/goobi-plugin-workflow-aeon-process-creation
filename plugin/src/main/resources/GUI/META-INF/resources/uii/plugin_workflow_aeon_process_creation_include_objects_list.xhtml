@@ -179,14 +179,6 @@
                                 value="#{msgs.plugin_workflow_aeon_deletionDisabled}"
                                 rendered="#{item.disabled and NavigationForm.workflowPlugin.operationType == 'cancel'}" />
 
-                            <!-- future process title -->
-                            <intranda:formOutputText
-                                rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
-                                label="#{msgs.prozessTitel}" 
-                                field="#{item.processTitle}" 
-                                name="futureTitle" 
-                                fieldStyle="form-control"/>
-
                             <x:dataList
                                 value="#{item.properties}"
                                 var="property">
