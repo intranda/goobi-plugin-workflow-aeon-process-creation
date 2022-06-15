@@ -58,6 +58,13 @@
                                 layout="block"
                                 styleClass="box-content nopadding"
                                 style="border-color: #666">
+                                                            <!-- future process title -->
+                            <intranda:formOutputText
+                                label="#{msgs.prozessTitel}" 
+                                field="#{item.processTitle}" 
+                                name="futureTitle" 
+                                fieldStyle="form-control"/>
+                                
                                 <x:dataList
                                     value="#{item.properties}"
                                     var="property">

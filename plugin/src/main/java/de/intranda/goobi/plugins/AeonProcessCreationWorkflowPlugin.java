@@ -366,10 +366,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                         //                        AeonTN pulled from Aeon field - transactionNumber
 
                         // get next free id
-                        String repository = (String) map.get("site");
+                        String repository = (String) map.get("itemInfo2");
                         int transactionNumber = (int) map.get("transactionNumber");
 
-                        String generatedTitle = transactionNumber + "_" + repository ;
+                        String generatedTitle = transactionNumber + "_" + repository;
                         record.setProcessTitle(generatedTitle);
 
                         // copy properties
@@ -386,7 +386,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
                         //  check for duplicates in active projects, load the processes with the same transaction number
                         List<Process> processes = ProcessManager.getProcesses("prozesse.erstellungsdatum desc",
-                                "prozesse.titel like \"%" + repository + "_" + transactionNumber + "%\"");
+                                "prozesse.titel like \"%" + generatedTitle + "%\"");
 
                         for (Process other : processes) {
                             if (!other.getProjekt().getProjectIsArchived()) {
@@ -681,14 +681,15 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     if (nextFreeId > 999) {
                         orderNumber = String.valueOf(nextFreeId);
                     } else if (nextFreeId > 99) {
-                        orderNumber = "0" +  String.valueOf(nextFreeId);
+                        orderNumber = "0" + String.valueOf(nextFreeId);
                     } else if (nextFreeId > 9) {
-                        orderNumber = "00" +  String.valueOf(nextFreeId);
+                        orderNumber = "00" + String.valueOf(nextFreeId);
                     } else {
-                        orderNumber = "000" +  String.valueOf(nextFreeId);
+                        orderNumber = "000" + String.valueOf(nextFreeId);
                     }
 
-                    process.setTitel( rec.getProcessTitle()+ "_" + orderNumber);
+                    process.setTitel(rec.getProcessTitle() + "_" + orderNumber);
+                    rec.setProcessTitle(process.getTitel());
                     bhelp.EigenschaftHinzufuegen(process, "OrderNumber", orderNumber);
 
                     // save process
