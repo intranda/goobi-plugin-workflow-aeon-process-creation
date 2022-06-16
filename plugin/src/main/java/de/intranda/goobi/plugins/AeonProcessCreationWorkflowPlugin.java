@@ -254,7 +254,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
                 // validate if required fields are available
                 for (String fieldname : requiredFields) {
-                    if (map.containsKey(fieldname) && map.get(fieldname) == null) {
+                    if (map.containsKey(fieldname) && (map.get(fieldname) == null || StringUtils.isBlank(map.get(fieldname).toString()))) {
                         Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldNull", fieldname));
                     }
                 }
