@@ -125,7 +125,7 @@
                                         </ui:fragment>
 
                                         <!-- radio buttons -->
-                                        <ui:fragment rendered="#{property.type == 'radio'}">
+                                        <ui:fragment rendered="#{property.type == 'radio' or property.type == 'radio-dont-overwrite'}">
                                             <h:selectOneRadio
                                                 id="radio"
                                                 styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"

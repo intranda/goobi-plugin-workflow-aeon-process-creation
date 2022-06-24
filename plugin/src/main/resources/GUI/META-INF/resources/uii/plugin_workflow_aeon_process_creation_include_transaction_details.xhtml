@@ -90,7 +90,7 @@
                                 <h:panelGroup
                                     layout="block"
                                     styleClass="form-group"
-                                    rendered="#{property.type == 'radio'}">
+                                    rendered="#{property.type == 'radio' or property.type == 'radio-dont-overwrite'}">
                                     <div class="col-sm-3 control-label">
                                         <h:outputLabel
                                             for="radio"
