@@ -221,7 +221,7 @@ Non-Yale
   -->
     <field type="Audio Recording (DRMS)">
       <title>Patron type</title>
-      <type readonly="false">radio</type>
+      <type readonly="false">radio-dont-overwrite</type>
       <variable place="process">Patron type</variable>
       <value></value>
       <select>Yale</select>
@@ -269,7 +269,7 @@ Video (displays when Video- DRMS MaterialType from Aeon is selected)
     </field>
     <field type="Video (DRMS)">
       <title>Patron type</title>
-      <type readonly="false">radio</type>
+      <type readonly="false">radio-dont-overwrite</type>
       <variable place="process">Patron type</variable>
       <value></value>
       <select>Yale</select>
@@ -311,7 +311,7 @@ Film (displays when Film- DRMS MaterialType from Aeon is selected)
     </field>
     <field type="Film (DRMS)">
       <title>Patron type</title>
-      <type readonly="false">radio</type>
+      <type readonly="false">radio-dont-overwrite</type>
       <variable place="process">Patron type</variable>
       <value></value>
       <select>Yale</select>
@@ -413,7 +413,7 @@ Processing (checkboxes - default all unchecked.)
 
     <field type="(DRMS) Book &amp; Paper">
       <title>Patron type</title>
-      <type readonly="false">radio</type>
+      <type readonly="false">radio-dont-overwrite</type>
       <variable place="process">Patron type</variable>
       <value></value>
       <select>Yale</select>
@@ -513,7 +513,7 @@ Type of request
     </field>
     <field type="Transmissives">
       <title>Patron type</title>
-      <type readonly="false">radio</type>
+      <type readonly="false">radio-dont-overwrite</type>
       <variable place="process">Patron type</variable>
       <value></value>
       <select>Yale</select>
