@@ -131,7 +131,7 @@
 
                         <intranda:formInputDropDownAjax
                             name="dropdown"
-                            rendered="#{property.type == 'select' or property.type == 'vocabulary'}"
+                            rendered="#{property.type == 'select' or property.type == 'vocabulary' or property.type == 'select-dont-overwrite'}"
                             label="#{property.title}"
                             field="#{property.value}"
                             help="#{property.helpMessage}"
