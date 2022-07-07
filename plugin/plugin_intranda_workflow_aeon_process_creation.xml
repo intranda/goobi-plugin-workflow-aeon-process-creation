@@ -30,22 +30,14 @@
   </processCancellation>
 
   <requiredFields>
-    <field>lastName</field>
-    <field>eMailAddress</field>
-    <field>username</field>
-    <field>site</field>
+    <field>itemInfo2</field>
     <field>transactionNumber</field>
     <field>creationDate</field>
     <field>callNumber</field>
     <field>itemTitle</field>
-    <field>itemIssue</field>
-    <field>itemVolume</field>
-    <field>itemEdition</field>
     <field>shippingOption</field>
     <field>referenceNumber</field>
     <field>location</field>
-    <field>itemPages</field>
-    <field>itemInfo5</field>
   </requiredFields>
 
 
@@ -63,7 +55,7 @@
       <message>Your content does not follow our validation guidelines</message>
     </field>
     <field aeon="lastName">
-      <title>Lastname</title>
+      <title>Lastname (non-Yale only)</title>
       <type readonly="true">input</type>
       <variable place="process">Lastname</variable>
       <value></value>
@@ -125,16 +117,42 @@
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
+    <field aeon="itemInfo2">
+      <title>Home site</title>
+      <type readonly="true">input</type>
+      <variable place="process">Home site</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field aeon="creationDate">
+      <title>Creation date</title>
+      <type readonly="true">input</type>
+      <variable place="process">Creation date</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+    <field aeon="itemTitle">
+      <title>Item title</title>
+      <type readonly="true">input</type>
+      <variable place="process">Item title</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
   </transaction>
 
   <!-- the properties are configured the same way as the aeon fields above. The only difference is
   here that there is no content from aeon to be mapped so that there needs no 'aeon' to be defined;
   the values here are stored for all created processes; -->
   <properties>
-  
-<!-- test fields to check field validation -->
+    <!-- audio -->
+    <!-- Payment by (dropdown - default patron)
+Patron
+Department
+ -->
+
+ <!-- test fields to check field validation -->
  <!-- 
- <field>
+ <field type="Audio Recording (DRMS)">
   <title>Validation select</title>
   <variable place="process">Validation 1</variable>
   <type readonly="false">select</type>
@@ -145,7 +163,7 @@
   <message>Validation message select field.</message>
   <help>This is my description for the field so that everyone gets some help.</help>
 </field>
-<field>
+<field type="Audio Recording (DRMS)">
   <title>Validation input</title>
   <type readonly="false">input</type>
   <variable place="process">Item pages</variable>
@@ -154,7 +172,7 @@
   <message>Validation message input field.</message>
   <help>This is my description for the field so that everyone gets some help.</help>
 </field>
-<field>
+<field type="Audio Recording (DRMS)">
   <title>Validation checkbox</title>
   <type readonly="false">checkbox</type>
   <variable place="process">Include masters (.wav)</variable>
@@ -163,7 +181,7 @@
   <message>Validation message checkbox field.</message>
   <help>This is my description for the field so that everyone gets some help.</help>
 </field>
-<field>
+<field type="Audio Recording (DRMS)">
   <title>Validation radio</title>
   <type readonly="false">radio</type>
   <variable place="process">Patron type</variable>
@@ -174,18 +192,7 @@
   <message>Validation message radio button.</message>
   <help>This is my description for the field so that everyone gets some help.</help>
 </field>
--->  
-  
-  
-    <!-- audio -->
-    <!-- Payment by (dropdown - default patron)
-Patron
-Department
- -->
- 
- 
-
- 
+-->
     <field type="Audio Recording (DRMS)">
       <title>Payment by</title>
       <variable place="process">Payment by</variable>
@@ -267,6 +274,15 @@ Video (displays when Video- DRMS MaterialType from Aeon is selected)
       <value>false</value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
+
+    <field type="Video (DRMS)">
+      <title>Include images of original container/object</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Include masters (.mxf or .mov)</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
     <field type="Video (DRMS)">
       <title>Patron type</title>
       <type readonly="false">radio-dont-overwrite</type>
@@ -309,6 +325,15 @@ Film (displays when Film- DRMS MaterialType from Aeon is selected)
       <value>false</value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
+
+    <field type="Film (DRMS)">
+      <title>Include images of original container/object</title>
+      <type readonly="false">checkbox</type>
+      <variable place="process">Include masters (.mxf or .mov)</variable>
+      <value>false</value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
+
     <field type="Film (DRMS)">
       <title>Patron type</title>
       <type readonly="false">radio-dont-overwrite</type>
@@ -423,9 +448,7 @@ Processing (checkboxes - default all unchecked.)
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-    <!--
-Type of request
-  -->
+    <!-- Type of request -->
     <field type="(DRMS) Book &amp; Paper">
       <title>Type of request</title>
       <type readonly="false">select</type>
@@ -436,20 +459,19 @@ Type of request
       <select>Throwaway</select>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-    <!--Return location (freetext field)* -->
-    <field aeon="location" type="(DRMS) Book &amp; Paper">
+
+    <!-- Return location (freetext field)* -->
+    <field aeon="location">
       <title>Return location</title>
-      <type readonly="false">input</type>
+      <type readonly="false">input-dont-overwrite</type>
       <variable place="process">Return location</variable>
       <value></value>
-      <validation strict="true">\w+</validation>
+      <validation strict="true">.+</validation>
       <message>The field cannot be empty.</message>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-
-    <!-- Transmissives -->
-
+    <!-- PPI -->
     <field type="Transmissives">
       <title>PPI</title>
       <type readonly="false">select+text</type>
@@ -532,15 +554,6 @@ Type of request
       <select>Throwaway</select>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-    <field aeon="location" type="Transmissives">
-      <title>Return location</title>
-      <type readonly="false">input</type>
-      <variable place="process">Return location</variable>
-      <value></value>
-      <validation strict="true">\w+</validation>
-      <message>The field cannot be empty.</message>
-      <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
   </properties>
 
   <!-- the process fields are configured differently -->
@@ -553,7 +566,13 @@ Type of request
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-
+    <field aeon="topContainer" displayAlways="false" displayInTitle="false">
+      <title>Call Number</title>
+      <type readonly="false">input</type>
+      <variable place="process">Call Number</variable>
+      <value></value>
+      <help>This is my description for the field so that everyone gets some help.</help>
+    </field>
     <field aeon="title" displayAlways="true" displayInTitle="true">
       <title>Title</title>
       <type readonly="false">input</type>
@@ -564,12 +583,11 @@ Type of request
 
     <field aeon="containerGrouping" displayAlways="true" displayInTitle="true">
       <title>Box and Folder</title>
-      <type readonly="false">input</type>
+      <type readonly="true">input</type>
       <variable place="process">Box and Folder</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-
 
 
     <field aeon="bibId" displayAlways="true" displayInTitle="false">
@@ -590,7 +608,7 @@ Type of request
 
     <field aeon="chron" displayAlways="false" displayInTitle="false">
       <title>Issue Number</title>
-      <type readonly="false">input</type>
+      <type readonly="true">input</type>
       <variable place="process">Issue Number</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
@@ -606,7 +624,7 @@ Type of request
 
     <field aeon="recordType" displayAlways="false" displayInTitle="false">
       <title>Record type</title>
-      <type readonly="false">select</type>
+      <type readonly="true">select</type>
       <variable place="process">Record type</variable>
       <value></value>
       <select>ils</select>
@@ -614,7 +632,7 @@ Type of request
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
 
-<!-- TODO
+    <!-- TODO
     Additional Add a partial checkbox to metadata cloud response results. Above the fold. 
     Would be checked when folders required (outlined in Aeon) are less than those described in archival object
 -->
