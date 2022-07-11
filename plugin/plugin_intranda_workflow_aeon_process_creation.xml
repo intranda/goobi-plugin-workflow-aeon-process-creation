@@ -561,21 +561,21 @@ Processing (checkboxes - default all unchecked.)
 
     <field aeon="callNumber" displayAlways="false" displayInTitle="false">
       <title>Call Number</title>
-      <type readonly="false">input</type>
+      <type readonly="true">input</type>
       <variable place="process">Call Number</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
     <field aeon="topContainer" displayAlways="false" displayInTitle="false">
       <title>Call Number</title>
-      <type readonly="false">input</type>
+      <type readonly="true">input</type>
       <variable place="process">Call Number</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
     <field aeon="title" displayAlways="true" displayInTitle="true">
       <title>Title</title>
-      <type readonly="false">input</type>
+      <type readonly="title">input</type>
       <variable place="process">Title</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
@@ -616,7 +616,7 @@ Processing (checkboxes - default all unchecked.)
 
     <field aeon="volume" displayAlways="false" displayInTitle="false">
       <title>Volume</title>
-      <type readonly="false">input</type>
+      <type readonly="true">input</type>
       <variable place="process">Volume</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
