@@ -42,7 +42,7 @@
     <dependency>
       <groupId>de.intranda.goobi.plugins.opac</groupId>
       <artifactId>goobi-plugin-opac-json-gui</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.2-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
