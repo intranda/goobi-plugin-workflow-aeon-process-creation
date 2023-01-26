@@ -575,7 +575,7 @@ Processing (checkboxes - default all unchecked.)
     </field>
     <field aeon="title" displayAlways="true" displayInTitle="true">
       <title>Title</title>
-      <type readonly="title">input</type>
+      <type readonly="true">input</type>
       <variable place="process">Title</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>

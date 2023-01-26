@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.goobi.beans.Process;
 
 import lombok.Data;
 
 @Data
-public class AeonRecord {
+public class AeonRecord implements Comparable<AeonRecord> {
+
+    private static final String ORDER_PROPERTY = "containerGrouping";
 
     private List<AeonProperty> properties = new ArrayList<>();
 
@@ -37,6 +40,25 @@ public class AeonRecord {
 
     private List<AeonExistingProcess> existingProcesses = new ArrayList<>();
 
+    @Override
+    public int compareTo(AeonRecord other) {
+        String orderField =  recordData.get(ORDER_PROPERTY);
+        String otherOrderField =  other.getRecordData().get(ORDER_PROPERTY);
+
+        // if both fields are empty, the order is the same
+        if (StringUtils.isBlank(orderField) && StringUtils.isBlank(otherOrderField)) {
+            return 0;
+        }
+        // if one field is empty, the other record has higher order
+        if (StringUtils.isNotBlank(orderField) && StringUtils.isBlank(otherOrderField)) {
+            return -1;
+        }
+        if (StringUtils.isBlank(orderField) && StringUtils.isNotBlank(otherOrderField)) {
+            return 1;
+        }
+
+        // compare values
+        return orderField.compareTo(otherOrderField);
+    }
 
 }
-

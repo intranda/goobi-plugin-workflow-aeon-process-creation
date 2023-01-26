@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -440,6 +441,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                             }
                         }
                     }
+
+                    Collections.sort(recordList);
+
                     setRequestSuccess(true);
                 } else {
                     //  aeon request valid, but no record in metadata cloud
