@@ -340,7 +340,76 @@
                                             value="#{property.helpMessage}" />
                                     </div>
                                 </h:panelGroup>
+
+                                <h:panelGroup
+                                    layout="block"
+                                    styleClass="form-group"
+                                    rendered="#{property.type == 'multiselect'}  and (item.showDetails or property.displayAlways)}">
+                                    <div class="col-sm-3 control-label">
+                                        <h:outputLabel
+                                            for="multiselect"
+                                            value="#{property.title}" />
+                                         </div>   
+                                         
+                                         <!-- TODO 
+<div class="col-sm-9 metadata-row-area-content metadata-row-area-content-white">
+            <h:selectOneMenu
+                id="multiselect"
+                forceId="true"
+                 styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                 value="#{property.value}"
+                required="false"
+                readonly="false">
+                                                               
+                                              <f:ajax
+                                                    execute="@this"
+                                                    render="@all"
+                                                    event="change" />
+                                                <f:selectItem
+                                                    itemValue=""
+                                                    itemLabel="#{msgs.bitteAuswaehlen}"
+                                                    itemDisabled="true" />
+                                                <f:selectItems
+                                                    value="#{property.selectValues}"
+                                                    var="var"
+                                                    itemLabel="#{var}"
+                                                    itemValue="#{var}" />
+            </h:selectOneMenu>
+
+            <div>
+                <x:dataList
+                    value="#{selectedItems}"
+                    var="selection">
+                    <h:commandLink action="#{field.removeSelectedValue(selection)}">
+                        <span class="badge margin-top-10">
+                            <h:outputText value="#{msgs[selection]}" />
+                        </span>
+                        <f:ajax
+                            execute="@this"
+                            render=":#{ajaxid} :hierarchy" />
+                    </h:commandLink>
+                </x:dataList>
+            </div>
+            
+                                       <h:message
+                                            for="multiselect"
+                                            showDetail="true"
+                                            styleClass="help-inline font-danger" />
+                                        <h:outputText
+                                            styleClass="help-block font-light"
+                                            rendered="#{NavigationForm.showHelp}"
+                                            value="#{property.helpMessage}" />
+            
+        </div>
                                 
+-->
+
+
+
+
+</h:panelGroup>
+
+
 
 
                             </x:dataList>
