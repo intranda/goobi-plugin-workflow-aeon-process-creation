@@ -58,6 +58,33 @@ public class AeonProperty {
 
     private AeonProcessCreationWorkflowPlugin plugin;
 
+    /** contains the list of selected values in multiselect */
+    private List<String> multiselectSelectedValues = new ArrayList<>();
+
+    public List<String> getPossibleValues() {
+        List<String> answer = new ArrayList<>();
+        for (String possibleValue : selectValues) {
+            if (!multiselectSelectedValues.contains(possibleValue)) {
+                answer.add(possibleValue);
+            }
+        }
+        return answer;
+    }
+
+    public String getMultiselectValue() {
+        return "";
+    }
+
+    public void setMultiselectValue(String value) {
+        if (StringUtils.isNotBlank(value)) {
+            multiselectSelectedValues.add(value);
+        }
+    }
+
+    public void removeSelectedValue(String value) {
+        multiselectSelectedValues.remove(value);
+    }
+
     public AeonProperty(HierarchicalConfiguration config, AeonProcessCreationWorkflowPlugin plugin) {
         this.config = config;
         aeonField = config.getString("@aeon");
@@ -145,63 +172,15 @@ public class AeonProperty {
         }
     }
 
-    //    public void validateProperty(FacesContext context, UIComponent component, Object value) {
-    //        if (overwriteMainField) {
-    //            // null value is always valid, when we overwrite main fields
-    //            String s = (String)value;
-    //            if (StringUtils.isBlank(s)) {
-    //                return;
-    //            }
-    //        }
-    //        FacesMessage message = null;
-    //
-    //        // check if validation expression was configured
-    //        if (StringUtils.isNotBlank(validationExpression)) {
-    //            // check if value is empty
-    //            if (value == null) {
-    //                if (strictValidation) {
-    //                    message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
-    //                    this.value = null;
-    //                } else {
-    //                    message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
-    //                    this.value = null;
-    //                }
-    //                throw new ValidatorException(message);
-    //            }
-    //            String data = (String) value;
-    //            // check if data matches expression
-    //            if (!data.matches(validationExpression)) {
-    //                FacesMessage message = null;
-    //                if (strictValidation) {
-    //                    message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "validation error", validationErrorMessage);
-    //                    this.value = data;
-    //                } else {
-    //                    message = new FacesMessage(FacesMessage.SEVERITY_WARN, "validation error", validationErrorMessage);
-    //                    this.value = data;
-    //                }
-    //                throw new ValidatorException(message);
-    //            }
-    //        }
-    //    }
-
     public AeonProperty cloneProperty() {
         AeonProperty property = new AeonProperty(config, plugin);
         return property;
     }
 
     public boolean isValid() {
-        //        if (overwriteMainField) {
-        //            // null value is always valid, when we overwrite main fields
-        //            if (StringUtils.isBlank(value)) {
-        //                return true;
-        //            }
-        //        }
 
         if (StringUtils.isNotBlank(validationExpression)) {
             if (!displayMap.isEmpty() && StringUtils.isNotBlank(value) && displayMap.get(value)) {
-                //                if (overwriteMainField && StringUtils.isBlank(additionalValue)) {
-                //                    return true;
-                //                }
                 if (!additionalValue.matches(validationExpression)) {
                     return false;
                 }

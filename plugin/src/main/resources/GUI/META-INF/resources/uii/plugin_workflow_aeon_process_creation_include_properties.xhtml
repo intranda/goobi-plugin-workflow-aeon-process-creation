@@ -33,7 +33,7 @@
             </div>
         </div>
         -->
-        
+
         <!-- Properties Box (REQUEST SENT) ++++ STILL EMPTY +++++  -->
         <div
             jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess and NavigationForm.workflowPlugin.operationType == 'creation'}"
@@ -178,6 +178,52 @@
                                                     event="blur" />
                                             </x:inputText>
                                         </ui:fragment>
+
+
+                                        <h:panelGroup
+                                            layout="block"
+                                            id="hierarchy"
+                                            rendered="#{property.type == 'multiselect'}">
+                                            <div class="col-sm-9 metadata-row-area-content metadata-row-area-content-white">
+                                                <h:selectOneMenu
+                                                    id="multiselect"
+                                                    forceId="true"
+                                                    styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                    value="#{property.multiselectValue}"
+                                                    required="false"
+                                                    readonly="false">
+
+                                                    <f:ajax
+                                                        execute="@this"
+                                                        render="@all"
+                                                        event="change" />
+                                                    <f:selectItem
+                                                        itemValue=""
+                                                        itemLabel="#{msgs.bitteAuswaehlen}"
+                                                        itemDisabled="true" />
+                                                    <f:selectItems
+                                                        value="#{property.possibleValues}"
+                                                        var="var"
+                                                        itemLabel="#{var}"
+                                                        itemValue="#{var}" />
+                                                </h:selectOneMenu>
+
+                                                <div>
+                                                    <x:dataList
+                                                        value="#{property.multiselectSelectedValues}"
+                                                        var="selection">
+                                                        <h:commandLink action="#{property.removeSelectedValue(selection)}">
+                                                            <span class="badge margin-top-10">
+                                                                <h:outputText value="#{msgs[selection]}" />
+                                                            </span>
+                                                            <f:ajax
+                                                                execute="@this"
+                                                                render="@all" />
+                                                        </h:commandLink>
+                                                    </x:dataList>
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>
 
                                         <h:panelGroup
                                             layout="block"

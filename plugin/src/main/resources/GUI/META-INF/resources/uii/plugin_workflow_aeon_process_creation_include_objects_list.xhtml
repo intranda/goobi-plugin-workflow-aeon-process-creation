@@ -44,9 +44,7 @@
                     value="#{NavigationForm.workflowPlugin.recordList}">
                     <!-- iterate through items from transaction -->
                     <div class="box box-bordered">
-                        <div
-                            class="box-title #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}"
-                            >
+                        <div class="box-title #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}">
                             <h2 style="color: #{item.accepted?'white':'#333'}; max-width: 80%">
                                 <ui:repeat
                                     var="p"
@@ -64,9 +62,10 @@
                                     title="#{msgs.plugin_workflow_aeon_accept}"
                                     jsf:rendered="#{not item.disabled or LoginForm.hasRole(NavigationForm.workflowPlugin.cancellationSepcialRights)}"
                                     jsf:id="toggle-accept">
-                                    <i class="fa #{item.accepted == false?'fa-toggle-off':'fa-toggle-on'}
-                                    #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}" 
-                                    style="font-size: 25px"/>
+                                    <i
+                                        class="fa #{item.accepted == false?'fa-toggle-off':'fa-toggle-on'}
+                                    #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}"
+                                        style="font-size: 25px" />
                                     <f:ajax render=":itemForm" />
                                     <f:setPropertyActionListener
                                         target="#{item.accepted}"
@@ -91,15 +90,14 @@
                         </div>
                         <h:panelGroup
                             layout="block"
-                            styleClass="box-content nopadding #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}"
-                            >
-                            
+                            styleClass="box-content nopadding #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}">
+
                             <!--  render modal with existing processes and their details  -->
-                            <h:panelGroup
-                                rendered="#{item.duplicate}">
-                                <a href="#"
+                            <h:panelGroup rendered="#{item.duplicate}">
+                                <a
+                                    href="#"
                                     data-toggle="modal"
-                                    data-target="#myModal-#{item.id}"> 
+                                    data-target="#myModal-#{item.id}">
                                     <h:outputText
                                         id="titleInUse"
                                         style="padding: 10px;margin-bottom:0;display: block;border-bottom:1px solid #ddd"
@@ -115,7 +113,8 @@
                                 role="dialog"
                                 pt:aria-label="myModalLabel">
                                 <div
-                                    class="modal-dialog" style="width:800px;"
+                                    class="modal-dialog"
+                                    style="width: 800px;"
                                     role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -123,11 +122,13 @@
                                                 href="#"
                                                 class="btn btn-blue pull-right"
                                                 title="#{msgs.cancel}"
-                                                data-dismiss="modal"> <i class="fa fa-times"></i>
+                                                data-dismiss="modal">
+                                                <i class="fa fa-times"></i>
                                             </a>
-                                            <h4 class="modal-title"
+                                            <h4
+                                                class="modal-title"
                                                 id="head-#{item.id}">
-                                               <ui:repeat
+                                                <ui:repeat
                                                     var="p"
                                                     value="#{item.properties}">
                                                     <h:outputText
@@ -137,35 +138,38 @@
                                             </h4>
                                         </div>
                                         <div class="modal-body">
-                                        
-                                            <ui:repeat var="proc" value="#{item.existingProcesses}">
-                                                <h4 style="font-size:15px; margin-top:20px;">
+
+                                            <ui:repeat
+                                                var="proc"
+                                                value="#{item.existingProcesses}">
+                                                <h4 style="font-size: 15px; margin-top: 20px;">
                                                     <span>#{proc.title}</span>
                                                     <span class="font-light pull-right">#{proc.date}</span>
                                                 </h4>
-                                        
-                                                <h:dataTable id="props" 
-                                                    styleClass="table table-hover table-nomargin dataTable table-bordered responsive" 
+
+                                                <h:dataTable
+                                                    id="props"
+                                                    styleClass="table table-hover table-nomargin dataTable table-bordered responsive"
                                                     var="prop"
-                									value="#{proc.duplicateProperties}">
-                
+                                                    value="#{proc.duplicateProperties}">
+
                                                     <h:column>
                                                         <f:facet name="header">
                                                             <h:outputText value="#{msgs.titel}" />
                                                         </f:facet>
-                                                        <h:outputText value="#{prop.title}"/>
+                                                        <h:outputText value="#{prop.title}" />
                                                     </h:column>
-                
-                									<h:column>
-                										<f:facet name="header">
-                											<h:outputText value="#{msgs.wert}" />
-                										</f:facet>
-                										<h:outputText value="#{prop.value}"/>
-                									</h:column>
-                									
-                								</h:dataTable>
+
+                                                    <h:column>
+                                                        <f:facet name="header">
+                                                            <h:outputText value="#{msgs.wert}" />
+                                                        </f:facet>
+                                                        <h:outputText value="#{prop.value}" />
+                                                    </h:column>
+
+                                                </h:dataTable>
                                             </ui:repeat>
-                                            
+
                                         </div>
                                     </div>
                                 </div>
@@ -201,7 +205,6 @@
                                                 value="#{property.value}"
                                                 required="false"
                                                 readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                <!--                                                 validator="#{property.validateProperty}" -->
                                                 <f:ajax
                                                     execute="@this"
                                                     render="group"
@@ -253,7 +256,7 @@
                                 <h:panelGroup
                                     layout="block"
                                     styleClass="form-group"
-                                    rendered="#{property.type == 'radio'}  and (item.showDetails or property.displayAlways)}">
+                                    rendered="#{property.type == 'radio' and (item.showDetails or property.displayAlways)}">
                                     <div class="col-sm-3 control-label">
                                         <h:outputLabel
                                             for="radio"
@@ -263,7 +266,8 @@
                                         <h:selectOneRadio
                                             id="radio"
                                             styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                            value="#{property.value}" readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
+                                            value="#{property.value}"
+                                            readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                             <f:ajax
                                                 execute="@this"
                                                 render="@all"
@@ -289,7 +293,7 @@
                                 <h:panelGroup
                                     layout="block"
                                     styleClass="form-group"
-                                    rendered="#{property.type == 'select+text'}  and (item.showDetails or property.displayAlways)}">
+                                    rendered="#{property.type == 'select+text' and (item.showDetails or property.displayAlways)}">
                                     <div class="col-sm-3 control-label">
                                         <h:outputLabel
                                             for="selection"
@@ -297,40 +301,40 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <!-- select menu and additional text box -->
-                                            <h:selectOneMenu
-                                                id="selection"
-                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.value}"
-                                                readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="change" />
-                                                <f:selectItem
-                                                    itemValue=""
-                                                    itemLabel="#{msgs.bitteAuswaehlen}"
-                                                    itemDisabled="true" />
-                                                <f:selectItems
-                                                    value="#{property.selectValues}"
-                                                    var="var"
-                                                    itemLabel="#{var}"
-                                                    itemValue="#{var}" />
-                                            </h:selectOneMenu>
-                                            <x:inputText
-                                                style="margin-top: 5px;"
-                                                id="additionalInput"
-                                                forceId="false"
-                                                rendered="#{property.displayMap[property.value]}"
-                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.additionalValue}"
-                                                required="false"
-                                                readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="blur" />
-                                            </x:inputText>
-                                       <h:message
+                                        <h:selectOneMenu
+                                            id="selection"
+                                            styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                            value="#{property.value}"
+                                            readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
+                                            <f:ajax
+                                                execute="@this"
+                                                render="@all"
+                                                event="change" />
+                                            <f:selectItem
+                                                itemValue=""
+                                                itemLabel="#{msgs.bitteAuswaehlen}"
+                                                itemDisabled="true" />
+                                            <f:selectItems
+                                                value="#{property.selectValues}"
+                                                var="var"
+                                                itemLabel="#{var}"
+                                                itemValue="#{var}" />
+                                        </h:selectOneMenu>
+                                        <x:inputText
+                                            style="margin-top: 5px;"
+                                            id="additionalInput"
+                                            forceId="false"
+                                            rendered="#{property.displayMap[property.value]}"
+                                            styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                            value="#{property.additionalValue}"
+                                            required="false"
+                                            readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
+                                            <f:ajax
+                                                execute="@this"
+                                                render="@all"
+                                                event="blur" />
+                                        </x:inputText>
+                                        <h:message
                                             for="selection"
                                             showDetail="true"
                                             styleClass="help-inline font-danger" />
@@ -341,77 +345,65 @@
                                     </div>
                                 </h:panelGroup>
 
+
+
                                 <h:panelGroup
                                     layout="block"
                                     styleClass="form-group"
-                                    rendered="#{property.type == 'multiselect'}  and (item.showDetails or property.displayAlways)}">
+                                    rendered="#{property.type == 'multiselect' and (item.showDetails or property.displayAlways)}">
+
                                     <div class="col-sm-3 control-label">
                                         <h:outputLabel
                                             for="multiselect"
                                             value="#{property.title}" />
-                                         </div>   
-                                         
-                                         <!-- TODO 
-<div class="col-sm-9 metadata-row-area-content metadata-row-area-content-white">
-            <h:selectOneMenu
-                id="multiselect"
-                forceId="true"
-                 styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                 value="#{property.value}"
-                required="false"
-                readonly="false">
-                                                               
-                                              <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="change" />
-                                                <f:selectItem
-                                                    itemValue=""
-                                                    itemLabel="#{msgs.bitteAuswaehlen}"
-                                                    itemDisabled="true" />
-                                                <f:selectItems
-                                                    value="#{property.selectValues}"
-                                                    var="var"
-                                                    itemLabel="#{var}"
-                                                    itemValue="#{var}" />
-            </h:selectOneMenu>
+                                    </div>
+                                    <div class="col-sm-9 metadata-row-area-content metadata-row-area-content-white">
+                                        <h:selectOneMenu
+                                            id="multiselect"
+                                            forceId="true"
+                                            styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                            value="#{property.multiselectValue}"
+                                            required="false"
+                                            readonly="false">
 
-            <div>
-                <x:dataList
-                    value="#{selectedItems}"
-                    var="selection">
-                    <h:commandLink action="#{field.removeSelectedValue(selection)}">
-                        <span class="badge margin-top-10">
-                            <h:outputText value="#{msgs[selection]}" />
-                        </span>
-                        <f:ajax
-                            execute="@this"
-                            render=":#{ajaxid} :hierarchy" />
-                    </h:commandLink>
-                </x:dataList>
-            </div>
-            
-                                       <h:message
-                                            for="multiselect"
-                                            showDetail="true"
-                                            styleClass="help-inline font-danger" />
-                                        <h:outputText
-                                            styleClass="help-block font-light"
-                                            rendered="#{NavigationForm.showHelp}"
-                                            value="#{property.helpMessage}" />
-            
-        </div>
-                                
--->
+                                            <f:ajax
+                                                execute="@this"
+                                                render="@all"
+                                                event="change" />
+                                            <f:selectItem
+                                                itemValue=""
+                                                itemLabel="#{msgs.bitteAuswaehlen}"
+                                                itemDisabled="true" />
+                                            <f:selectItems
+                                                value="#{property.possibleValues}"
+                                                var="var"
+                                                itemLabel="#{var}"
+                                                itemValue="#{var}" />
+                                        </h:selectOneMenu>
+
+                                        <div>
+                                            <x:dataList
+                                                value="#{property.multiselectSelectedValues}"
+                                                var="selection">
+                                                <h:commandLink action="#{property.removeSelectedValue(selection)}">
+                                                    <span class="badge margin-top-10">
+                                                        <h:outputText value="#{msgs[selection]}" />
+                                                    </span>
+                                                    <f:ajax
+                                                        execute="@this"
+                                                        render="@all" />
+                                                </h:commandLink>
+                                            </x:dataList>
+                                        </div>
+                                    </div>
 
 
+                                    <h:outputText
+                                        styleClass="help-block font-light"
+                                        rendered="#{NavigationForm.showHelp}"
+                                        value="#{property.helpMessage}" />
 
-
-</h:panelGroup>
-
-
-
-
+                                </h:panelGroup>
                             </x:dataList>
 
                             <ui:fragment rendered="#{item.showDetails and NavigationForm.workflowPlugin.operationType eq 'creation'}">
@@ -458,7 +450,8 @@
 
                                                 <h:selectOneMenu
                                                     styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                    value="#{property.value}" readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
+                                                    value="#{property.value}"
+                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
                                                     <f:ajax
                                                         event="change"
                                                         render="group"
@@ -507,42 +500,89 @@
 
                                             </ui:fragment>
 
-                                        <!-- select menu and additional text box -->
-                                        <ui:fragment rendered="#{property.type == 'select+text'}">
-                                            <h:selectOneMenu
-                                                id="selection"
-                                                styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.value}" readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="change" />
-                                                <f:selectItem
-                                                    itemValue=""
-                                                    itemLabel="#{msgs.bitteAuswaehlen}"
-                                                    itemDisabled="true" />
-                                                <f:selectItems
-                                                    value="#{property.selectValues}"
-                                                    var="var"
-                                                    itemLabel="#{var}"
-                                                    itemValue="#{var}" />
-                                            </h:selectOneMenu>
-                                            <x:inputText
-                                                style="margin-top: 5px;"
-                                                id="additionalInput"
-                                                forceId="false"
-                                                rendered="#{property.displayMap[property.value]}"
-                                                styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.additionalValue}"
-                                                required="false"
-                                                readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="blur" />
-                                            </x:inputText>
-                                        </ui:fragment>
-                                        
+                                            <!-- select menu and additional text box -->
+                                            <ui:fragment rendered="#{property.type == 'select+text'}">
+                                                <h:selectOneMenu
+                                                    id="selection"
+                                                    styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                    value="#{property.value}"
+                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
+                                                    <f:ajax
+                                                        execute="@this"
+                                                        render="@all"
+                                                        event="change" />
+                                                    <f:selectItem
+                                                        itemValue=""
+                                                        itemLabel="#{msgs.bitteAuswaehlen}"
+                                                        itemDisabled="true" />
+                                                    <f:selectItems
+                                                        value="#{property.selectValues}"
+                                                        var="var"
+                                                        itemLabel="#{var}"
+                                                        itemValue="#{var}" />
+                                                </h:selectOneMenu>
+                                                <x:inputText
+                                                    style="margin-top: 5px;"
+                                                    id="additionalInput"
+                                                    forceId="false"
+                                                    rendered="#{property.displayMap[property.value]}"
+                                                    styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                    value="#{property.additionalValue}"
+                                                    required="false"
+                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
+                                                    <f:ajax
+                                                        execute="@this"
+                                                        render="@all"
+                                                        event="blur" />
+                                                </x:inputText>
+                                            </ui:fragment>
+
+
+                                            <h:panelGroup
+                                                layout="block"
+                                                id="hierarchy"
+                                                rendered="#{property.type == 'multiselect'}">
+                                                <div class="col-sm-9 metadata-row-area-content metadata-row-area-content-white">
+                                                    <h:selectOneMenu
+                                                        id="multiselect"
+                                                        forceId="true"
+                                                        styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
+                                                        value="#{property.multiselectValue}"
+                                                        required="false"
+                                                        readonly="false">
+
+                                                        <f:ajax
+                                                            execute="@this"
+                                                            render="@all"
+                                                            event="change" />
+                                                        <f:selectItem
+                                                            itemValue=""
+                                                            itemLabel="#{msgs.bitteAuswaehlen}"
+                                                            itemDisabled="true" />
+                                                        <f:selectItems
+                                                            value="#{property.possibleValues}"
+                                                            var="var"
+                                                            itemLabel="#{var}"
+                                                            itemValue="#{var}" />
+                                                    </h:selectOneMenu>
+
+                                                    <div>
+                                                        <x:dataList
+                                                            value="#{property.multiselectSelectedValues}"
+                                                            var="selection">
+                                                            <h:commandLink action="#{property.removeSelectedValue(selection)}">
+                                                                <span class="badge margin-top-10">
+                                                                    <h:outputText value="#{msgs[selection]}" />
+                                                                </span>
+                                                                <f:ajax
+                                                                    execute="@this"
+                                                                    render="@all" />
+                                                            </h:commandLink>
+                                                        </x:dataList>
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+
                                             <ui:fragment rendered="#{property.type == 'input-dont-overwrite' or property.type == 'radio-dont-overwrite' or property.type == 'select-dont-overwrite'}">
                                                 <x:outputText
                                                     id="output"
@@ -550,9 +590,8 @@
                                                     name="input"
                                                     styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''} greybackground"
                                                     value="#{property.value}"
-                                                    required="false"
-                                                   >
-                                            
+                                                    required="false">
+
                                                 </x:outputText>
                                             </ui:fragment>
 
@@ -580,64 +619,64 @@
                     </div>
                 </ui:repeat>
                 <!-- accept all / decline all buttons -->
-                
+
                 <ui:fragment rendered="#{NavigationForm.workflowPlugin.recordList != null and NavigationForm.workflowPlugin.recordList.size() > 0}">
-	                <div class="margin-top-10">
-	                
-	                    <button
-	                        jsf:id="declineAll"
-	                        class="btn margin-right-10 font-size-s"
-	                        jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
-	                        <i class="fa fa-toggle-off margin-right-5"></i>
-	                        <h:outputText
-	                            styleClass="font-size-s"
-	                            value="#{msgs.plugin_workflow_aeon_declineAll}" />
-	                        <f:ajax render=":itemForm" />
-	                    </button>
-	
-	                    <button
-	                        jsf:id="acceptAll"
-	                        class="btn margin-right-10 font-size-s"
-	                        jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
-	                        <i class="fa fa-toggle-on margin-right-5 #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'bcolor-creation' : 'bcolor-deletion'}"></i>
-	                        <h:outputText
-	                            styleClass="font-size-s"
-	                            value="#{msgs.plugin_workflow_aeon_acceptAll}" />
-	
-	                        <f:ajax render=":itemForm" />
-	                    </button>
-	
-	                </div>
-	                <div class="margin-top-10 pull-right">
-	
-	                    <button
-	                        class="btn btn-success font-size-s pull-right border-creation"
-	                        jsf:id="absenden"
-	                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
-	                        jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
-	                        <i class="fa fa-save margin-right-5"></i>
-	                        <h:outputText
-	                            styleClass="font-size-s"
-	                            value="#{msgs.plugin_workflow_aeon_createProcesses}" />
-	                    </button>
-	
-	                    <button
-	                        class="btn btn-danger font-size-s pull-right border-deletion"
-	                        jsf:id="disable"
-	                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
-	                        jsf:action="#{NavigationForm.workflowPlugin.cancelProcesses}">
-	                        <i class="fa fa-trash margin-right-5"></i>
-	                        <h:outputText
-	                            styleClass="font-size-s"
-	                            value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
-	                    </button>
-	                    
-	                </div>
+                    <div class="margin-top-10">
+
+                        <button
+                            jsf:id="declineAll"
+                            class="btn margin-right-10 font-size-s"
+                            jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
+                            <i class="fa fa-toggle-off margin-right-5"></i>
+                            <h:outputText
+                                styleClass="font-size-s"
+                                value="#{msgs.plugin_workflow_aeon_declineAll}" />
+                            <f:ajax render=":itemForm" />
+                        </button>
+
+                        <button
+                            jsf:id="acceptAll"
+                            class="btn margin-right-10 font-size-s"
+                            jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
+                            <i class="fa fa-toggle-on margin-right-5 #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'bcolor-creation' : 'bcolor-deletion'}"></i>
+                            <h:outputText
+                                styleClass="font-size-s"
+                                value="#{msgs.plugin_workflow_aeon_acceptAll}" />
+
+                            <f:ajax render=":itemForm" />
+                        </button>
+
+                    </div>
+                    <div class="margin-top-10 pull-right">
+
+                        <button
+                            class="btn btn-success font-size-s pull-right border-creation"
+                            jsf:id="absenden"
+                            jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
+                            jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
+                            <i class="fa fa-save margin-right-5"></i>
+                            <h:outputText
+                                styleClass="font-size-s"
+                                value="#{msgs.plugin_workflow_aeon_createProcesses}" />
+                        </button>
+
+                        <button
+                            class="btn btn-danger font-size-s pull-right border-deletion"
+                            jsf:id="disable"
+                            jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
+                            jsf:action="#{NavigationForm.workflowPlugin.cancelProcesses}">
+                            <i class="fa fa-trash margin-right-5"></i>
+                            <h:outputText
+                                styleClass="font-size-s"
+                                value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
+                        </button>
+
+                    </div>
                 </ui:fragment>
-                
+
             </h:form>
         </div>
-        
-        
+
+
     </composite:implementation>
 </ui:composition>
