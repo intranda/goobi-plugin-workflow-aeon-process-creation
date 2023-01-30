@@ -17,98 +17,98 @@
 
         <style>
 .form-control.invalid {
-    border: 1px solid #E8860C;
+	border: 1px solid #E8860C;
 }
 
 .form-control.invalid.strict {
-    border-color: #ff4433;
+	border-color: #ff4433;
 }
 
 .form-control.differFromDefault {
-    border: 1px solid #368ee0;
+	border: 1px solid #368ee0;
 }
 
 .warning-icon {
-    position: absolute;
-    right: 2px;
-    top: 1px;
-    background: #E8860C;
-    padding: 2px;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    text-align: center;
-    color: white;
+	position: absolute;
+	right: 2px;
+	top: 1px;
+	background: #E8860C;
+	padding: 2px;
+	border-radius: 50%;
+	width: 16px;
+	height: 16px;
+	text-align: center;
+	color: white;
 }
 
 .warning-icon.error {
-    background: #ff4433;
+	background: #ff4433;
 }
 
 .warning-icon.check {
-    background: #368ee0;
-    padding: 2px;
-    font-size: 10px;
+	background: #368ee0;
+	padding: 2px;
+	font-size: 10px;
 }
 
 .validation-message {
-    color: #E8860C;
-    padding-top: 5px;
+	color: #E8860C;
+	padding-top: 5px;
 }
 
 .font-danger.validation-message {
-    color: #ff4433;
+	color: #ff4433;
 }
 
 .fa-toggle-on.color-creation {
-    color: white;
+	color: white;
 }
 
 .fa-angle-up.accepted {
-    color: white;
+	color: white;
 }
 
 .fa-angle-down.accepted {
-    color: white;
+	color: white;
 }
 
 .fa-toggle-on.color-deletion {
-    color: white;
+	color: white;
 }
 
 .fa-toggle-on.bcolor-creation {
-    color: green;
+	color: green;
 }
 
 .fa-toggle-on.bcolor-deletion {
-    color: #E51400;
+	color: #E51400;
 }
 
 .border-creation {
-    border-color: green !important;
-    background-color: green !important;
+	border-color: green !important;
+	background-color: green !important;
 }
 
 .border-deletion {
-    border-color: #E51400 !important;
-    background-color: #E51400;
+	border-color: #E51400 !important;
+	background-color: #E51400;
 }
 
 .border-unselect {
-    border-color: #666 !important;
+	border-color: #666 !important;
 }
 
 .btn.toggle {
-    background: none;
+	background: none;
 }
 
 input[type="radio"] {
-    margin-left: 5px;
-    margin-right: 5px;
+	margin-left: 5px;
+	margin-right: 5px;
 }
 
 .greybackground {
-    background-color: #eee;
+	background-color: #eee;
 }
 </style>
 
@@ -118,7 +118,8 @@ input[type="radio"] {
                 styleClass="alert alert-danger alert-dismissable margin-bottom-10 margin-top-10"
                 value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation" />
         </h:panelGroup>
-        <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'request'}">
+        <h:panelGroup
+            rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'request'}">
             <div class="row">
                 <div class="col-sm-6">
                     <!--  Transaction Request input Box  -->
@@ -216,7 +217,8 @@ input[type="radio"] {
                                     <button
                                         jsf:id="sendRequest"
                                         class="btn btn-primary font-size-s"
-                                        jsf:action="#{NavigationForm.workflowPlugin.sendRequest}">#{NavigationForm.workflowPlugin.operationType == 'creation' ? msgs.plugin_workflow_aeon_startRequest : msgs.plugin_workflow_aeon_cancelRequest}</button>
+                                        jsf:action="#{NavigationForm.workflowPlugin.sendRequest}">#{NavigationForm.workflowPlugin.operationType
+                                        == 'creation' ? msgs.plugin_workflow_aeon_startRequest : msgs.plugin_workflow_aeon_cancelRequest}</button>
                                 </div>
                             </h:form>
                         </div>
@@ -236,7 +238,8 @@ input[type="radio"] {
             </div>
         </h:panelGroup>
 
-        <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'summary'}">
+        <h:panelGroup
+            rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'summary'}">
             <div class="row">
                 <div class="col-sm-6">
                     <ui:include src="plugin_workflow_aeon_process_creation_include_created_objects_list.xhtml" />
@@ -254,8 +257,33 @@ input[type="radio"] {
                                 <h:form id="summaryForm">
                                     <div class="box-content">
                                         <ul class="action-ul">
+                                            <!-- back -->
                                             <li class="action-li">
                                                 <button
+                                                    class="expandbutton"
+                                                    jsf:id="back"
+                                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}"
+                                                    jsf:action="#{NavigationForm.workflowPlugin.previousPage}">
+                                                    <span class="btn margin-right-10 fa fa-undo fa-lg width-40" />
+                                                    <h:outputText value="#{msgs.zurueck}" />
+                                                </button>
+                                            </li>
+                                            <!-- save -->
+                                            <li class="action-li">
+                                                <button
+                                                    class="expandbutton"
+                                                    jsf:id="createProcess"
+                                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}"
+                                                    jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
+                                                    <span class="btn margin-right-10 fa fa-save fa-lg width-40" />
+                                                    <h:outputText value="#{msgs.plugin_workflow_aeon_createProcesses}" />
+                                                </button>
+                                            </li>
+
+                                            <!-- docket -->
+                                            <li class="action-li">
+                                                <button
+                                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}"
                                                     jsf:id="dockets"
                                                     class="expandbutton"
                                                     jsf:action="#{NavigationForm.workflowPlugin.generateDockets}">
@@ -263,17 +291,17 @@ input[type="radio"] {
                                                     <h:outputText value="#{msgs.process_generateDocket}" />
                                                 </button>
                                             </li>
+
+                                            <!-- start again -->
                                             <li class="action-li">
                                                 <button
+                                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}"
                                                     jsf:id="startNewRequest"
                                                     class="expandbutton"
                                                     jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">
                                                     <span class="btn margin-right-10 fa fa-file-o fa-lg width-40" />
                                                     <h:outputText value="#{msgs.plugin_workflow_aeon_startNewRequest}" />
                                                 </button>
-
-
-
                                             </li>
                                         </ul>
                                     </div>

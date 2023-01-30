@@ -173,6 +173,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @Setter
     private String cancellationSepcialRights;
 
+    @Getter
+    private String overviewMode = "";
+
     /*
      * Sends a Request to the goobi api (RestTest.java) and
      * recieves JSON String as response which is parsed into the AeonTransaction object
@@ -514,10 +517,18 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         input = "";
         screenName = "request";
         operationType = "creation";
+        overviewMode = "";
     }
 
-    public void createProcesses() {
+    public void nextPage() {
+        // if validation fails, stay on first page
+        if (validateSelection()) {
+            screenName = "summary";
+            overviewMode = "";
+        }
+    }
 
+    private boolean validateSelection() {
         // check if at least one record was selected
 
         int numberOfRecordsToCreate = 0;
@@ -528,7 +539,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
         if (numberOfRecordsToCreate == 0) {
             Helper.setFehlerMeldung("plugin_workflow_aeon_nothing_selected");
-            return;
+            return false;
         }
 
         //  validate properties, details, process values
@@ -537,7 +548,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             if (StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null || prop.getShippingOption().equals(shippingOption)) {
                 if (!prop.isValid() && prop.isStrictValidation()) {
                     Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
-                    return;
+                    return false;
                 }
             }
         }
@@ -546,7 +557,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 for (AeonProperty prop : rec.getProcessProperties()) {
                     if (!prop.isValid() && prop.isStrictValidation()) {
                         Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
-                        return;
+                        return false;
                     }
                 }
             }
@@ -555,8 +566,21 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         for (AeonProperty prop : transactionFields) {
             if (!prop.isValid()) {
                 Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_transaction_fields");
-                return;
+                return false;
             }
+        }
+
+        return true;
+    }
+
+    public void previousPage() {
+        screenName = "request";
+    }
+
+    public void createProcesses() {
+
+        if (!validateSelection()) {
+            return;
         }
 
         Process processTemplate = ProcessManager.getProcessByExactTitle(selectedWorkflow);
@@ -740,6 +764,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             }
         }
         screenName = "summary";
+        overviewMode = "saved";
     }
 
     /**
