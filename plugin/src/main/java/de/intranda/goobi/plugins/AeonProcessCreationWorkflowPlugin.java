@@ -190,7 +190,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
             Map<String, Object> map = null;
 
-            if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
+            if ("1234567890".equals(this.input)) { //(JUST FOR TESTING: checks if input is 1234567890)
                 try {
                     map = client.target("http://localhost:8080/goobi/api/")
                             .path("testingRest")
@@ -202,31 +202,29 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     log.error(e + " " + e.getMessage());
                 }
 
-            } else {
-                if (StringUtils.isNotBlank(apiKey)) {
-                    try {
-                        map = client.target(apiUrl)
-                                .path("Requests")
-                                .path(input)
-                                .request(MediaType.APPLICATION_JSON)
-                                .header("X-AEON-API-KEY", apiKey)
-                                .get(Map.class);
-                    } catch (Exception e) {
-                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_identifier_not_found") + ": " + e.getMessage());
-                        return;
-                    }
-                } else {
-                    LoginResponse res = client.target(apiUrl)
-                            .path("Token")
-                            .request(MediaType.APPLICATION_JSON)
-                            .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
+            } else if (StringUtils.isNotBlank(apiKey)) {
+                try {
                     map = client.target(apiUrl)
                             .path("Requests")
                             .path(input)
                             .request(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "BEARER " + res.getAccessToken())
+                            .header("X-AEON-API-KEY", apiKey)
                             .get(Map.class);
+                } catch (Exception e) {
+                    Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_identifier_not_found") + ": " + e.getMessage());
+                    return;
                 }
+            } else {
+                LoginResponse res = client.target(apiUrl)
+                        .path("Token")
+                        .request(MediaType.APPLICATION_JSON)
+                        .post(Entity.entity(user, MediaType.APPLICATION_JSON), LoginResponse.class);
+                map = client.target(apiUrl)
+                        .path("Requests")
+                        .path(input)
+                        .request(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "BEARER " + res.getAccessToken())
+                        .get(Map.class);
             }
             if (map != null) {
                 try {
@@ -311,11 +309,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
 
                 opacPlugin = (IJsonPlugin) myImportOpac;
-                if (this.input.equals("1234567890")) { //(JUST FOR TESTING: checks if input is 1234567890)
+                if ("1234567890".equals(this.input)) { //(JUST FOR TESTING: checks if input is 1234567890)
                     opacPlugin.setTestMode(true);
                 } else {
                     for (ISearchField sf : opacPlugin.getSearchFieldList()) {
-                        if (sf.getId().equals("Barcode")) {
+                        if ("Barcode".equals(sf.getId())) {
                             sf.setText(catalogueIdentifier);
                         }
                     }
@@ -473,8 +471,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     }
 
     private void extractProcessValues(Process other, AeonProperty aeonProperty) {
-        // TODO multiselect
-
         switch (aeonProperty.getPlace()) {
             case "process":
                 for (Processproperty processProperty : other.getEigenschaften()) {
@@ -736,7 +732,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
                 // start any open automatic tasks
                 for (Step s : process.getSchritteList()) {
-                    if (s.getBearbeitungsstatusEnum().equals(StepStatus.OPEN) && s.isTypAutomatisch()) {
+                    if (StepStatus.OPEN.equals(s.getBearbeitungsstatusEnum()) && s.isTypAutomatisch()) {
                         ScriptThreadWithoutHibernate myThread = new ScriptThreadWithoutHibernate(s);
                         myThread.startOrPutToQueue();
                     }
@@ -858,16 +854,15 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         this.selectedWorkflow = selectedWorkflow;
     }
 
-    public void updateProperties(String propertyName, String oldValue, String newValue) {
-        for (AeonRecord record : recordList) {
-            for (AeonProperty prop : record.getProcessProperties()) {
+    public void updateProperties(String propertyName, String oldValue, String newValue, String additionalValue) {
+        for (AeonRecord aeonRecord : recordList) {
+            for (AeonProperty prop : aeonRecord.getProcessProperties()) {
                 if (prop.getTitle().equals(propertyName)) {
                     // configure new default value
                     prop.setDefaultValue(newValue);
                     // update property value
-                    //                    if (oldValue.equals(prop.getValue())) {
                     prop.setValue(newValue);
-                    //                    }
+                    prop.setAdditionalValue(additionalValue);
                     break;
                 }
             }

@@ -113,7 +113,7 @@ public class AeonProperty {
         validationExpression = config.getString("validation", "");
         strictValidation = config.getBoolean("validation/@strict", false);
         validationErrorMessage = config.getString("message", "");
-        if (type.equals("vocabulary")) {
+        if ("vocabulary".equals(type)) {
             vocabularyName = config.getString("vocabularyName", "");
             vocabularyField = Arrays.asList(config.getStringArray("vocabularyField"));
             initializeVocabulary();
@@ -180,16 +180,14 @@ public class AeonProperty {
     public boolean isValid() {
 
         if (StringUtils.isNotBlank(validationExpression)) {
-            if (!displayMap.isEmpty() && StringUtils.isNotBlank(value) && displayMap.get(value)) {
+            if (!displayMap.isEmpty() && StringUtils.isNotBlank(value) && displayMap.get(value) != null) {
                 if (!additionalValue.matches(validationExpression)) {
                     return false;
                 }
-            } else {
-                if (StringUtils.isBlank(value)) {
-                    return false;
-                } else if (!value.matches(validationExpression)) {
-                    return false;
-                }
+            } else if (StringUtils.isBlank(value)) {
+                return false;
+            } else if (!value.matches(validationExpression)) {
+                return false;
             }
         }
         return true;
@@ -211,9 +209,16 @@ public class AeonProperty {
 
     public void setValue(String value) {
         if (!overwriteMainField) {
-            plugin.updateProperties(title, this.value, value);
+            plugin.updateProperties(title, this.value, value, additionalValue);
         }
         this.value = value;
+    }
+
+    public void setAdditionalValue(String additionalValue) {
+        if (!overwriteMainField) {
+            plugin.updateProperties(title, this.value, value, additionalValue);
+        }
+        this.additionalValue = additionalValue;
     }
 
     public String getExportValue() {
