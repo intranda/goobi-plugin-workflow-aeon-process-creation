@@ -180,7 +180,7 @@ public class AeonProperty {
     public boolean isValid() {
 
         if (StringUtils.isNotBlank(validationExpression)) {
-            if (!displayMap.isEmpty() && StringUtils.isNotBlank(value) && displayMap.get(value) != null) {
+            if (!displayMap.isEmpty() && StringUtils.isNotBlank(value) && displayMap.get(value).booleanValue()) {
                 if (!additionalValue.matches(validationExpression)) {
                     return false;
                 }
