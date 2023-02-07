@@ -466,6 +466,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 try {
                     MySQLHelper.closeConnection(connection);
                 } catch (SQLException e) {
+                    // do nothing
                 }
             }
         }
@@ -545,11 +546,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         //  validate properties, details, process values
 
         for (AeonProperty prop : propertyFields) {
-            if (StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null || prop.getShippingOption().equals(shippingOption)) {
-                if (!prop.isValid() && prop.isStrictValidation()) {
-                    Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
-                    return false;
-                }
+            if (StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null
+                    || prop.getShippingOption().equals(shippingOption) && !prop.isValid() && prop.isStrictValidation()) {
+                Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
+                return false;
             }
         }
         for (AeonRecord rec : recordList) {
@@ -645,6 +645,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                                     case "template":
                                         bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), value);
                                         break;
+                                    default:
+                                        break;
                                 }
                             }
                         } else {
@@ -666,6 +668,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                                     case "template":
                                         bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), value);
                                         break;
+                                    default:
+                                        break;
                                 }
                             }
                         }
@@ -682,6 +686,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                                 break;
                             case "template":
                                 bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getExportValue());
+                                break;
+                            default:
                                 break;
                         }
                     }
@@ -716,6 +722,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                                 bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), prop.getPropertyName(), prop.getExportValue());
                             }
                             break;
+                        default:
+                            break;
                     }
 
                 }
@@ -733,11 +741,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     if (nextFreeId > 999) {
                         orderNumber = String.valueOf(nextFreeId);
                     } else if (nextFreeId > 99) {
-                        orderNumber = "0" + String.valueOf(nextFreeId);
+                        orderNumber = "0" + nextFreeId;
                     } else if (nextFreeId > 9) {
-                        orderNumber = "00" + String.valueOf(nextFreeId);
+                        orderNumber = "00" + nextFreeId;
                     } else {
-                        orderNumber = "000" + String.valueOf(nextFreeId);
+                        orderNumber = "000" + nextFreeId;
                     }
 
                     process.setTitel(rec.getProcessTitle() + "_" + orderNumber);
@@ -796,8 +804,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         // process cancellation
         transactionFieldName = config.getString("/processCancellation/transactionFieldName");
-        //        cancellationPropertyName = config.getString("/processCancellation/propertyName");
-        //        cancellationPropertyValue = config.getString("/processCancellation/propertyValue");
         cancellationProjectName = config.getString("/processCancellation/projectName");
         cancellationStepName = config.getString("/processCancellation/stepName");
         cancellationSepcialRights = config.getString("/processCancellation/specialRights");
@@ -817,8 +823,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         }
 
         requiredFields = Arrays.asList(config.getStringArray("/requiredFields/field"));
-        //        this.transactionFields = config.configurationsAt("/transaction/field");
-        //        this.processFields = config.configurationsAt("/processes/field");
 
         propertyFields.clear();
         List<HierarchicalConfiguration> properties = config.configurationsAt("/properties/field");
@@ -909,16 +913,15 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         List<Process> processList = ProcessManager.getProcesses("prozesse.titel", sql.toString());
 
         for (Process process : processList) {
-            //                 Process other = ProcessManager.getProcessByExactTitle(generatedTitle);
-            AeonRecord record = new AeonRecord();
-            record.setProcessTitle(process.getTitel());
-            record.setExistingProcess(process);
+            AeonRecord aeonRecord = new AeonRecord();
+            aeonRecord.setProcessTitle(process.getTitel());
+            aeonRecord.setExistingProcess(process);
 
             for (AeonProperty p : recordFields) {
                 AeonProperty prop = p.cloneProperty();
                 prop.setOverwriteMainField(true);
                 extractProcessValues(process, prop);
-                record.getProperties().add(prop);
+                aeonRecord.getProperties().add(prop);
 
             }
             for (AeonProperty property : propertyFields) {
@@ -926,7 +929,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 aeonProperty.setOverwriteMainField(true);
                 extractProcessValues(process, aeonProperty);
 
-                record.getProcessProperties().add(aeonProperty);
+                aeonRecord.getProcessProperties().add(aeonProperty);
             }
 
             //            Orders that are before condition assessment step - cancel and don’t retain in Goobi.
@@ -934,62 +937,40 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             //            Public Services could cancel through Aeon TN plugin before condition assessment.
             //            Only Preservation can cancel after condition assessment
 
-            record.setDisabled(true);
+            aeonRecord.setDisabled(true);
 
             try {
-                org.goobi.beans.User user = Helper.getCurrentUser();
-                if (user != null) {
-                    if (user.getAllUserRoles().contains(cancellationSepcialRights)) {
-                        record.setDisabled(false);
-                    }
+                org.goobi.beans.User u = Helper.getCurrentUser();
+                if (u != null && u.getAllUserRoles().contains(cancellationSepcialRights)) {
+                    aeonRecord.setDisabled(false);
                 }
 
             } catch (Exception e) {
                 log.error(e);
             }
 
-            // old implementation checks, if a property is set
-            //            if (process.getEigenschaften() != null) {
-            //                for (Processproperty pp : process.getEigenschaften()) {
-            //                    if (pp.getTitel().equals(cancellationPropertyName) && cancellationPropertyValue.equals(pp.getWert())) {
-            //                        record.setDisabled(false);
-            //                        break;
-            //                    }
-            //                }
-            //            }
-
             // new implementation checks, if a certain step is finished
             // if yes, only a special user group is allowed to cancel items
 
             for (Step step : process.getSchritte()) {
                 if (step.getTitel().equals(cancellationStepName) && step.getBearbeitungsstatusEnum() != StepStatus.DONE) {
-                    record.setDisabled(false);
-                    record.setDeletable(true);
+                    aeonRecord.setDisabled(false);
+                    aeonRecord.setDeletable(true);
                     break;
                 }
             }
 
-            recordList.add(record);
-
-            //        ### Allow cancelation of items
-            //        - should happen in the same AEON Goobi interface (e.g. on the right side)
-            //        - User shall:
-            //          - type in TN number
-            //          - display all the items, that were part of the request
-            //          - User selects the ones to be cancelled
-            //          - allow the cancelation only if specific property with name `Can be cancelled` is set to `true`
-            //        - _ToDo Yale:_ Decide if deletion or deactivation
-            //        - _ToDo intranda:_ develop this
-
+            recordList.add(aeonRecord);
         }
 
         if (!recordList.isEmpty()) {
+            Collections.sort(recordList);
             setRequestSuccess(true);
         }
     }
 
     public void cancelProcesses() {
-        for (AeonRecord record : recordList) {
+        for (AeonRecord aeonRecord : recordList) {
 
             Project project = null;
             try {
@@ -999,11 +980,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             }
             if (project == null) {
                 Helper.setFehlerMeldung("keinProjektAngegeben");
+                return;
             }
             // move selected processes to configured project
-            if (!record.isDisabled() && record.isAccepted()) {
-                Process process = record.getExistingProcess();
-                if (record.isDeletable()) {
+            if (!aeonRecord.isDisabled() && aeonRecord.isAccepted()) {
+                Process process = aeonRecord.getExistingProcess();
+                if (aeonRecord.isDeletable()) {
                     ProcessManager.deleteProcess(process);
                 } else {
                     process.setProjekt(project);
@@ -1015,7 +997,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         resetRequest();
     }
 
-    private AeonRecord popupItem;
+    private transient AeonRecord popupItem;
 
     public AeonRecord getPopupItem() {
         return popupItem;
