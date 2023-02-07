@@ -58,13 +58,13 @@
                                 layout="block"
                                 styleClass="box-content nopadding"
                                 style="border-color: #666">
-                                                            <!-- future process title -->
-                            <intranda:formOutputText
-                                label="#{msgs.prozessTitel}" 
-                                field="#{item.processTitle}" 
-                                name="futureTitle" 
-                                fieldStyle="form-control"/>
-                                
+                                <!-- future process title -->
+                                <intranda:formOutputText
+                                    label="#{msgs.prozessTitel}"
+                                    field="#{item.processTitle}"
+                                    name="futureTitle"
+                                    fieldStyle="form-control" />
+
                                 <x:dataList
                                     value="#{item.properties}"
                                     var="property">
@@ -93,6 +93,35 @@
                                     </h:panelGroup>
 
                                 </x:dataList>
+
+                                <x:dataList
+                                    value="#{item.processProperties}"
+                                    var="property">
+                                    <h:panelGroup
+                                        layout="block"
+                                        styleClass="form-group"
+                                        rendered="#{item.showDetails or property.displayAlways}">
+                                        <h:outputLabel
+                                            for="propOut"
+                                            styleClass="control-label col-sm-3"
+                                            value="#{property.title}" />
+                                        <div class="col-sm-9">
+                                            <x:outputText
+                                                id="propOut"
+                                                style="border:0px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                                forceId="true"
+                                                styleClass="form-control"
+                                                value="#{property.value}"
+                                                title="#{property.value}" />
+                                            <h:outputText
+                                                styleClass="help-block font-light"
+                                                rendered="#{NavigationForm.showHelp}"
+                                                value="#{property.helpMessage}" />
+                                        </div>
+                                    </h:panelGroup>
+                                </x:dataList>
+
+
                             </h:panelGroup>
                         </div>
                     </ui:fragment>
