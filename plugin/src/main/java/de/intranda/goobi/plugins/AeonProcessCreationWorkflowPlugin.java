@@ -546,8 +546,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         //  validate properties, details, process values
 
         for (AeonProperty prop : propertyFields) {
-            if (StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null
-                    || prop.getShippingOption().equals(shippingOption) && !prop.isValid() && prop.isStrictValidation()) {
+            if ((StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null || prop.getShippingOption().equals(shippingOption))
+                    && (!prop.isValid() && prop.isStrictValidation())) {
                 Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
                 return false;
             }
@@ -771,6 +771,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
             }
         }
+        Helper.setMeldung("plugin_workflow_aeon_processesCreated");
+
         screenName = "summary";
         overviewMode = "saved";
     }
@@ -883,7 +885,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         this.selectedWorkflow = selectedWorkflow;
     }
 
-    public void updateProperties(String propertyName, String oldValue, String newValue, String additionalValue) {
+    public void updateProperties(String propertyName, String oldValue, String newValue, String additionalValue) { //NOSONAR
         for (AeonRecord aeonRecord : recordList) {
             for (AeonProperty prop : aeonRecord.getProcessProperties()) {
                 if (prop.getTitle().equals(propertyName)) {
