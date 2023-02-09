@@ -42,8 +42,20 @@ public class AeonRecord implements Comparable<AeonRecord> {
 
     @Override
     public int compareTo(AeonRecord other) {
-        String orderField =  recordData.get(ORDER_PROPERTY);
-        String otherOrderField =  other.getRecordData().get(ORDER_PROPERTY);
+
+        // comparing cancel records
+        if (recordData == null && other.getRecordData() == null) {
+            return processTitle.compareTo(other.getProcessTitle());
+        }
+
+        String orderField = "";
+        String otherOrderField = "";
+        if (recordData != null) {
+            orderField = recordData.get(ORDER_PROPERTY);
+        }
+        if (other.getRecordData() != null) {
+            otherOrderField = other.getRecordData().get(ORDER_PROPERTY);
+        }
 
         // if both fields are empty, the order is the same
         if (StringUtils.isBlank(orderField) && StringUtils.isBlank(otherOrderField)) {
