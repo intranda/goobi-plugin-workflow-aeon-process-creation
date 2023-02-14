@@ -258,51 +258,56 @@ input[type="radio"] {
                                     <div class="box-content">
                                         <ul class="action-ul">
                                             <!-- back -->
-                                            <li class="action-li">
-                                                <button
-                                                    class="expandbutton"
-                                                    jsf:id="back"
-                                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}"
-                                                    jsf:action="#{NavigationForm.workflowPlugin.previousPage}">
-                                                    <span class="btn margin-right-10 fa fa-undo fa-lg width-40" />
-                                                    <h:outputText value="#{msgs.zurueck}" />
-                                                </button>
-                                            </li>
+                                            <ui:fragment rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}">
+	                                            <li class="action-li">
+	                                                <button
+	                                                    class="expandbutton"
+	                                                    jsf:id="back"
+	                                                    jsf:action="#{NavigationForm.workflowPlugin.previousPage}">
+	                                                    <span class="btn margin-right-10 fa fa-undo fa-lg width-40" />
+	                                                    <h:outputText value="#{msgs.zurueck}" />
+	                                                </button>
+	                                            </li>
+                                            </ui:fragment>
+                                            
                                             <!-- save -->
-                                            <li class="action-li">
-                                                <button
-                                                    class="expandbutton"
-                                                    jsf:id="createProcess"
-                                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}"
-                                                    jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
-                                                    <span class="btn margin-right-10 fa fa-save fa-lg width-40" />
-                                                    <h:outputText value="#{msgs.plugin_workflow_aeon_createProcesses}" />
-                                                </button>
-                                            </li>
+                                            <ui:fragment rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}">
+	                                            <li class="action-li">
+	                                                <button
+	                                                    class="expandbutton"
+	                                                    jsf:id="createProcess"
+	                                                    jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
+	                                                    <span class="btn margin-right-10 fa fa-save fa-lg width-40" />
+	                                                    <h:outputText value="#{msgs.plugin_workflow_aeon_createProcesses}" />
+	                                                </button>
+	                                            </li>
+                                            </ui:fragment>
 
                                             <!-- docket -->
-                                            <li class="action-li">
-                                                <button
-                                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}"
-                                                    jsf:id="dockets"
-                                                    class="expandbutton"
-                                                    jsf:action="#{NavigationForm.workflowPlugin.generateDockets}">
-                                                    <span class="btn margin-right-10 fa fa-print fa-lg width-40" />
-                                                    <h:outputText value="#{msgs.process_generateDocket}" />
-                                                </button>
-                                            </li>
+                                            <ui:fragment rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}">
+	                                            <li class="action-li">
+	                                                <button
+	                                                    jsf:id="dockets"
+	                                                    class="expandbutton"
+	                                                    jsf:action="#{NavigationForm.workflowPlugin.generateDockets}">
+	                                                    <span class="btn margin-right-10 fa fa-print fa-lg width-40" />
+	                                                    <h:outputText value="#{msgs.process_generateDocket}" />
+	                                                </button>
+	                                            </li>
+                                            </ui:fragment>
 
                                             <!-- start again -->
-                                            <li class="action-li">
-                                                <button
-                                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}"
-                                                    jsf:id="startNewRequest"
-                                                    class="expandbutton"
-                                                    jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">
-                                                    <span class="btn margin-right-10 fa fa-file-o fa-lg width-40" />
-                                                    <h:outputText value="#{msgs.plugin_workflow_aeon_startNewRequest}" />
-                                                </button>
-                                            </li>
+                                            <ui:fragment rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}">
+	                                            <li class="action-li">
+	                                                <button
+	                                                    jsf:id="startNewRequest"
+	                                                    class="expandbutton"
+	                                                    jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">
+	                                                    <span class="btn margin-right-10 fa fa-file-o fa-lg width-40" />
+	                                                    <h:outputText value="#{msgs.plugin_workflow_aeon_startNewRequest}" />
+	                                                </button>
+	                                            </li>
+                                            </ui:fragment>
                                         </ul>
                                     </div>
 
