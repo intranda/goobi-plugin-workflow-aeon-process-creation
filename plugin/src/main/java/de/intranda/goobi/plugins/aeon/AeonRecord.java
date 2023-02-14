@@ -6,13 +6,16 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.goobi.beans.Process;
+import org.goobi.beans.Processproperty;
 
 import lombok.Data;
 
 @Data
 public class AeonRecord implements Comparable<AeonRecord> {
 
-    private static final String ORDER_PROPERTY = "containerGrouping";
+    private static final String JSON_ORDER_PROPERTY = "containerGrouping";
+    private static final String PROCESS_ORDER_PROPERTY = "Box and Folder";
+
 
     private List<AeonProperty> properties = new ArrayList<>();
 
@@ -45,16 +48,29 @@ public class AeonRecord implements Comparable<AeonRecord> {
 
         // comparing cancel records
         if (recordData == null && other.getRecordData() == null) {
-            return processTitle.compareTo(other.getProcessTitle());
+            String orderField = "";
+            String otherOrderField = "";
+            for (Processproperty pp:  existingProcess.getEigenschaften()) {
+                if (PROCESS_ORDER_PROPERTY.equals(pp.getTitel())) {
+                    orderField=pp.getWert();
+                }
+            }
+            for (Processproperty pp:  other.getExistingProcess().getEigenschaften()) {
+                if (PROCESS_ORDER_PROPERTY.equals(pp.getTitel())) {
+                    otherOrderField=pp.getWert();
+                }
+            }
+            return orderField.compareTo(otherOrderField);
         }
 
+        // compare new records
         String orderField = "";
         String otherOrderField = "";
         if (recordData != null) {
-            orderField = recordData.get(ORDER_PROPERTY);
+            orderField = recordData.get(JSON_ORDER_PROPERTY);
         }
         if (other.getRecordData() != null) {
-            otherOrderField = other.getRecordData().get(ORDER_PROPERTY);
+            otherOrderField = other.getRecordData().get(JSON_ORDER_PROPERTY);
         }
 
         // if both fields are empty, the order is the same
