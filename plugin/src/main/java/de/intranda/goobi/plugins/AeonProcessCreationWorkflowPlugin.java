@@ -381,7 +381,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
                         //  check for duplicates in active projects, load the processes with the same transaction number
                         List<Process> processes =
-                                ProcessManager.getProcesses("prozesse.erstellungsdatum desc", "prozesse.titel like \"%" + generatedTitle + "%\"");
+                                ProcessManager.getProcesses("prozesse.erstellungsdatum desc", "prozesse.titel like \"%" + generatedTitle + "%\"",
+                                        null);
 
                         for (Process other : processes) {
                             if (!other.getProjekt().getProjectIsArchived().booleanValue()) {
@@ -835,7 +836,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         String sql = FilterHelper.criteriaBuilder("", true, null, null, null, true, false);
         // load all process templates
-        List<Process> templates = ProcessManager.getProcesses("prozesse.titel", sql);
+        List<Process> templates = ProcessManager.getProcesses("prozesse.titel", sql, null);
         for (Process p : templates) {
             possibleWorkflows.add(p.getTitel());
         }
@@ -912,7 +913,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         recordList.clear();
 
-        List<Process> processList = ProcessManager.getProcesses("prozesse.titel", sql.toString());
+        List<Process> processList = ProcessManager.getProcesses("prozesse.titel", sql.toString(), null);
 
         for (Process process : processList) {
             AeonRecord aeonRecord = new AeonRecord();
