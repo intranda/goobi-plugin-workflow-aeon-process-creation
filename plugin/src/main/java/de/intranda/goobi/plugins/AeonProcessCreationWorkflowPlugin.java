@@ -385,52 +385,57 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                                         null);
 
                         for (Process other : processes) {
-                            if (!other.getProjekt().getProjectIsArchived().booleanValue()) {
-                                // check if properties matches
-                                boolean isDuplicate = false;
-                                if ("ils".matches(overview.get("recordType"))) {
-                                    String bib = "";
-                                    String vol = "";
+                            // check if properties matches
+                            boolean isDuplicate = false;
+                            boolean isBlocked = false;
 
-                                    for (Processproperty pp : other.getEigenschaften()) {
-                                        if (ilsBibId.equals(pp.getTitel())) {
-                                            bib = pp.getWert();
-                                        } else if (ilsVolumeNumber.equals(pp.getTitel())) {
-                                            vol = pp.getWert();
-                                        }
+                            if ("ils".matches(overview.get("recordType"))) {
+                                String bib = "";
+                                String vol = "";
+
+                                for (Processproperty pp : other.getEigenschaften()) {
+                                    if (ilsBibId.equals(pp.getTitel())) {
+                                        bib = pp.getWert();
+                                    } else if (ilsVolumeNumber.equals(pp.getTitel())) {
+                                        vol = pp.getWert();
                                     }
-                                    if (bib.equals(overview.get("bibId")) && vol.equals(overview.get("volume"))) {
+                                }
+                                if (bib.equals(overview.get("bibId")) && vol.equals(overview.get("volume"))) {
+                                    isDuplicate = true;
+                                }
+                            } else {
+                                for (Processproperty pp : other.getEigenschaften()) {
+                                    if (aspaceResourceIDProperty.equals(pp.getTitel()) && pp.getWert().equals(overview.get("uri"))) {
                                         isDuplicate = true;
                                     }
-                                } else {
-                                    for (Processproperty pp : other.getEigenschaften()) {
-                                        if (aspaceResourceIDProperty.equals(pp.getTitel()) && pp.getWert().equals(overview.get("uri"))) {
-                                            isDuplicate = true;
-                                        }
-                                    }
+                                }
+                            }
+
+                            if (isDuplicate) {
+                                if (other.getProjekt().getProjectIsArchived().booleanValue()) {
+                                    isBlocked = true;
                                 }
 
-                                if (isDuplicate) {
-                                    aeonRecord.setDuplicateTitle(other.getTitel());
-                                    aeonRecord.setDuplicate(true);
+                                aeonRecord.setDuplicateTitle(other.getTitel());
+                                aeonRecord.setDuplicate(true);
+                                aeonRecord.setLocked(isBlocked);
 
-                                    AeonExistingProcess aep = new AeonExistingProcess();
-                                    aep.setTitle(other.getTitel());
-                                    aep.setDate(other.getErstellungsdatumAsString());
-                                    for (AeonProperty property : aeonRecord.getProperties()) {
-                                        AeonProperty aeonProperty = property.cloneProperty();
-                                        aeonProperty.setValue("");
-                                        aep.getDuplicateProperties().add(aeonProperty);
-                                        extractProcessValues(other, aeonProperty);
-                                    }
-                                    for (AeonProperty property : aeonRecord.getProcessProperties()) {
-                                        AeonProperty aeonProperty = property.cloneProperty();
-                                        aeonProperty.setValue("");
-                                        aep.getDuplicateProperties().add(aeonProperty);
-                                        extractProcessValues(other, aeonProperty);
-                                    }
-                                    aeonRecord.getExistingProcesses().add(aep);
+                                AeonExistingProcess aep = new AeonExistingProcess();
+                                aep.setTitle(other.getTitel());
+                                aep.setDate(other.getErstellungsdatumAsString());
+                                for (AeonProperty property : aeonRecord.getProperties()) {
+                                    AeonProperty aeonProperty = property.cloneProperty();
+                                    aeonProperty.setValue("");
+                                    aep.getDuplicateProperties().add(aeonProperty);
+                                    extractProcessValues(other, aeonProperty);
                                 }
+                                for (AeonProperty property : aeonRecord.getProcessProperties()) {
+                                    AeonProperty aeonProperty = property.cloneProperty();
+                                    aeonProperty.setValue("");
+                                    aep.getDuplicateProperties().add(aeonProperty);
+                                    extractProcessValues(other, aeonProperty);
+                                }
+                                aeonRecord.getExistingProcesses().add(aep);
                             }
                         }
                     }

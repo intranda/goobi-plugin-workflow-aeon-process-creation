@@ -60,7 +60,7 @@
                                 <button
                                     class="btn toggle margin-right-5"
                                     title="#{msgs.plugin_workflow_aeon_accept}"
-                                    jsf:rendered="#{not item.disabled or LoginForm.hasRole(NavigationForm.workflowPlugin.cancellationSepcialRights)}"
+                                    jsf:rendered="#{(not item.disabled or LoginForm.hasRole(NavigationForm.workflowPlugin.cancellationSepcialRights)) and not item.locked}"
                                     jsf:id="toggle-accept">
                                     <i
                                         class="fa #{item.accepted == false?'fa-toggle-off':'fa-toggle-on'}
@@ -93,7 +93,7 @@
                             styleClass="box-content nopadding #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}">
 
                             <!--  render modal with existing processes and their details  -->
-                            <h:panelGroup rendered="#{item.duplicate}">
+                            <h:panelGroup rendered="#{item.duplicate and not item.locked}">
                                 <a
                                     href="#"
                                     data-toggle="modal"
@@ -106,6 +106,19 @@
                                     </h:outputText>
                                 </a>
                             </h:panelGroup>
+                            <h:panelGroup rendered="#{item.duplicate and item.locked}">
+                                <a
+                                    href="#"
+                                    data-toggle="modal"
+                                    data-target="#myModal-#{item.id}">
+                                    <h:outputText
+                                        id="titleLocked"
+                                        style="padding: 10px;margin-bottom:0;display: block;border-bottom:1px solid #ddd"
+                                        styleClass="alert alert-danger"
+                                        value="#{msgs['plugin_workflow_aeon_titleLocked']}">
+                                    </h:outputText>
+                                </a>
+                            </h:panelGroup>                            
                             <div
                                 class="modal fade"
                                 id="myModal-#{item.id}"

@@ -16,7 +16,6 @@ public class AeonRecord implements Comparable<AeonRecord> {
     private static final String JSON_ORDER_PROPERTY = "containerGrouping";
     private static final String PROCESS_ORDER_PROPERTY = "Box and Folder";
 
-
     private List<AeonProperty> properties = new ArrayList<>();
 
     private long id = System.currentTimeMillis();
@@ -32,6 +31,7 @@ public class AeonRecord implements Comparable<AeonRecord> {
     private String duplicateTitle;
 
     private boolean duplicate;
+    private boolean locked; // true if process is a duplicate and current project is disabled
 
     private boolean disabled;
 
@@ -50,14 +50,14 @@ public class AeonRecord implements Comparable<AeonRecord> {
         if (recordData == null && other.getRecordData() == null) {
             String orderField = "";
             String otherOrderField = "";
-            for (Processproperty pp:  existingProcess.getEigenschaften()) {
+            for (Processproperty pp : existingProcess.getEigenschaften()) {
                 if (PROCESS_ORDER_PROPERTY.equals(pp.getTitel())) {
-                    orderField=pp.getWert();
+                    orderField = pp.getWert();
                 }
             }
-            for (Processproperty pp:  other.getExistingProcess().getEigenschaften()) {
+            for (Processproperty pp : other.getExistingProcess().getEigenschaften()) {
                 if (PROCESS_ORDER_PROPERTY.equals(pp.getTitel())) {
-                    otherOrderField=pp.getWert();
+                    otherOrderField = pp.getWert();
                 }
             }
             return orderField.compareTo(otherOrderField);
