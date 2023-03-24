@@ -621,7 +621,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 bhelp.EigenschaftHinzufuegen(process, "TemplateID", "" + processTemplate.getId());
 
                 // check if patron type yale was selected
-                for (AeonProperty prop : rec.getProperties()) {
+                for (AeonProperty prop : rec.getProcessProperties()) {
                     if ("Patron type".equals(prop.getTitle()) && "Yale".equals(prop.getValue())) {
                         // if this is the case, all steps get higher priority
                         for (Step step : process.getSchritte()) {
