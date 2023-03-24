@@ -211,10 +211,12 @@ input[type="radio"] {
                                 </div>
                                 <div class="pull-right">
                                     <button
+                                        onclick="preventDoubleSubmit(this);"
                                         jsf:id="cancel"
                                         class="btn margin-right-10 font-size-s"
                                         jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">#{msgs.plugin_workflow_aeon_cancel}</button>
                                     <button
+                                        onclick="preventDoubleSubmit(this);"
                                         jsf:id="sendRequest"
                                         class="btn btn-primary font-size-s"
                                         jsf:action="#{NavigationForm.workflowPlugin.sendRequest}">#{NavigationForm.workflowPlugin.operationType
@@ -261,6 +263,7 @@ input[type="radio"] {
                                             <ui:fragment rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}">
 	                                            <li class="action-li">
 	                                                <button
+                                                        onclick="preventDoubleSubmit(this);"
 	                                                    class="expandbutton"
 	                                                    jsf:id="back"
 	                                                    jsf:action="#{NavigationForm.workflowPlugin.previousPage}">
@@ -274,6 +277,7 @@ input[type="radio"] {
                                             <ui:fragment rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}">
 	                                            <li class="action-li">
 	                                                <button
+                                                        onclick="preventDoubleSubmit(this);"
 	                                                    class="expandbutton"
 	                                                    jsf:id="createProcess"
 	                                                    jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
@@ -287,6 +291,7 @@ input[type="radio"] {
                                             <ui:fragment rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}">
 	                                            <li class="action-li">
 	                                                <button
+                                                        onclick="preventDoubleSubmit(this);"
 	                                                    jsf:id="dockets"
 	                                                    class="expandbutton"
 	                                                    jsf:action="#{NavigationForm.workflowPlugin.generateDockets}">
@@ -300,6 +305,7 @@ input[type="radio"] {
                                             <ui:fragment rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}">
 	                                            <li class="action-li">
 	                                                <button
+                                                        onclick="preventDoubleSubmit(this);"
 	                                                    jsf:id="startNewRequest"
 	                                                    class="expandbutton"
 	                                                    jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">

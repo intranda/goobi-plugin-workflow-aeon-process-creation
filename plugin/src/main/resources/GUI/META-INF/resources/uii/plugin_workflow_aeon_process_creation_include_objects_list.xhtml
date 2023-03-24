@@ -661,19 +661,9 @@
 
                     </div>
                     <div class="margin-top-10 pull-right">
-<!-- 
-                        <button
-                            class="btn btn-success font-size-s pull-right border-creation"
-                            jsf:id="absenden"
-                            jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
-                            jsf:action="#{NavigationForm.workflowPlugin.createProcesses}">
-                            <i class="fa fa-save margin-right-5"></i>
-                            <h:outputText
-                                styleClass="font-size-s"
-                                value="#{msgs.plugin_workflow_aeon_createProcesses}" />
-                        </button>
- -->
+
                          <button
+                            onclick="preventDoubleSubmit(this);"
                             class="btn btn-success font-size-s pull-right border-creation"
                             jsf:id="absenden"
                             jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
@@ -685,6 +675,7 @@
                         </button>
  
                         <button
+                            onclick="preventDoubleSubmit(this);"
                             class="btn btn-danger font-size-s pull-right border-deletion"
                             jsf:id="disable"
                             jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
