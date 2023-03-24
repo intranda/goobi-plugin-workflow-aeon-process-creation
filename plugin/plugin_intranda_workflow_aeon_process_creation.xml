@@ -109,7 +109,7 @@
       <variable place="process">Item edition</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
-    </field>
+    </field>Falls du Fragen hast: Unser
     <field aeon="itemPages">
       <title>Item pages</title>
       <type readonly="true">input</type>
@@ -637,4 +637,23 @@ Processing (checkboxes - default all unchecked.)
     Would be checked when folders required (outlined in Aeon) are less than those described in archival object
 -->
   </processes>
+  
+  
+  <existingProcessProperties> 
+      <field>
+          <!-- display name -->
+          <title>Call Number</title>
+          <!-- variable name -->
+          <variable place="process">Call Number</variable>
+        </field>
+         <field>
+          <title>Record type</title>
+          <variable place="process">Record type</variable>
+        </field>
+              <field>
+          <title>Title</title>
+          <variable place="process">Title</variable>
+        </field>     
+        
+  </existingProcessProperties>
 </config_plugin>

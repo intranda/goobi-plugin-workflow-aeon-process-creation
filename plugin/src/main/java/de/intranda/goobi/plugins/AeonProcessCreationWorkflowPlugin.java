@@ -102,6 +102,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     @Setter
     private transient List<AeonProperty> propertyFields = new ArrayList<>();
 
+    @Getter
+    @Setter
+    private transient List<AeonProperty> existingProcessFields = new ArrayList<>();
+
     // contains a list of required fields that are mandatory in the metadata cloud result
     private List<String> requiredFields;
 
@@ -423,18 +427,18 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                                 AeonExistingProcess aep = new AeonExistingProcess();
                                 aep.setTitle(other.getTitel());
                                 aep.setDate(other.getErstellungsdatumAsString());
-                                for (AeonProperty property : aeonRecord.getProperties()) {
+                                for (AeonProperty property : existingProcessFields) {
                                     AeonProperty aeonProperty = property.cloneProperty();
                                     aeonProperty.setValue("");
                                     aep.getDuplicateProperties().add(aeonProperty);
                                     extractProcessValues(other, aeonProperty);
                                 }
-                                for (AeonProperty property : aeonRecord.getProcessProperties()) {
-                                    AeonProperty aeonProperty = property.cloneProperty();
-                                    aeonProperty.setValue("");
-                                    aep.getDuplicateProperties().add(aeonProperty);
-                                    extractProcessValues(other, aeonProperty);
-                                }
+                                //                                for (AeonProperty property : aeonRecord.getProcessProperties()) {
+                                //                                    AeonProperty aeonProperty = property.cloneProperty();
+                                //                                    aeonProperty.setValue("");
+                                //                                    aep.getDuplicateProperties().add(aeonProperty);
+                                //                                    extractProcessValues(other, aeonProperty);
+                                //                                }
                                 aeonRecord.getExistingProcesses().add(aep);
                             }
                         }
@@ -837,6 +841,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         for (HierarchicalConfiguration hc : properties) {
             AeonProperty property = new AeonProperty(hc, this);
             propertyFields.add(property);
+        }
+
+        existingProcessFields.clear();
+        List<HierarchicalConfiguration> existingProcessProperties = config.configurationsAt("/existingProcessProperties/field");
+        for (HierarchicalConfiguration hc : existingProcessProperties) {
+            AeonProperty property = new AeonProperty(hc, this);
+            existingProcessFields.add(property);
         }
 
         String sql = FilterHelper.criteriaBuilder("", true, null, null, null, true, false);
