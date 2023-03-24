@@ -620,6 +620,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 bhelp.EigenschaftHinzufuegen(process, "Template", processTemplate.getTitel());
                 bhelp.EigenschaftHinzufuegen(process, "TemplateID", "" + processTemplate.getId());
 
+                // check if patron type yale was selected
+                for (AeonProperty prop : rec.getProperties()) {
+                    if ("Patron type".equals(prop.getTitle()) && "Yale".equals(prop.getValue())) {
+                        // if this is the case, all steps get higher priority
+                        for (Step step : process.getSchritte()) {
+                            step.setPrioritaet(1);
+                        }
+                    }
+                }
+
                 List<Masterpiece> mpl = process.getWerkstuecke();
                 if (mpl.isEmpty()) {
                     Masterpiece mp = new Masterpiece();
@@ -791,7 +801,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
      * Constructor try to use empty constructor, remove configuration from here
      */
     public AeonProcessCreationWorkflowPlugin() {
-        log.debug("AeonProcessCreation workflow plugin started");
         initializeConfiguration();
     }
 
