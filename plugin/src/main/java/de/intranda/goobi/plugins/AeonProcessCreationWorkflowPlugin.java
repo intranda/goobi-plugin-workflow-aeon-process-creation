@@ -458,9 +458,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             } else {
                 //  no valid aeon request
             }
-        } else
-
-        {
+        } else {
             searchForDeactivateProcess();
         }
     }
@@ -1005,6 +1003,21 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             } catch (Exception e) {
                 log.error(e);
             }
+            aeonRecord.setDuplicate(true);
+
+            aeonRecord.setDuplicateTitle(process.getTitel());
+
+            AeonExistingProcess aep = new AeonExistingProcess();
+            aep.setTitle(process.getTitel());
+            aep.setDate(process.getErstellungsdatumAsString());
+            for (AeonProperty property : existingProcessFields) {
+                AeonProperty aeonProperty = property.cloneProperty();
+                aeonProperty.setValue("");
+                aep.getDuplicateProperties().add(aeonProperty);
+                extractProcessValues(process, aeonProperty);
+            }
+
+            aeonRecord.getExistingProcesses().add(aep);
 
             // new implementation checks, if a certain step is finished
             // if yes, only a special user group is allowed to cancel items

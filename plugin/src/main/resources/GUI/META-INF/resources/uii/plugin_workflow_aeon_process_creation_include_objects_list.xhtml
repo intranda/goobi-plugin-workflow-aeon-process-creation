@@ -98,12 +98,12 @@
                                     href="#"
                                     data-toggle="modal"
                                     data-target="#myModal-#{item.id}">
-                                    <h:outputText
-                                        id="titleInUse"
+                                    <h:outputFormat id="titleInUse"
                                         style="padding: 10px;margin-bottom:0;display: block;border-bottom:1px solid #ddd"
                                         styleClass="alert alert-warning"
                                         value="#{msgs['plugin_workflow_aeon_titleInUse']}">
-                                    </h:outputText>
+                                        <f:param value="#{item.duplicateTitle}" />
+                                    </h:outputFormat>
                                 </a>
                             </h:panelGroup>
                             <h:panelGroup rendered="#{item.duplicate and item.locked}">
