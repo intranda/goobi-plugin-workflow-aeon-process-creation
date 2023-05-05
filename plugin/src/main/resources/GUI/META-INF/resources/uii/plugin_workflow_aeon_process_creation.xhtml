@@ -211,7 +211,7 @@ input[type="radio"] {
                                 </div>
                                 <div class="pull-right">
                                     <button
-                                        onclick="preventDoubleSubmit(this);"
+                                        onclick="preventDoubleSubmit(this); "
                                         jsf:id="cancel"
                                         class="btn margin-right-10 font-size-s"
                                         jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">#{msgs.plugin_workflow_aeon_cancel}</button>

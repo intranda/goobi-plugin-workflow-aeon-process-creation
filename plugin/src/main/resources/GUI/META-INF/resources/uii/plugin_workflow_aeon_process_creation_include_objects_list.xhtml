@@ -673,18 +673,57 @@
                                 styleClass="font-size-s"
                                 value="#{msgs.weiter}" />
                         </button>
- 
+
+
                         <button
-                            onclick="preventDoubleSubmit(this);"
+                            jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
                             class="btn btn-danger font-size-s pull-right border-deletion"
                             jsf:id="disable"
-                            jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
-                            jsf:action="#{NavigationForm.workflowPlugin.cancelProcesses}">
-                            <i class="fa fa-trash margin-right-5"></i>
+                            type="button"
+                            data-toggle="modal"
+                            data-target="#deleteModal">
+                            <i class="fa fa-trash-o margin-right-5" />
                             <h:outputText
                                 styleClass="font-size-s"
                                 value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
                         </button>
+
+                        <div
+                            class="modal fade"
+                            id="deleteModal"
+                            tabindex="-1"
+                            role="dialog"
+                            aria-labelledby="myModalLabel">
+                            <div
+                                class="modal-dialog"
+                                role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4
+                                            class="modal-title"
+                                            id="myModalLabel">
+                                            <h:outputText value="#{msgs.loeschen}" />
+                                        </h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>#{msgs.plugin_workflow_aeon_deletionWarningConfirmation}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button
+                                            class="btn"
+                                            data-dismiss="modal"
+                                            aria-hidden="true">#{msgs.abbrechen}</button>
+                                        <button
+                                            jsf:id="confirmDelete"
+                                            class="btn btn-danger"
+                                            jsf:action="#{NavigationForm.workflowPlugin.cancelProcesses}">
+                                            <i class="fa fa-trash-o margin-right-5" />
+                                            <h:outputText value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                     </div>
                 </ui:fragment>
