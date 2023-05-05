@@ -195,6 +195,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         if ("creation".equals(operationType)) {
 
+            if (!checkTransactionNumber()) {
+                Helper.setFehlerMeldung("plugin_workflow_aeon_transactionIdentifierInUse");
+                return;
+            }
+
             Map<String, Object> map = null;
 
             if ("1234567890".equals(this.input)) { //(JUST FOR TESTING: checks if input is 1234567890)
@@ -453,9 +458,33 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
             } else {
                 //  no valid aeon request
             }
-        } else {
+        } else
+
+        {
             searchForDeactivateProcess();
         }
+    }
+
+    private boolean checkTransactionNumber() {
+
+        String sql = "SELECT COUNT(1) FROM prozesseeigenschaften WHERE titel = 'Transaction Identifier' AND wert = ?";
+        Connection connection = null;
+        try {
+            connection = MySQLHelper.getInstance().getConnection();
+            int numberOfProcesses = new QueryRunner().query(connection, sql, MySQLHelper.resultSetToIntegerHandler, input);
+            return numberOfProcesses == 0;
+        } catch (SQLException e) {
+            log.error(e);
+        } finally {
+            if (connection != null) {
+                try {
+                    MySQLHelper.closeConnection(connection);
+                } catch (SQLException e) {
+                    // do nothing
+                }
+            }
+        }
+        return false;
     }
 
     private int getNextId() {
