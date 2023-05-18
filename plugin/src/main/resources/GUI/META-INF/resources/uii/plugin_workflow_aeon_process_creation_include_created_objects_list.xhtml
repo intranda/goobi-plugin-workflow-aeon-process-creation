@@ -8,7 +8,7 @@
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:jsf="http://xmlns.jcp.org/jsf"
     xmlns:c="http://java.sun.com/jstl/core"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites">
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG">
 
     <composite:interface>
     </composite:interface>
@@ -18,18 +18,24 @@
         <!-- All Objects List (REQUEST SUCCESS) -->
         <div>
             <h:form
-                id="itemSummaryForm"
-                styleClass="form-horizontal form-bordered">
+                id="itemSummaryForm">
                 <ui:repeat
                     var="item"
                     value="#{NavigationForm.workflowPlugin.recordList}">
-                    <!-- iterate through items from transaction -->
+                    
+                    <!-- RUN THROUGH ALL ACCEPTED PROCESSES -->
                     <ui:fragment rendered="#{item.accepted}">
-                        <div class="box box-bordered">
-                            <div
-                                class="box-title"
-                                style="border-color: #666;">
-                                <h2 style="color: #333; max-width: 85%">
+                        
+                        <intranda:box
+                            boxType="outline"
+                            boxPadding="false"
+                            boxForm="true"
+                            icon="fa-search"
+                            boxTitle="false">
+                            
+                            <!-- TITLE  OF BOX -->
+                            <div class="box__title">
+                                <h2>
                                     <ui:repeat
                                         var="p"
                                         value="#{item.properties}">
@@ -38,95 +44,74 @@
                                             rendered="#{p.displayInTitle}" />
                                     </ui:repeat>
                                 </h2>
-                                <!--  decline / accept / expand buttons -->
-                                <div class="pull-right">
+                                
+                                <!-- BUTTONS IN TITLE -->
+                                <div class="actions d-flex">
                                     <button
                                         type="button"
-                                        class="btn margin-right-5"
-                                        style="background: transparent"
+                                        class="btn d-flex align-items-center btn--title-action-neutral"
                                         title="#{(item.showDetails) ? 'hide details' : 'show details'}"
                                         jsf:id="details">
-                                        <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'}"></i>
+                                        <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'} #{item.accepted?'accepted':'notaccepted'}"></i>
                                         <f:setPropertyActionListener
                                             target="#{item.showDetails}"
                                             value="#{!item.showDetails}" />
                                         <f:ajax render="itemSummaryForm" />
                                     </button>
                                 </div>
+                                <!-- // BUTTONS IN TITLE -->
                             </div>
-                            <h:panelGroup
-                                layout="block"
-                                styleClass="box-content nopadding"
-                                style="border-color: #666">
-                                <!-- future process title -->
-                                <intranda:formOutputText
-                                    label="#{msgs.prozessTitel}"
-                                    field="#{item.processTitle}"
-                                    name="futureTitle"
-                                    fieldStyle="form-control" />
+                            <!-- // TITLE  OF BOX -->
+                            
+                            <!-- future process title -->
+                            <intranda:formOutputText
+                                label="#{msgs.prozessTitel}"
+                                field="#{item.processTitle}"
+                                name="futureTitle"
+                                required="false"
+                                fieldStyle="form-control" 
+                                help="#{msgs.plugin_workflow_aeon_futureProcessTitle}"/>
+                                
+                            <x:dataList
+                                value="#{item.properties}"
+                                var="property">
 
-                                <x:dataList
-                                    value="#{item.properties}"
-                                    var="property">
+                                <h:panelGroup
+                                    rendered="#{item.showDetails or property.displayAlways}">
+                                     <intranda:formOutputText
+                                        label="#{property.title}"
+                                        field="#{property.value}"
+                                        name="property"
+                                        required="false"
+                                        fieldStyle="form-control" 
+                                        help="#{property.helpMessage}"/>
+                                </h:panelGroup>
 
-                                    <h:panelGroup
-                                        layout="block"
-                                        styleClass="form-group"
-                                        rendered="#{item.showDetails or property.displayAlways}">
-                                        <h:outputLabel
-                                            for="output"
-                                            styleClass="control-label col-sm-3"
-                                            value="#{property.title}" />
-                                        <div class="col-sm-9">
-                                            <x:outputText
-                                                id="output"
-                                                style="border:0px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                                                forceId="true"
-                                                styleClass="form-control"
-                                                value="#{property.value}"
-                                                title="#{property.value}" />
-                                            <h:outputText
-                                                styleClass="help-block font-light"
-                                                rendered="#{NavigationForm.showHelp}"
-                                                value="#{property.helpMessage}" />
-                                        </div>
-                                    </h:panelGroup>
+                            </x:dataList>
 
-                                </x:dataList>
-
-                                <x:dataList
-                                    value="#{item.processProperties}"
-                                    var="property">
-                                    <h:panelGroup
-                                        layout="block"
-                                        styleClass="form-group"
-                                        rendered="#{item.showDetails or property.displayAlways}">
-                                        <h:outputLabel
-                                            for="propOut"
-                                            styleClass="control-label col-sm-3"
-                                            value="#{property.title}" />
-                                        <div class="col-sm-9">
-                                            <x:outputText
-                                                id="propOut"
-                                                style="border:0px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                                                forceId="true"
-                                                styleClass="form-control"
-                                                value="#{property.value}"
-                                                title="#{property.value}" />
-                                            <h:outputText
-                                                styleClass="help-block font-light"
-                                                rendered="#{NavigationForm.showHelp}"
-                                                value="#{property.helpMessage}" />
-                                        </div>
-                                    </h:panelGroup>
-                                </x:dataList>
-
-
-                            </h:panelGroup>
-                        </div>
+                            <x:dataList
+                                value="#{item.processProperties}"
+                                var="property">
+                                
+                                <h:panelGroup
+                                    rendered="#{item.showDetails or property.displayAlways}">
+                                     <intranda:formOutputText
+                                        label="#{property.title}"
+                                        field="#{property.value}"
+                                        name="property"
+                                        required="false"
+                                        fieldStyle="form-control" 
+                                        help="#{property.helpMessage}"/>
+                                </h:panelGroup>
+                            </x:dataList>
+                                
+                        </intranda:box>
+                        
+                        <div style="height:10px;"/>
                     </ui:fragment>
                 </ui:repeat>
-
+                <!-- // RUN THROUGH ALL ACCEPTED PROCESSES -->
+                
             </h:form>
         </div>
     </composite:implementation>

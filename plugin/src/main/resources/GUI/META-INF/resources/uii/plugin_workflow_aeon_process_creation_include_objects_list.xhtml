@@ -8,729 +8,496 @@
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:jsf="http://xmlns.jcp.org/jsf"
     xmlns:c="http://java.sun.com/jstl/core"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
     xmlns:p="http://primefaces.org/ui">
 
     <composite:interface>
     </composite:interface>
 
     <composite:implementation>
-        <!-- All Objects List (NO REQUEST) -->
-        <div
-            jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false}"
-            class="box thin-margin lightgrey box-bordered">
-            <div
-                class="box-title"
-                style="background-color: #eee;">
-                <h2 class="tableColumnMaxWidthExtraLong">#{msgs.plugin_workflow_aeon_objects}</h2>
-
-            </div>
-            <div class="box-content nopadding">
-
-                <div style="background-color: #eee; height: 500px;">
+        
+        <!-- STILL NO REQUEST SENT -->
+        <ui:fragment
+            rendered="#{NavigationForm.workflowPlugin.requestSuccess == false}">
+            <intranda:box
+                boxType="outline"
+                boxPadding="false"
+                icon="fa-search"
+                title="#{msgs.plugin_workflow_aeon_objects}">
+                
+                <div style="background-color: #eee; height: 300px;">
                     <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
-                        <p>#{msgs.plugin_workflow_aeon_notRequestedYet}</p>
+                        <h:outputText value="#{msgs.plugin_workflow_aeon_notRequestedYet}"/>
                     </div>
                 </div>
-            </div>
-        </div>
-        <!-- All Objects List (REQUEST SUCCESS) -->
-        <div jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess}">
-            <h:form
-                id="itemForm"
-                styleClass="form-horizontal form-bordered">
-                <ui:repeat
-                    var="item"
-                    value="#{NavigationForm.workflowPlugin.recordList}">
-                    <!-- iterate through items from transaction -->
-                    <div class="box box-bordered">
-                        <div class="box-title #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}">
-                            <h2 style="color: #{item.accepted?'white':'#333'}; max-width: 80%">
-                                <ui:repeat
-                                    var="p"
-                                    value="#{item.properties}">
-                                    <h:outputText
-                                        value="#{p.value} "
-                                        rendered="#{p.displayInTitle}" />
-                                </ui:repeat>
-                            </h2>
-                            <!--  decline / accept / expand buttons -->
-                            <div class="pull-right">
-
-                                <button
-                                    class="btn toggle margin-right-5"
-                                    title="#{msgs.plugin_workflow_aeon_accept}"
-                                    jsf:rendered="#{(not item.disabled or LoginForm.hasRole(NavigationForm.workflowPlugin.cancellationSepcialRights)) and not item.locked}"
-                                    jsf:id="toggle-accept">
-                                    <i
-                                        class="fa #{item.accepted == false?'fa-toggle-off':'fa-toggle-on'}
-                                    #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}"
-                                        style="font-size: 25px" />
-                                    <f:ajax render=":itemForm" />
-                                    <f:setPropertyActionListener
-                                        target="#{item.accepted}"
-                                        value="#{not item.accepted}" />
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    class="btn margin-right-5"
-                                    style="background: transparent"
-                                    title="#{(item.showDetails) ? 'hide details' : 'show details'}"
-                                    jsf:rendered="#{NavigationForm.workflowPlugin.operationType eq 'creation'}"
-                                    jsf:id="details">
-                                    <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'} #{item.accepted?'accepted':'notaccepted'}"></i>
-                                    <f:setPropertyActionListener
-                                        target="#{item.showDetails}"
-                                        value="#{!item.showDetails}" />
-                                    <f:ajax render=":itemForm" />
-                                </button>
-                            </div>
+            </intranda:box>
+        </ui:fragment>
+        <!-- // STILL NO REQUEST SENT -->
+       
+       
+        <!-- ALL OBJECTS FROM REQUEST SUCCESS -->
+        <h:form rendered="#{NavigationForm.workflowPlugin.requestSuccess}"
+            id="itemForm">
+            
+            <!-- RUN THROUGH ALL FOLDERS -->
+            <ui:repeat
+                var="item"
+                value="#{NavigationForm.workflowPlugin.recordList}">
+                
+                <!-- iterate through items from transaction -->
+                <intranda:box
+                    boxType="#{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'success' : 'hot' : 'outline'}"
+                    boxPadding="false"
+                    boxForm="true"
+                    icon="fa-search"
+                    boxTitle="false">
+                    
+                    <!-- TITLE  OF BOX -->
+                    <div class="box__title">
+                        <h2>
+                            <ui:repeat
+                                var="p"
+                                value="#{item.properties}">
+                                <h:outputText
+                                    value="#{p.value}"
+                                    rendered="#{p.displayInTitle}" />
+                            </ui:repeat>
+                            #{LoginForm.hasRole(NavigationForm.workflowPlugin.cancellationSepcialRights)}
+                        </h2>
+                        
+                        <!-- BUTTONS IN TITLE -->
+                        <div class="actions d-flex">
+                            <button
+                                class="btn d-flex align-items-center #{item.accepted ? 'btn--title-action' : 'btn--title-action-neutral'}"
+                                title="#{msgs.plugin_workflow_aeon_accept}"
+                                jsf:rel="tooltip"
+                                jsf:rendered="#{(not item.disabled or LoginForm.hasRole(NavigationForm.workflowPlugin.cancellationSepcialRights)) and not item.locked}"
+                                jsf:id="toggle-accept">
+                                <i class="fa #{item.accepted == false?'fa-toggle-off':'fa-toggle-on'}
+                                #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'color-creation' : 'color-deletion'}"
+                                    style="font-size: 25px" />
+                                <f:ajax render=":itemForm" />
+                                <f:setPropertyActionListener
+                                    target="#{item.accepted}"
+                                    value="#{not item.accepted}" />
+                            </button>
+                            
+                            <button
+                                type="button"
+                                class="btn d-flex align-items-center #{item.accepted ? 'btn--title-action' : 'btn--title-action-neutral'}"
+                                title="#{(item.showDetails) ? 'hide details' : 'show details'}"
+                                jsf:rendered="#{NavigationForm.workflowPlugin.operationType eq 'creation'}"
+                                jsf:id="details">
+                                <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'} #{item.accepted?'accepted':'notaccepted'}"></i>
+                                <f:setPropertyActionListener
+                                    target="#{item.showDetails}"
+                                    value="#{!item.showDetails}" />
+                                <f:ajax render=":itemForm" />
+                            </button>
                         </div>
-                        <h:panelGroup
-                            layout="block"
-                            styleClass="box-content nopadding #{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'border-creation' : 'border-deletion' : 'border-unselect'}">
+                        <!-- // BUTTONS IN TITLE -->
+                    </div>
+                    <!--  // TITLE OF BOX -->
+                    
+                    
+                    <!--  WARNING MESSAGE FOR DUPLICATE ITEMS  -->
+                    <h:panelGroup rendered="#{item.duplicate and NavigationForm.workflowPlugin.operationType eq 'creation'}">
+                        <a
+                            href="#"
+                            data-bs-toggle="modal"
+                            data-bs-target="#myModal-#{item.id}">
+                            
+                            <!-- IF NOT LOCKED -->
+                            <h:outputFormat id="titleInUse" 
+                                rendered="#{not item.locked}"
+                                styleClass="alert alert-warning p-3 d-block mb-0 rounded-0"
+                                value="#{msgs['plugin_workflow_aeon_titleInUse']}">
+                                <f:param value="#{item.duplicateTitle}" />
+                            </h:outputFormat>
+                            <!-- IF LOCKED -->
+                            <h:outputText
+                                id="titleLocked"
+                                rendered="#{item.locked}"
+                                styleClass="alert alert-danger p-3 d-block mb-0 rounded-0"
+                                value="#{msgs['plugin_workflow_aeon_titleLocked']}">
+                            </h:outputText>
+                        </a>
+                    </h:panelGroup>
+                    <!--  // WARNING MESSAGE FOR DUPLICATE ITEMS  -->
+                    
+                    <!-- WARNING MESSAGE WHEN DELETION -->
+                    <h:panelGroup rendered="#{NavigationForm.workflowPlugin.operationType ne 'creation'}">
+                        <a
+                            href="#"
+                            data-bs-toggle="modal"
+                            data-bs-target="#myModal-#{item.id}">
+                            
+                            <!-- IF ENABLED -->
+                            <h:outputText
+                                id="item-enabled"
+                                rendered="#{not item.disabled}"
+                                styleClass="alert alert-warning p-3 d-block mb-0 rounded-0"
+                                value="#{msgs.plugin_workflow_aeon_deletionWarning}">
+                            </h:outputText>
+                            
+                            <!-- IF DISABLED -->
+                            <h:outputText
+                                id="item-disabled"
+                                rendered="#{item.disabled}"
+                                styleClass="alert alert-danger p-3 d-block mb-0 rounded-0"
+                                value="#{msgs.plugin_workflow_aeon_deletionDisabled}">
+                            </h:outputText>
+                        </a>
+                    </h:panelGroup>
+                    <!-- // WARNING MESSAGE WHEN DELETION -->
+                    
+                    
+                    <!--  // MODAL OF EXISTING PROCESS WITH PROCESS PROPERTIES  -->
+                    <div
+                        class="modal fade"
+                        id="myModal-#{item.id}"
+                        tabindex="-1"
+                        role="dialog"
+                        pt:aria-label="myModalLabel">
+                        <div
+                            class="modal-dialog"
+                            style="width: 800px;max-width: 800px;"
+                            role="document">
+                            <div class="modal-content">
+                                <!-- MODAL HEADER -->
+                                <div class="modal-header bg-primary-400 text-white">
+                                    <h4
+                                        class="modal-title"
+                                        id="head-#{item.id}">
+                                        <ui:repeat
+                                            var="p"
+                                            value="#{item.properties}">
+                                            <h:outputText
+                                                value="#{p.value} "
+                                                rendered="#{p.displayInTitle}" />
+                                        </ui:repeat>
+                                    </h4>
+                                    <button
+                                        type="button"
+                                        class="btn-close btn-close-white"
+                                        data-bs-dismiss="modal"
+                                        title="#{msgs.cancel}"
+                                        aria-label="Close"/>
+                                </div>
+                                <!-- // MODAL HEADER -->
+                                
+                                <!-- MODAL BODY -->
+                                <div class="modal-body">
 
-                            <!--  render modal with existing processes and their details  -->
-                            <h:panelGroup rendered="#{item.duplicate and not item.locked}">
-                                <a
-                                    href="#"
-                                    data-toggle="modal"
-                                    data-target="#myModal-#{item.id}">
-                                    <h:outputFormat id="titleInUse"
-                                        style="padding: 10px;margin-bottom:0;display: block;border-bottom:1px solid #ddd"
-                                        styleClass="alert alert-warning"
-                                        value="#{msgs['plugin_workflow_aeon_titleInUse']}">
-                                        <f:param value="#{item.duplicateTitle}" />
-                                    </h:outputFormat>
-                                </a>
-                            </h:panelGroup>
-                            <h:panelGroup rendered="#{item.duplicate and item.locked}">
-                                <a
-                                    href="#"
-                                    data-toggle="modal"
-                                    data-target="#myModal-#{item.id}">
-                                    <h:outputText
-                                        id="titleLocked"
-                                        style="padding: 10px;margin-bottom:0;display: block;border-bottom:1px solid #ddd"
-                                        styleClass="alert alert-danger"
-                                        value="#{msgs['plugin_workflow_aeon_titleLocked']}">
-                                    </h:outputText>
-                                </a>
-                            </h:panelGroup>                            
-                            <div
-                                class="modal fade"
-                                id="myModal-#{item.id}"
-                                tabindex="-1"
-                                role="dialog"
-                                pt:aria-label="myModalLabel">
-                                <div
-                                    class="modal-dialog"
-                                    style="width: 800px;"
-                                    role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <a
-                                                href="#"
-                                                class="btn btn-blue pull-right"
-                                                title="#{msgs.cancel}"
-                                                data-dismiss="modal">
-                                                <i class="fa fa-times"></i>
-                                            </a>
-                                            <h4
-                                                class="modal-title"
-                                                id="head-#{item.id}">
-                                                <ui:repeat
-                                                    var="p"
-                                                    value="#{item.properties}">
-                                                    <h:outputText
-                                                        value="#{p.value} "
-                                                        rendered="#{p.displayInTitle}" />
-                                                </ui:repeat>
-                                            </h4>
-                                        </div>
-                                        <div class="modal-body">
-
-                                            <ui:repeat
-                                                var="proc"
-                                                value="#{item.existingProcesses}">
-                                                <h4 style="font-size: 15px; margin-top: 20px;">
-                                                    <span>#{proc.title}</span>
-                                                    <span class="font-light pull-right">#{proc.date}</span>
-                                                </h4>
-
+                                    <ui:repeat
+                                        var="proc"
+                                        value="#{item.existingProcesses}">
+                                        <h5 class="mt-2 mb-3">
+                                            <span>#{proc.title}</span>
+                                            <span class="font-light pull-right">#{proc.date}</span>
+                                        </h5>
+            
+                                        <div class="gw-table">
+                                            <div class="gw-table__wrapper">            
                                                 <h:dataTable
                                                     id="props"
-                                                    styleClass="table table-hover table-nomargin dataTable table-bordered responsive"
+                                                    styleClass="table table-hover dataTable table-bordered responsive modaltable"
                                                     var="prop"
                                                     value="#{proc.duplicateProperties}">
-
+        
                                                     <h:column>
                                                         <f:facet name="header">
                                                             <h:outputText value="#{msgs.titel}" />
                                                         </f:facet>
                                                         <h:outputText value="#{prop.title}" />
                                                     </h:column>
-
+        
                                                     <h:column>
                                                         <f:facet name="header">
                                                             <h:outputText value="#{msgs.wert}" />
                                                         </f:facet>
                                                         <h:outputText value="#{prop.value}" />
                                                     </h:column>
-
                                                 </h:dataTable>
-                                            </ui:repeat>
-
+                                            </div>
                                         </div>
-                                    </div>
+                                    </ui:repeat>
+
+                                </div>
+                                <!-- // MODAL BODY -->
+                            </div>
+                        </div>
+                    </div>
+                    <!--  // MODAL OF EXISTING PROCESS WITH PROCESS PROPERTIES  -->
+
+                    
+                    <!-- LIST OF PROPERTIES -->
+                    <x:dataList
+                        value="#{item.properties}"
+                        var="property">
+                        
+                        <div class="row" jsf:rendered="#{item.showDetails or property.displayAlways}">
+                            <!-- LABEL -->
+                            <div class="col-12 col-md-3">
+                                <intranda:formLabel label="#{property.title}" 
+                                    labelFor="input" labelRequired="false"/>
+                            </div>
+                            <!-- // LABEL -->
+                        
+                            <div class="col-12 col-md-9 ">
+                            
+                                <!-- IF INPUT FIELD -->
+                                <ui:fragment rendered="#{property.type == 'input'}">
+                                    <ui:include src="plugin_workflow_aeon_include_input.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF INPUT FIELD -->
+                            
+                                <!-- IF SELECT FIELD -->
+                                <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary'}">
+                                    <ui:include src="plugin_workflow_aeon_include_select.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF SELECT FIELD -->
+                            
+                                 <!-- IF CHECKBOX FIELD -->
+                                <ui:fragment rendered="#{property.type == 'checkbox'}">
+                                   <ui:include src="plugin_workflow_aeon_include_checkbox.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF CHECKBOX FIELD -->
+                                
+                                <!-- IF RADIO FIELD -->
+                                <ui:fragment rendered="#{property.type == 'radio'}">
+                                   <ui:include src="plugin_workflow_aeon_include_radio.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF RADIO FIELD -->
+                                
+                                <!-- IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+                                <ui:fragment rendered="#{property.type == 'select+text'}">
+                                     <ui:include src="plugin_workflow_aeon_include_selectAndText.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+                                
+                                <!-- IF MULTISELECT FIELD -->
+                                <ui:fragment rendered="#{property.type == 'multiselect'}">
+                                     <ui:include src="plugin_workflow_aeon_include_multiselect.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF MULTISELECT FIELD -->
+                                
+                                <!-- VALIDATION AND HELP -->
+                                <ui:include  src="plugin_workflow_aeon_include_validationAndHelp.xhtml"/>
+                                
+                            </div>
+                        </div>
+                    </x:dataList>
+                    <!-- LIST OF PROPERTIES -->
+                    
+                    <!-- LIST OF EXPANDED PROPERTIES -->
+                    <ui:fragment rendered="#{item.showDetails and NavigationForm.workflowPlugin.operationType eq 'creation'}">
+                        <x:dataList
+                            value="#{item.processProperties}"
+                            var="property">
+
+                            <div class="row" jsf:rendered="#{item.showDetails or property.displayAlways}">
+                                <!-- LABEL -->
+                                <div class="col-12 col-md-3">
+                                    <intranda:formLabel label="#{property.title}" 
+                                        labelFor="input" labelRequired="false"/>
+                                </div>
+                                <!-- // LABEL -->
+                            
+                                <div class="col-12 col-md-9 ">
+                                
+                                    <!-- IF INPUT FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'input'}">
+                                        <ui:include src="plugin_workflow_aeon_include_input.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF INPUT FIELD -->
+                                
+                                    <!-- IF SELECT FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary'}">
+                                        <ui:include src="plugin_workflow_aeon_include_select.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF SELECT FIELD -->
+                                
+                                     <!-- IF CHECKBOX FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'checkbox'}">
+                                       <ui:include src="plugin_workflow_aeon_include_checkbox.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF CHECKBOX FIELD -->
+                                    
+                                    <!-- IF RADIO FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'radio'}">
+                                       <ui:include src="plugin_workflow_aeon_include_radio.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF RADIO FIELD -->
+                                    
+                                    <!-- IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'select+text'}">
+                                         <ui:include src="plugin_workflow_aeon_include_selectAndText.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+                                    
+                                    <!-- IF MULTISELECT FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'multiselect'}">
+                                         <ui:include src="plugin_workflow_aeon_include_multiselect.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF MULTISELECT FIELD -->
+                                    
+                                    <!-- OUTPUT ONLY -->
+                                    <x:outputText
+                                        id="output"
+                                        rendered="#{property.type == 'input-dont-overwrite' or property.type == 'radio-dont-overwrite' or property.type == 'select-dont-overwrite'}"
+                                        forceId="false"
+                                        name="output"
+                                        styleClass="form-control form__input #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''} greybackground"
+                                        value="#{property.value}"
+                                        required="false">
+                                    </x:outputText>
+                                    <!-- // OUTPUT ONLY -->
+                                    
+                                    <!-- CONTENT IS DIFFERENT -->
+                                    <h:panelGroup
+                                        layout="block"
+                                        rendered="#{property.valid and property.differFromDefault}"
+                                        styleClass="w-100 contentIsDifferent-message">
+                                        <i class="fa fa-pencil-square warning-icon"/>
+                                        <h:outputText value="#{msgs.plugin_workflow_aeon_differentValue}"/>
+                                    </h:panelGroup>
+                                    <!-- // CONTENT IS DIFFERENT -->
+        
+        
+                                    <!-- VALIDATION AND HELP -->
+                                    <ui:include  src="plugin_workflow_aeon_include_validationAndHelp.xhtml"/>
+                                    
                                 </div>
                             </div>
+                        </x:dataList>
 
-                            <!-- waning when cancel not allowed -->
-                            <h:outputText
-                                id="item-disabled"
-                                style="padding: 10px;margin-bottom:0;display: block;"
-                                styleClass="alert alert-danger"
-                                value="#{msgs.plugin_workflow_aeon_deletionDisabled}"
-                                rendered="#{item.disabled and NavigationForm.workflowPlugin.operationType == 'cancel'}" />
+                    </ui:fragment>
+                    <!-- // LIST OF EXPANDED PROPERTIES -->
+                        
+                </intranda:box>
+                
+                <div style="height:10px;"/>
+            </ui:repeat>
+            <!-- // RUN THROUGH ALL FOLDERS -->
+            
+            <!-- SOME DISTANCE TO ALLOW SCROLLING -->
+            <div style="height:50px;"/>
+            
+            <!-- BUTTONS -->
+            <ui:fragment rendered="#{NavigationForm.workflowPlugin.recordList != null and NavigationForm.workflowPlugin.recordList.size() > 0}">
 
-                            <x:dataList
-                                value="#{item.properties}"
-                                var="property">
-                                <ui:fragment rendered="#{property.type == 'input' and (item.showDetails or property.displayAlways)}">
-                                    <h:panelGroup
-                                        layout="block"
-                                        styleClass="form-group"
-                                        id="group">
-                                        <div class="col-sm-3 control-label notFocusable">
-                                            <h:outputLabel
-                                                for="input"
-                                                value="#{property.title}" />
-                                        </div>
-                                        <div class="col-sm-9">
-                                            <x:inputText
-                                                id="input"
-                                                forceId="false"
-                                                name="input"
-                                                styleClass="form-control"
-                                                value="#{property.value}"
-                                                required="false"
-                                                readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="group"
-                                                    event="blur" />
-                                            </x:inputText>
-
-                                            <h:outputText
-                                                styleClass="help-inline  #{property.strictValidation ? 'font-danger' : ''} alert"
-                                                rendered="#{!property.valid}"
-                                                value="#{property.validationErrorMessage}" />
-
-                                            <h:outputText
-                                                styleClass="help-block font-light"
-                                                rendered="#{NavigationForm.showHelp}"
-                                                value="#{property.helpMessage}" />
-                                        </div>
-                                    </h:panelGroup>
-                                </ui:fragment>
-
-                                <intranda:formInputDropDownAjax
-                                    name="dropdown"
-                                    rendered="#{property.type == 'select' or property.type == 'vocabulary' and (item.showDetails or property.displayAlways)}"
-                                    label="#{property.title}"
-                                    field="#{property.value}"
-                                    help="#{property.helpMessage}"
-                                    selectItems="#{property.selectValues}"
-                                    fieldStyle="form-control"
-                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}"
-                                    required="false"
-                                    ajaxEvent="change"
-                                    ajaxRender="@this"
-                                    var="var"
-                                    itemLabel="#{var}"
-                                    itemValue="#{var}" />
-                                <!--                                     validator="#{property.validateProperty}" -->
-
-                                <intranda:formInputCheckBoxAjax
-                                    name="checkbox"
-                                    rendered="#{property.type == 'checkbox' and (item.showDetails or property.displayAlways)}"
-                                    label="#{property.title}"
-                                    field="#{property.value}"
-                                    help="#{property.helpMessage}"
-                                    fieldStyle="form-control"
-                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}"
-                                    required="false"
-                                    ajaxEvent="change"
-                                    ajaxRender="@this" />
-                                <!--                                     validator="#{property.validateProperty}" -->
-                                <h:panelGroup
-                                    layout="block"
-                                    styleClass="form-group"
-                                    rendered="#{property.type == 'radio' and (item.showDetails or property.displayAlways)}">
-                                    <div class="col-sm-3 control-label">
-                                        <h:outputLabel
-                                            for="radio"
-                                            value="#{property.title}" />
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <h:selectOneRadio
-                                            id="radio"
-                                            styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                            value="#{property.value}"
-                                            readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                            <f:ajax
-                                                execute="@this"
-                                                render="@all"
-                                                event="change" />
-                                            <f:selectItems
-                                                value="#{property.selectValues}"
-                                                var="var"
-                                                itemLabel="#{var}"
-                                                itemValue="#{var}" />
-                                        </h:selectOneRadio>
-                                        <h:message
-                                            for="radio"
-                                            showDetail="true"
-                                            styleClass="help-inline font-danger" />
-                                        <h:outputText
-                                            styleClass="help-block font-light"
-                                            rendered="#{NavigationForm.showHelp}"
-                                            value="#{property.helpMessage}" />
-                                    </div>
-                                </h:panelGroup>
-
-
-                                <h:panelGroup
-                                    layout="block"
-                                    styleClass="form-group"
-                                    rendered="#{property.type == 'select+text' and (item.showDetails or property.displayAlways)}">
-                                    <div class="col-sm-3 control-label">
-                                        <h:outputLabel
-                                            for="selection"
-                                            value="#{property.title}" />
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <!-- select menu and additional text box -->
-                                        <h:selectOneMenu
-                                            id="selection"
-                                            styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                            value="#{property.value}"
-                                            readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                            <f:ajax
-                                                execute="@this"
-                                                render="@all"
-                                                event="change" />
-                                            <f:selectItem
-                                                itemValue=""
-                                                itemLabel="#{msgs.bitteAuswaehlen}"
-                                                itemDisabled="true" />
-                                            <f:selectItems
-                                                value="#{property.selectValues}"
-                                                var="var"
-                                                itemLabel="#{var}"
-                                                itemValue="#{var}" />
-                                        </h:selectOneMenu>
-                                        <x:inputText
-                                            style="margin-top: 5px;"
-                                            id="additionalInput"
-                                            forceId="false"
-                                            rendered="#{property.displayMap[property.value]}"
-                                            styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                            value="#{property.additionalValue}"
-                                            required="false"
-                                            readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                            <f:ajax
-                                                execute="@this"
-                                                render="@all"
-                                                event="blur" />
-                                        </x:inputText>
-                                        <h:message
-                                            for="selection"
-                                            showDetail="true"
-                                            styleClass="help-inline font-danger" />
-                                        <h:outputText
-                                            styleClass="help-block font-light"
-                                            rendered="#{NavigationForm.showHelp}"
-                                            value="#{property.helpMessage}" />
-                                    </div>
-                                </h:panelGroup>
-
-
-
-                                <h:panelGroup
-                                    layout="block"
-                                    styleClass="form-group"
-                                    rendered="#{property.type == 'multiselect' and (item.showDetails or property.displayAlways)}">
-
-                                    <div class="col-sm-3 control-label">
-                                        <h:outputLabel
-                                            for="multiselect"
-                                            value="#{property.title}" />
-                                    </div>
-                                    <div class="col-sm-9 metadata-row-area-content metadata-row-area-content-white">
-                                        <h:selectOneMenu
-                                            id="multiselect"
-                                            forceId="true"
-                                            styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                            value="#{property.multiselectValue}"
-                                            required="false"
-                                            readonly="false">
-
-                                            <f:ajax
-                                                execute="@this"
-                                                render="@all"
-                                                event="change" />
-                                            <f:selectItem
-                                                itemValue=""
-                                                itemLabel="#{msgs.bitteAuswaehlen}"
-                                                itemDisabled="true" />
-                                            <f:selectItems
-                                                value="#{property.possibleValues}"
-                                                var="var"
-                                                itemLabel="#{var}"
-                                                itemValue="#{var}" />
-                                        </h:selectOneMenu>
-
-                                        <div>
-                                            <x:dataList
-                                                value="#{property.multiselectSelectedValues}"
-                                                var="selection">
-                                                <h:commandLink action="#{property.removeSelectedValue(selection)}">
-                                                    <span class="badge margin-top-10">
-                                                        <h:outputText value="#{msgs[selection]}" />
-                                                    </span>
-                                                    <f:ajax
-                                                        execute="@this"
-                                                        render="@all" />
-                                                </h:commandLink>
-                                            </x:dataList>
-                                        </div>
-                                    </div>
-
-
-                                    <h:outputText
-                                        styleClass="help-block font-light"
-                                        rendered="#{NavigationForm.showHelp}"
-                                        value="#{property.helpMessage}" />
-
-                                </h:panelGroup>
-                            </x:dataList>
-
-                            <ui:fragment rendered="#{item.showDetails and NavigationForm.workflowPlugin.operationType eq 'creation'}">
-                                <x:dataList
-                                    value="#{item.processProperties}"
-                                    var="property">
-
-                                    <h:panelGroup
-                                        layout="block"
-                                        styleClass="form-group"
-                                        id="group">
-                                        <div class="col-sm-3 control-label notFocusable">
-                                            <h:outputLabel
-                                                for="input"
-                                                value="#{property.title}" />
-                                        </div>
-                                        <div class="col-sm-9 position-relative">
-                                            <i
-                                                class="fa fa-info warning-icon"
-                                                jsf:rendered="#{!property.valid and !property.strictValidation}" />
-                                            <i
-                                                class="fa fa-exclamation warning-icon error"
-                                                jsf:rendered="#{!property.valid and property.strictValidation}" />
-                                            <i
-                                                class="fa fa-pencil warning-icon check"
-                                                jsf:rendered="#{property.valid and property.differFromDefault}" />
-                                            <ui:fragment rendered="#{property.type == 'input'}">
-                                                <x:inputText
-                                                    id="input"
-                                                    forceId="false"
-                                                    name="input"
-                                                    styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                    value="#{property.value}"
-                                                    required="false"
-                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                    <!--                                                     validator="#{property.validateProperty}" -->
-                                                    <f:ajax
-                                                        execute="@this"
-                                                        render="group"
-                                                        event="blur" />
-                                                </x:inputText>
-                                            </ui:fragment>
-                                            <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary'}">
-
-                                                <h:selectOneMenu
-                                                    styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                    value="#{property.value}"
-                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                    <f:ajax
-                                                        event="change"
-                                                        render="group"
-                                                        execute="@this" />
-                                                    <f:selectItem
-                                                        itemValue=""
-                                                        itemLabel="#{msgs.bitteAuswaehlen}"
-                                                        itemDisabled="true" />
-                                                    <f:selectItems
-                                                        value="#{property.selectValues}"
-                                                        var="var"
-                                                        itemLabel="#{var}"
-                                                        itemValue="#{var}" />
-                                                </h:selectOneMenu>
-                                            </ui:fragment>
-
-                                            <ui:fragment rendered="#{property.type == 'checkbox'}">
-                                                <h:selectBooleanCheckbox
-                                                    styleClass="checkbox-height-fix"
-                                                    style="margin-left: 0px;"
-                                                    value="#{property.value}"
-                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                    <f:ajax
-                                                        event="change"
-                                                        render="group"
-                                                        execute="@this" />
-                                                </h:selectBooleanCheckbox>
-                                            </ui:fragment>
-
-                                            <ui:fragment rendered="#{property.type == 'radio'}">
-                                                <h:selectOneRadio
-                                                    id="radio"
-                                                    styleClass="#{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                    value="#{property.value}"
-                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                    <f:ajax
-                                                        execute="@this"
-                                                        render="@all"
-                                                        event="change" />
-                                                    <f:selectItems
-                                                        value="#{property.selectValues}"
-                                                        var="var"
-                                                        itemLabel="#{var}"
-                                                        itemValue="#{var}" />
-                                                </h:selectOneRadio>
-
-                                            </ui:fragment>
-
-                                            <!-- select menu and additional text box -->
-                                            <ui:fragment rendered="#{property.type == 'select+text'}">
-                                                <h:selectOneMenu
-                                                    id="selection"
-                                                    styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                    value="#{property.value}"
-                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                    <f:ajax
-                                                        execute="@this"
-                                                        render="@all"
-                                                        event="change" />
-                                                    <f:selectItem
-                                                        itemValue=""
-                                                        itemLabel="#{msgs.bitteAuswaehlen}"
-                                                        itemDisabled="true" />
-                                                    <f:selectItems
-                                                        value="#{property.selectValues}"
-                                                        var="var"
-                                                        itemLabel="#{var}"
-                                                        itemValue="#{var}" />
-                                                </h:selectOneMenu>
-                                                <x:inputText
-                                                    style="margin-top: 5px;"
-                                                    id="additionalInput"
-                                                    forceId="false"
-                                                    rendered="#{property.displayMap[property.value]}"
-                                                    styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                    value="#{property.additionalValue}"
-                                                    required="false"
-                                                    readonly="#{property.readonly or NavigationForm.workflowPlugin.operationType ne 'creation'}">
-                                                    <f:ajax
-                                                        execute="@this"
-                                                        render="@all"
-                                                        event="blur" />
-                                                </x:inputText>
-                                            </ui:fragment>
-
-
-                                            <h:panelGroup
-                                                layout="block"
-                                                id="hierarchy"
-                                                rendered="#{property.type == 'multiselect'}">
-                                                <div class="col-sm-9 metadata-row-area-content metadata-row-area-content-white">
-                                                    <h:selectOneMenu
-                                                        id="multiselect"
-                                                        forceId="true"
-                                                        styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                        value="#{property.multiselectValue}"
-                                                        required="false"
-                                                        readonly="false">
-
-                                                        <f:ajax
-                                                            execute="@this"
-                                                            render="@all"
-                                                            event="change" />
-                                                        <f:selectItem
-                                                            itemValue=""
-                                                            itemLabel="#{msgs.bitteAuswaehlen}"
-                                                            itemDisabled="true" />
-                                                        <f:selectItems
-                                                            value="#{property.possibleValues}"
-                                                            var="var"
-                                                            itemLabel="#{var}"
-                                                            itemValue="#{var}" />
-                                                    </h:selectOneMenu>
-
-                                                    <div>
-                                                        <x:dataList
-                                                            value="#{property.multiselectSelectedValues}"
-                                                            var="selection">
-                                                            <h:commandLink action="#{property.removeSelectedValue(selection)}">
-                                                                <span class="badge margin-top-10">
-                                                                    <h:outputText value="#{msgs[selection]}" />
-                                                                </span>
-                                                                <f:ajax
-                                                                    execute="@this"
-                                                                    render="@all" />
-                                                            </h:commandLink>
-                                                        </x:dataList>
-                                                    </div>
-                                                </div>
-                                            </h:panelGroup>
-
-                                            <ui:fragment rendered="#{property.type == 'input-dont-overwrite' or property.type == 'radio-dont-overwrite' or property.type == 'select-dont-overwrite'}">
-                                                <x:outputText
-                                                    id="output"
-                                                    forceId="false"
-                                                    name="input"
-                                                    styleClass="form-control #{!property.valid ? 'invalid' : property.differFromDefault ? 'differFromDefault' : ''} #{property.strictValidation ? 'strict' : ''} greybackground"
-                                                    value="#{property.value}"
-                                                    required="false">
-
-                                                </x:outputText>
-                                            </ui:fragment>
-
-
-                                            <h:panelGroup
-                                                layout="block"
-                                                rendered="#{!property.valid}"
-                                                styleClass=" #{property.strictValidation ? 'font-danger' : ''} validation-message">
-                                                <h:outputText value="#{property.validationErrorMessage}" />
-                                            </h:panelGroup>
-                                            <h:outputText
-                                                styleClass="help-block font-light"
-                                                rendered="#{NavigationForm.showHelp}"
-                                                value="#{property.helpMessage}" />
-                                        </div>
-                                    </h:panelGroup>
-
-
-
-                                </x:dataList>
-
-
-                            </ui:fragment>
-                        </h:panelGroup>
-                    </div>
-                </ui:repeat>
-                <!-- accept all / decline all buttons -->
-
-                <ui:fragment rendered="#{NavigationForm.workflowPlugin.recordList != null and NavigationForm.workflowPlugin.recordList.size() > 0}">
-                    <div class="margin-top-10">
-
-                        <button
-                            jsf:id="declineAll"
-                            class="btn margin-right-10 font-size-s"
-                            jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
-                            <i class="fa fa-toggle-off margin-right-5"></i>
-                            <h:outputText
-                                styleClass="font-size-s"
-                                value="#{msgs.plugin_workflow_aeon_declineAll}" />
-                            <f:ajax render=":itemForm" />
-                        </button>
-
-                        <button
-                            jsf:id="acceptAll"
-                            class="btn margin-right-10 font-size-s"
-                            jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
-                            <i class="fa fa-toggle-on margin-right-5 #{NavigationForm.workflowPlugin.operationType == 'creation' ? 'bcolor-creation' : 'bcolor-deletion'}"></i>
-                            <h:outputText
-                                styleClass="font-size-s"
-                                value="#{msgs.plugin_workflow_aeon_acceptAll}" />
-
-                            <f:ajax render=":itemForm" />
-                        </button>
-
-                    </div>
-                    <div class="margin-top-10 pull-right">
-
-                         <button
-                            onclick="preventDoubleSubmit(this);"
-                            class="btn btn-success font-size-s pull-right border-creation"
-                            jsf:id="absenden"
-                            jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'creation'}"
-                            jsf:action="#{NavigationForm.workflowPlugin.nextPage}">
-                            <i class="fa fa-arrow-circle-o-right margin-right-5"></i>
-                            <h:outputText
-                                styleClass="font-size-s"
-                                value="#{msgs.weiter}" />
-                        </button>
-
-
-                        <button
-                            jsf:rendered="#{NavigationForm.workflowPlugin.operationType == 'cancel'}"
-                            class="btn btn-danger font-size-s pull-right border-deletion"
-                            jsf:id="disable"
-                            type="button"
-                            data-toggle="modal"
-                            data-target="#deleteModal">
-                            <i class="fa fa-trash-o margin-right-5" />
-                            <h:outputText
-                                styleClass="font-size-s"
-                                value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
-                        </button>
-
-                        <div
-                            class="modal fade"
-                            id="deleteModal"
-                            tabindex="-1"
-                            role="dialog"
-                            aria-labelledby="myModalLabel">
-                            <div
-                                class="modal-dialog"
-                                role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4
-                                            class="modal-title"
-                                            id="myModalLabel">
-                                            <h:outputText value="#{msgs.loeschen}" />
-                                        </h4>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>#{msgs.plugin_workflow_aeon_deletionWarningConfirmation}</p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button
-                                            class="btn"
-                                            data-dismiss="modal"
-                                            aria-hidden="true">#{msgs.abbrechen}</button>
-                                        <button
-                                            jsf:id="confirmDelete"
-                                            class="btn btn-danger"
-                                            jsf:action="#{NavigationForm.workflowPlugin.cancelProcesses}">
-                                            <i class="fa fa-trash-o margin-right-5" />
+                <div class="fixed-bottom">
+                
+                    <div class="row">
+                        <div class="col-sm-6"></div>
+                        <div class="col-sm-6">
+                        
+                            <div class="p-3 bg-light border-top border-start border-end #{NavigationForm.workflowPlugin.operationType eq 'creation' ? 'borderSuccess' : 'borderHot'}">
+                                <button
+                                    jsf:id="declineAll"
+                                    class="btn btn-blank me-2 ms-3"
+                                    jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
+                                    <i class="fa fa-toggle-off"></i>
+                                    <span>
+                                    <h:outputText value="#{msgs.plugin_workflow_aeon_declineAll}" />
+                                    </span>
+                                    <f:ajax render=":itemForm" />
+                                </button>
+                
+                                <button
+                                    jsf:id="acceptAll"
+                                    class="btn btn-blank"
+                                    jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
+                                    <i class="fa fa-toggle-on #{NavigationForm.workflowPlugin.operationType eq 'creation' ? 'bcolor-creation' : 'bcolor-deletion'}"></i>
+                                    <span>
+                                        <h:outputText value="#{msgs.plugin_workflow_aeon_acceptAll}" />
+                                    </span>
+                                    <f:ajax render=":itemForm" />
+                                </button>
+                
+                                <div class="float-end">
+                
+                                     <button
+                                        onclick="preventDoubleSubmit(this);"
+                                        class="btn btn-success float-end me-4"
+                                        jsf:id="absenden"
+                                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType eq 'creation'}"
+                                        jsf:action="#{NavigationForm.workflowPlugin.nextPage}">
+                                        <i class="fa fa-arrow-circle-o-right"></i>
+                                        <span>
+                                            <h:outputText value="#{msgs.weiter}" />
+                                        </span>
+                                    </button>
+                
+                                    <button
+                                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType eq 'cancel'}"
+                                        class="btn btn-hot float-end me-4"
+                                        jsf:id="disable"
+                                        type="button"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal">
+                                        <i class="fa fa-trash-o" />
+                                        <span>
                                             <h:outputText value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
-                                        </button>
-                                    </div>
+                                        </span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
-
                     </div>
-                </ui:fragment>
+                </div>
 
-            </h:form>
-        </div>
+                <div
+                    class="modal fade"
+                    id="deleteModal"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="myModalLabel">
+                    <div
+                        class="modal-dialog"
+                        role="document">
+                        <div class="modal-content">
+                            <!-- MODAL HEADER -->
+                            <div class="modal-header bg-primary-400 text-white">
+                                <h4
+                                    class="modal-title"
+                                    id="myModalLabel">
+                                    <h:outputText value="#{msgs.loeschen}" />
+                                </h4>
+                            </div>
+                            <!-- // MODAL HEADER -->
+                            
+                            <!-- MODAL BODY -->
+                            <div class="modal-body">
+                                <p>#{msgs.plugin_workflow_aeon_deletionWarningConfirmation}</p>
+                            </div>
+                            <!-- // MODAL BODY -->
+                            
+                            <div class="modal-footer">
+                                <button
+                                    class="btn btn-blank"
+                                    data-dismiss="modal"
+                                    aria-hidden="true">#{msgs.abbrechen}</button>
+                                <button
+                                    jsf:id="confirmDelete"
+                                    class="btn btn-danger"
+                                    jsf:action="#{NavigationForm.workflowPlugin.cancelProcesses}">
+                                    <i class="fa fa-trash-o" />
+                                    <span>
+                                        <h:outputText value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ui:fragment>
+            <!-- // BUTTONS -->
 
 
+        </h:form>
+        <!-- // ALL OBJECTS FROM REQUEST SUCCESS -->
+        
     </composite:implementation>
 </ui:composition>

@@ -805,8 +805,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     // save fileformat
                     process.writeMetadataFile(fileformat);
                     generatedProcesses.add(process);
+                    screenName = "summary";
+                    overviewMode = "saved";
+                    Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_processCreated") + ": " + process.getTitel());
                 } catch (Exception e) {
-                    log.error(e);
+                    log.error("Error while creating the Goobi processes", e);
+                    Helper.setFehlerMeldung("Error while creating the Goobi processes", e);
                 }
 
                 // start any open automatic tasks
@@ -818,10 +822,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                 }
             }
         }
-        Helper.setMeldung("plugin_workflow_aeon_processesCreated");
 
-        screenName = "summary";
-        overviewMode = "saved";
     }
 
     /**

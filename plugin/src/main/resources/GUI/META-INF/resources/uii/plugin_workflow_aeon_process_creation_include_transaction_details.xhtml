@@ -7,158 +7,87 @@
     xmlns:x="http://myfaces.apache.org/tomahawk"
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:jsf="http://xmlns.jcp.org/jsf"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
     xmlns:c="http://java.sun.com/jstl/core">
 
     <composite:interface>
     </composite:interface>
 
     <composite:implementation>
-        <h:form
-            id="myform"
-            styleClass="form-horizontal form-bordered">
-            <!-- transaction Details Box (NO REQUEST)
-            <div
-                jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false or NavigationForm.workflowPlugin.operationType != 'creation'}"
-                class="box  thin-margin  lightgrey box-bordered">
-                <div
-                    class="box-title"
-                    style="background-color: #eee;">
-                    <h2 class="tableColumnMaxWidthExtraLong">#{msgs.plugin_workflow_aeon_requestedDetails}</h2>
+        
+        <!-- BOX WITH TRANSACTION DETAILS -->
+        <h:form id="myform" rendered="#{NavigationForm.workflowPlugin.requestSuccess and NavigationForm.workflowPlugin.operationType == 'creation'}" styleClass="mb-3">
+        
+            <intranda:box
+                boxType="outline"
+                boxPadding="false"
+                boxForm="true"
+                icon="fa-plug"
+                title="#{msgs.plugin_workflow_aeon_requestedDetails}">
+                
+                <!-- RUN THROUGH ALL FIELDS -->
+                <x:dataList
+                    value="#{NavigationForm.workflowPlugin.transactionFields}"
+                    var="property">
+                    
+                    <div class="row">
+                        
+                        <!-- LABEL -->
+                        <div class="col-12 col-md-3">
+                            <intranda:formLabel label="#{property.title}" 
+                                labelFor="input"  labelRequired="false"/>
+                        </div>
+                        <!-- // LABEL -->
+                        
+                        <div class="col-12 col-md-9 ">
+                            
+                            <!-- IF INPUT FIELD -->
+                            <ui:fragment rendered="#{property.type == 'input' or property.type == 'input-dont-overwrite'}">
+                                <ui:include  src="plugin_workflow_aeon_include_input.xhtml"/>
+                            </ui:fragment>
+                            <!-- // IF INPUT FIELD -->
+                            
+                            <!-- IF SELECT FIELD -->
+                            <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary' or property.type == 'select-dont-overwrite'}">
+                                <ui:include  src="plugin_workflow_aeon_include_select.xhtml"/>
+                            </ui:fragment>
+                            <!-- // IF SELECT FIELD -->
+                            
+                            <!-- IF CHECKBOX FIELD -->
+                            <ui:fragment rendered="#{property.type == 'checkbox'}">
+                               <ui:include  src="plugin_workflow_aeon_include_checkbox.xhtml"/>
+                            </ui:fragment>
+                            <!-- // IF CHECKBOX FIELD -->
 
-                </div>
-                <div class="box-content nopadding">
+                            <!-- IF RADIO FIELD -->
+                            <ui:fragment rendered="#{property.type == 'radio' or property.type == 'radio-dont-overwrite'}">
+                               <ui:include  src="plugin_workflow_aeon_include_radio.xhtml"/>
+                            </ui:fragment>
+                            <!-- // IF RADIO FIELD -->
 
-                    <div style="background-color: #eee; height: 250px;">
-                        <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
-                            <p>#{msgs.plugin_workflow_aeon_notRequestedYet}</p>
+                            <!-- IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+                            <ui:fragment rendered="#{property.type == 'select+text'}">
+                                 <ui:include  src="plugin_workflow_aeon_include_selectAndText.xhtml"/>
+                            </ui:fragment>
+                            <!-- // IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+                            
+                            <!-- IF MULTISELECT FIELD -->
+                            <ui:fragment rendered="#{property.type == 'multiselect'}">
+                                 <ui:include src="plugin_workflow_aeon_include_multiselect.xhtml"/>
+                            </ui:fragment>
+                            <!-- // IF MULTISELECT FIELD -->
+                    
+                            <!-- VALIDATION AND HELP -->
+                            <ui:include  src="plugin_workflow_aeon_include_validationAndHelp.xhtml"/>
+                            
                         </div>
                     </div>
-                </div>
-            </div>
-            -->
-
-            <!-- transaction Details Box (REQUEST SENT)-->
-            <div
-                jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess and NavigationForm.workflowPlugin.operationType == 'creation'}"
-                class="box box-color  lightgrey box-bordered">
-                <div class="box-title">
-                    <h2>#{msgs.plugin_workflow_aeon_requestedDetails}</h2>
-
-                </div>
-                <div class="box-content nopadding">
-                    <x:dataList
-                        value="#{NavigationForm.workflowPlugin.transactionFields}"
-                        var="property">
-                        <ui:fragment rendered="#{property.type == 'input' or property.type == 'input-dont-overwrite'}">
-                            <h:panelGroup
-                                layout="block"
-                                styleClass="form-group"
-                                id="group">
-                                <div class="col-sm-3 control-label notFocusable">
-                                    <h:outputLabel
-                                        for="input"
-                                        value="#{property.title}" />
-                                </div>
-                                <div class="col-sm-9">
-                                    <x:inputText
-                                        id="input"
-                                        forceId="false"
-                                        name="input"
-                                        styleClass="form-control"
-                                        value="#{property.value}"
-                                        required="false"
-                                        readonly="#{property.readonly}"
-                                        >
-                                        <f:ajax
-                                            execute="@this"
-                                            render="group"
-                                            event="blur" />
-                                    </x:inputText>
-                                    <h:outputText
-                                        styleClass="help-inline  #{property.strictValidation ? 'font-danger' : ''} alert"
-                                        rendered="#{!property.valid}"
-                                        value="#{property.validationErrorMessage}" />
-                                    <h:outputText
-                                        styleClass="help-block font-light"
-                                        rendered="#{NavigationForm.showHelp}"
-                                        value="#{property.helpMessage}" />
-                                </div>
-                            </h:panelGroup>
-                        </ui:fragment>
-
-                                <h:panelGroup
-                                    layout="block"
-                                    styleClass="form-group"
-                                    rendered="#{property.type == 'radio' or property.type == 'radio-dont-overwrite'}">
-                                    <div class="col-sm-3 control-label">
-                                        <h:outputLabel
-                                            for="radio"
-                                            value="#{property.title}" />
-                                    </div>
-                                    <div class="col-sm-9">
-<!--                                         <i -->
-<!--                                             class="fa fa-info warning-icon" -->
-<!--                                             jsf:rendered="#{!property.valid and !property.strictValidation}" /> -->
-<!--                                         <i -->
-<!--                                             class="fa fa-exclamation warning-icon error" -->
-<!--                                             jsf:rendered="#{!property.valid and property.strictValidation}" /> -->
-                                        <h:selectOneRadio
-                                            id="radio"
-                                            styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                            value="#{property.value}">
-                                            <f:ajax
-                                                execute="@this"
-                                                render="@all"
-                                                event="change" />
-                                            <f:selectItems
-                                                value="#{property.selectValues}"
-                                                var="var"
-                                                itemLabel="#{var}"
-                                                itemValue="#{var}" />
-                                        </h:selectOneRadio>
-                                        <h:message
-                                            for="radio"
-                                            showDetail="true"
-                                            styleClass="help-inline font-danger" />
-                                        <h:outputText
-                                            styleClass="help-block font-light"
-                                            rendered="#{NavigationForm.showHelp}"
-                                            value="#{property.helpMessage}" />
-                                    </div>
-                                </h:panelGroup>
-
-
-                        <intranda:formInputDropDownAjax
-                            name="dropdown"
-                            rendered="#{property.type == 'select' or property.type == 'vocabulary' or property.type == 'select-dont-overwrite'}"
-                            label="#{property.title}"
-                            field="#{property.value}"
-                            help="#{property.helpMessage}"
-                            selectItems="#{property.selectValues}"
-                            fieldStyle="form-control"
-                            readonly="#{property.readonly}"
-                            required="false"
-                            ajaxEvent="change"
-                            ajaxRender="@this"
-                            var="var"
-                            itemLabel="#{var}"
-                            itemValue="#{var}" />
-
-                        <intranda:formInputCheckBoxAjax
-                            name="checkbox"
-                            rendered="#{property.type == 'checkbox'}"
-                            label="#{property.title}"
-                            field="#{property.value}"
-                            help="#{property.helpMessage}"
-                            fieldStyle="form-control"
-                            readonly="#{property.readonly}"
-                            required="false"
-                            ajaxEvent="change"
-                            ajaxRender="@this" />
-                    </x:dataList>
-                </div>
-            </div>
+                </x:dataList>
+                <!-- // RUN THROUGH ALL FIELDS -->
+         
+            </intranda:box>
         </h:form>
+        <!-- // BOX WITH TRANSACTION DETAILS -->
+
     </composite:implementation>
 </ui:composition>

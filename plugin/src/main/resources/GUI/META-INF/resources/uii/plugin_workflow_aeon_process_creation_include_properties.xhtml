@@ -7,241 +7,86 @@
     xmlns:x="http://myfaces.apache.org/tomahawk"
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:jsf="http://xmlns.jcp.org/jsf"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites">
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG">
 
     <composite:interface>
     </composite:interface>
 
     <composite:implementation>
-        <!-- Properties Box (NO REQUEST)
-        <div
-            jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess == false or NavigationForm.workflowPlugin.operationType != 'creation'}"
-            class="box thin-margin lightgrey box-bordered">
-            <div
-                class="box-title"
-                style="background-color: #eee;">
-                <h2 class="tableColumnMaxWidthExtraLong">#{msgs.plugin_workflow_aeon_propertiesForAllProcesses}</h2>
 
-            </div>
-            <div class="box-content nopadding">
+        <!-- PROCESS PROPERTIES -->
+        <h:form id="properties" rendered="#{NavigationForm.workflowPlugin.requestSuccess and NavigationForm.workflowPlugin.operationType == 'creation'}">
+            
+            <intranda:box
+                boxType="action"
+                boxPadding="false"
+                boxForm="true"
+                icon="fa-plug"
+                title="#{msgs.plugin_workflow_aeon_propertiesForAllProcesses}">
+                
+                <x:dataList
+                    value="#{NavigationForm.workflowPlugin.propertyFields}"
+                    var="property">
 
-                <div style="background-color: #eee; height: 250px; text-align: center;">
-                    <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
-                        <p>#{msgs.plugin_workflow_aeon_notRequestedYet}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        -->
+                    <ui:fragment rendered="#{property.shippingOption == null or property.shippingOption == NavigationForm.workflowPlugin.shippingOption}">
 
-        <!-- Properties Box (REQUEST SENT) ++++ STILL EMPTY +++++  -->
-        <div
-            jsf:rendered="#{NavigationForm.workflowPlugin.requestSuccess and NavigationForm.workflowPlugin.operationType == 'creation'}"
-            class="box box-color orange box-bordered">
-            <div class="box-title">
-                <h2>#{msgs.plugin_workflow_aeon_propertiesForAllProcesses}</h2>
-            </div>
-            <div class="box-content nopadding">
-                <h:form
-                    id="properties"
-                    styleClass="form-horizontal form-bordered">
+                        <div class="row">
+                            <!-- LABEL -->
+                            <div class="col-12 col-md-3">
+                                <intranda:formLabel label="#{property.title}" 
+                                    labelFor="input" labelRequired="false"/>
+                            </div>
+                            <!-- // LABEL -->
+                            
+                            <div class="col-12 col-md-9 ">
+                            
+                                <!-- IF INPUT FIELD -->
+                                <ui:fragment rendered="#{property.type == 'input' or property.type == 'input-dont-overwrite'}">
+                                    <ui:include src="plugin_workflow_aeon_include_input.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF INPUT FIELD -->
+                                
+                                <!-- IF SELECT FIELD -->
+                                <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary' or property.type == 'select-dont-overwrite'}">
+                                    <ui:include src="plugin_workflow_aeon_include_select.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF SELECT FIELD -->
+                                
+                                <!-- IF CHECKBOX FIELD -->
+                                <ui:fragment rendered="#{property.type == 'checkbox'}">
+                                   <ui:include src="plugin_workflow_aeon_include_checkbox.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF CHECKBOX FIELD -->
 
-                    <div>
-                        <x:dataList
-                            value="#{NavigationForm.workflowPlugin.propertyFields}"
-                            var="property">
+                                <!-- IF RADIO FIELD -->
+                                <ui:fragment rendered="#{property.type == 'radio' or property.type == 'radio-dont-overwrite'}">
+                                   <ui:include src="plugin_workflow_aeon_include_radio.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF RADIO FIELD -->
 
+                                <!-- IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+                                <ui:fragment rendered="#{property.type == 'select+text'}">
+                                     <ui:include src="plugin_workflow_aeon_include_selectAndText.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+                                
+                                <!-- IF MULTISELECT FIELD -->
+                                <ui:fragment rendered="#{property.type == 'multiselect'}">
+                                     <ui:include src="plugin_workflow_aeon_include_multiselect.xhtml"/>
+                                </ui:fragment>
+                                <!-- // IF MULTISELECT FIELD -->
 
-                            <ui:fragment rendered="#{property.shippingOption == null or property.shippingOption == NavigationForm.workflowPlugin.shippingOption}">
+                                <!-- VALIDATION AND HELP -->
+                                <ui:include  src="plugin_workflow_aeon_include_validationAndHelp.xhtml"/>
+                                
+                            </div>
+                        </div>
 
-                                <h:panelGroup
-                                    layout="block"
-                                    styleClass="form-group"
-                                    id="group">
-                                    <div class="col-sm-3 control-label notFocusable">
-                                        <h:outputLabel
-                                            for="input"
-                                            value="#{property.title}" />
-                                    </div>
-                                    <div class="col-sm-9 position-relative">
-                                        <i
-                                            class="fa fa-info warning-icon"
-                                            jsf:rendered="#{!property.valid and !property.strictValidation}" />
-                                        <i
-                                            class="fa fa-exclamation warning-icon error"
-                                            jsf:rendered="#{!property.valid and property.strictValidation}" />
-
-                                        <!-- input field -->
-                                        <ui:fragment rendered="#{property.type == 'input' or property.type == 'input-dont-overwrite'}">
-                                            <x:inputText
-                                                id="input"
-                                                forceId="false"
-                                                name="input"
-                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.value}"
-                                                required="false"
-                                                readonly="#{property.readonly}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="blur" />
-                                            </x:inputText>
-                                        </ui:fragment>
-
-                                        <!-- select menu -->
-                                        <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary' or property.type == 'select-dont-overwrite'}">
-                                            <h:selectOneMenu
-                                                id="dropdown"
-                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.value}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="change" />
-                                                <f:selectItem
-                                                    itemValue=""
-                                                    itemLabel="#{msgs.bitteAuswaehlen}"
-                                                    itemDisabled="true" />
-                                                <f:selectItems
-                                                    value="#{property.selectValues}"
-                                                    var="var"
-                                                    itemLabel="#{var}"
-                                                    itemValue="#{var}" />
-                                            </h:selectOneMenu>
-                                        </ui:fragment>
-
-                                        <!-- checkbox -->
-                                        <ui:fragment rendered="#{property.type == 'checkbox'}">
-                                            <h:selectBooleanCheckbox
-                                                id="checkbox"
-                                                styleClass="checkbox-height-fix"
-                                                style="margin-left: 0px;"
-                                                value="#{property.value}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="change" />
-                                            </h:selectBooleanCheckbox>
-                                        </ui:fragment>
-
-                                        <!-- radio buttons -->
-                                        <ui:fragment rendered="#{property.type == 'radio' or property.type == 'radio-dont-overwrite'}">
-                                            <h:selectOneRadio
-                                                id="radio"
-                                                styleClass="#{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.value}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="change" />
-                                                <f:selectItems
-                                                    value="#{property.selectValues}"
-                                                    var="var"
-                                                    itemLabel="#{var}"
-                                                    itemValue="#{var}" />
-                                            </h:selectOneRadio>
-
-                                        </ui:fragment>
-
-                                        <!-- select menu and additional text box -->
-                                        <ui:fragment rendered="#{property.type == 'select+text'}">
-                                            <h:selectOneMenu
-                                                id="selection"
-                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.value}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="change" />
-                                                <f:selectItem
-                                                    itemValue=""
-                                                    itemLabel="#{msgs.bitteAuswaehlen}"
-                                                    itemDisabled="true" />
-                                                <f:selectItems
-                                                    value="#{property.selectValues}"
-                                                    var="var"
-                                                    itemLabel="#{var}"
-                                                    itemValue="#{var}" />
-                                            </h:selectOneMenu>
-                                            <x:inputText
-                                                style="margin-top: 5px;"
-                                                id="additionalInput"
-                                                forceId="false"
-                                                rendered="#{property.displayMap[property.value]}"
-                                                styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                value="#{property.additionalValue}"
-                                                required="false"
-                                                readonly="#{property.readonly}">
-                                                <f:ajax
-                                                    execute="@this"
-                                                    render="@all"
-                                                    event="blur" />
-                                            </x:inputText>
-                                        </ui:fragment>
-
-
-                                        <h:panelGroup
-                                            layout="block"
-                                            id="hierarchy"
-                                            rendered="#{property.type == 'multiselect'}">
-                                            <div class="col-sm-9 metadata-row-area-content metadata-row-area-content-white">
-                                                <h:selectOneMenu
-                                                    id="multiselect"
-                                                    forceId="true"
-                                                    styleClass="form-control #{!property.valid ? 'invalid' : ''} #{property.strictValidation ? 'strict' : ''}"
-                                                    value="#{property.multiselectValue}"
-                                                    required="false"
-                                                    readonly="false">
-
-                                                    <f:ajax
-                                                        execute="@this"
-                                                        render="@all"
-                                                        event="change" />
-                                                    <f:selectItem
-                                                        itemValue=""
-                                                        itemLabel="#{msgs.bitteAuswaehlen}"
-                                                        itemDisabled="true" />
-                                                    <f:selectItems
-                                                        value="#{property.possibleValues}"
-                                                        var="var"
-                                                        itemLabel="#{var}"
-                                                        itemValue="#{var}" />
-                                                </h:selectOneMenu>
-
-                                                <div>
-                                                    <x:dataList
-                                                        value="#{property.multiselectSelectedValues}"
-                                                        var="selection">
-                                                        <h:commandLink action="#{property.removeSelectedValue(selection)}">
-                                                            <span class="badge margin-top-10">
-                                                                <h:outputText value="#{msgs[selection]}" />
-                                                            </span>
-                                                            <f:ajax
-                                                                execute="@this"
-                                                                render="@all" />
-                                                        </h:commandLink>
-                                                    </x:dataList>
-                                                </div>
-                                            </div>
-                                        </h:panelGroup>
-
-                                        <h:panelGroup
-                                            layout="block"
-                                            rendered="#{!property.valid}"
-                                            styleClass=" #{property.strictValidation ? 'font-danger' : ''} validation-message">
-                                            <h:outputText value="#{property.validationErrorMessage}" />
-                                        </h:panelGroup>
-                                        <h:outputText
-                                            styleClass="help-block font-light"
-                                            rendered="#{NavigationForm.showHelp}"
-                                            value="#{property.helpMessage}" />
-                                    </div>
-                                </h:panelGroup>
-                            </ui:fragment>
-                        </x:dataList>
-                    </div>
-                </h:form>
-            </div>
-        </div>
+                    </ui:fragment>
+                </x:dataList>
+            </intranda:box>                
+        </h:form>
+        <!-- // PROCESS PROPERTIES -->
+        
     </composite:implementation>
 </ui:composition>
