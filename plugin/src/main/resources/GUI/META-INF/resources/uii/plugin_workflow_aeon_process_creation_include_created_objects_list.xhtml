@@ -17,22 +17,21 @@
 
         <!-- All Objects List (REQUEST SUCCESS) -->
         <div>
-            <h:form
-                id="itemSummaryForm">
+            <h:form id="itemSummaryForm">
                 <ui:repeat
                     var="item"
                     value="#{NavigationForm.workflowPlugin.recordList}">
-                    
+
                     <!-- RUN THROUGH ALL ACCEPTED PROCESSES -->
                     <ui:fragment rendered="#{item.accepted}">
-                        
+
                         <intranda:box
                             boxType="outline"
                             boxPadding="false"
                             boxForm="true"
                             icon="fa-search"
                             boxTitle="false">
-                            
+
                             <!-- TITLE  OF BOX -->
                             <div class="box__title">
                                 <h2>
@@ -44,7 +43,7 @@
                                             rendered="#{p.displayInTitle}" />
                                     </ui:repeat>
                                 </h2>
-                                
+
                                 <!-- BUTTONS IN TITLE -->
                                 <div class="actions d-flex">
                                     <button
@@ -52,7 +51,8 @@
                                         class="btn d-flex align-items-center btn--title-action-neutral"
                                         title="#{(item.showDetails) ? 'hide details' : 'show details'}"
                                         jsf:id="details">
-                                        <i class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'} #{item.accepted?'accepted':'notaccepted'}"></i>
+                                        <i
+                                            class="fa #{(item.showDetails) ? 'fa-angle-up' : 'fa-angle-down'} #{item.accepted?'accepted':'notaccepted'}"></i>
                                         <f:setPropertyActionListener
                                             target="#{item.showDetails}"
                                             value="#{!item.showDetails}" />
@@ -62,29 +62,44 @@
                                 <!-- // BUTTONS IN TITLE -->
                             </div>
                             <!-- // TITLE  OF BOX -->
-                            
+
                             <!-- future process title -->
                             <intranda:formOutputText
                                 label="#{msgs.prozessTitel}"
                                 field="#{item.processTitle}"
                                 name="futureTitle"
                                 required="false"
-                                fieldStyle="form-control" 
-                                help="#{msgs.plugin_workflow_aeon_futureProcessTitle}"/>
-                                
+                                fieldStyle="form-control"
+                                help="#{msgs.plugin_workflow_aeon_futureProcessTitle}" />
+
                             <x:dataList
                                 value="#{item.properties}"
                                 var="property">
 
-                                <h:panelGroup
-                                    rendered="#{item.showDetails or property.displayAlways}">
-                                     <intranda:formOutputText
+                                <ui:fragment rendered="#{property.type == 'multiselect' and (item.showDetails or property.displayAlways)}">
+                                    <ui:repeat
+                                        var="val"
+                                        value="#{property.multiselectSelectedValues}">
+                                        <h:panelGroup rendered="#{item.showDetails or property.displayAlways}">
+                                            <intranda:formOutputText
+                                                label="#{property.title}"
+                                                field="#{val}"
+                                                name="property"
+                                                required="false"
+                                                fieldStyle="form-control"
+                                                help="#{property.helpMessage}" />
+                                        </h:panelGroup>
+
+                                    </ui:repeat>
+                                </ui:fragment>
+                                <h:panelGroup rendered="#{property.type != 'multiselect' and (item.showDetails or property.displayAlways)}">
+                                    <intranda:formOutputText
                                         label="#{property.title}"
                                         field="#{property.value}"
                                         name="property"
                                         required="false"
-                                        fieldStyle="form-control" 
-                                        help="#{property.helpMessage}"/>
+                                        fieldStyle="form-control"
+                                        help="#{property.helpMessage}" />
                                 </h:panelGroup>
 
                             </x:dataList>
@@ -92,26 +107,39 @@
                             <x:dataList
                                 value="#{item.processProperties}"
                                 var="property">
-                                
-                                <h:panelGroup
-                                    rendered="#{item.showDetails or property.displayAlways}">
-                                     <intranda:formOutputText
+                                <ui:fragment rendered="#{property.type == 'multiselect' and (item.showDetails or property.displayAlways)}">
+                                    <ui:repeat
+                                        var="val"
+                                        value="#{property.multiselectSelectedValues}">
+                                        <h:panelGroup rendered="#{item.showDetails or property.displayAlways}">
+                                            <intranda:formOutputText
+                                                label="#{property.title}"
+                                                field="#{val}"
+                                                name="property"
+                                                required="false"
+                                                fieldStyle="form-control"
+                                                help="#{property.helpMessage}" />
+                                        </h:panelGroup>
+                                    </ui:repeat>
+                                </ui:fragment>
+                                <h:panelGroup rendered="#{property.type != 'multiselect' and (item.showDetails or property.displayAlways)}">
+                                    <intranda:formOutputText
                                         label="#{property.title}"
                                         field="#{property.value}"
                                         name="property"
                                         required="false"
-                                        fieldStyle="form-control" 
-                                        help="#{property.helpMessage}"/>
+                                        fieldStyle="form-control"
+                                        help="#{property.helpMessage}" />
                                 </h:panelGroup>
                             </x:dataList>
-                                
+
                         </intranda:box>
-                        
-                        <div style="height:10px;"/>
+
+                        <div style="height: 10px;" />
                     </ui:fragment>
                 </ui:repeat>
                 <!-- // RUN THROUGH ALL ACCEPTED PROCESSES -->
-                
+
             </h:form>
         </div>
     </composite:implementation>

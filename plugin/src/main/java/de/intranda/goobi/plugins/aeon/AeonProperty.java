@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.goobi.production.cli.helper.StringPair;
@@ -60,6 +61,7 @@ public class AeonProperty {
 
     /** contains the list of selected values in multiselect */
     private List<String> multiselectSelectedValues = new ArrayList<>();
+    private List<String> defaultSelectedValues = new ArrayList<>();
 
     public List<String> getPossibleValues() {
         List<String> answer = new ArrayList<>();
@@ -78,11 +80,17 @@ public class AeonProperty {
     public void setMultiselectValue(String value) {
         if (StringUtils.isNotBlank(value)) {
             multiselectSelectedValues.add(value);
+            if (!overwriteMainField) {
+                plugin.updateMultiselectProperties(title, multiselectSelectedValues);
+            }
         }
     }
 
     public void removeSelectedValue(String value) {
         multiselectSelectedValues.remove(value);
+        if (!overwriteMainField) {
+            plugin.updateMultiselectProperties(title, multiselectSelectedValues);
+        }
     }
 
     public AeonProperty(HierarchicalConfiguration config, AeonProcessCreationWorkflowPlugin plugin) {
@@ -173,8 +181,7 @@ public class AeonProperty {
     }
 
     public AeonProperty cloneProperty() {
-        AeonProperty property = new AeonProperty(config, plugin);
-        return property;
+        return new AeonProperty(config, plugin);
     }
 
     public boolean isValid() {
@@ -194,6 +201,16 @@ public class AeonProperty {
     }
 
     public boolean isDifferFromDefault() {
+        // compare multi
+        if ("multiselect".equals(type)) {
+            // both empty
+            if (multiselectSelectedValues.isEmpty() && defaultSelectedValues.isEmpty()) {
+                return true;
+            }
+            // check if both contain the same content
+            return !CollectionUtils.isEqualCollection(multiselectSelectedValues, defaultSelectedValues);
+        }
+
         if (StringUtils.isBlank(defaultValue) && StringUtils.isNotBlank(value)) {
             return true;
         }
@@ -209,14 +226,14 @@ public class AeonProperty {
 
     public void setValue(String value) {
         if (!overwriteMainField) {
-            plugin.updateProperties(title, this.value, value, additionalValue);
+            plugin.updateProperties(title, value, additionalValue);
         }
         this.value = value;
     }
 
     public void setAdditionalValue(String additionalValue) {
         if (!overwriteMainField) {
-            plugin.updateProperties(title, this.value, value, additionalValue);
+            plugin.updateProperties(title, value, additionalValue);
         }
         this.additionalValue = additionalValue;
     }

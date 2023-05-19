@@ -363,6 +363,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                             if (StringUtils.isNotBlank(prop.getValue())) {
                                 aeonRecord.getProperties().add(prop);
                             }
+                            prop.setOverwriteMainField(false);
                         }
 
                         //                        Process title: Job#-repository-AeonTN e.g 999-music-12345. The job# is an auto generated one-up number.
@@ -744,7 +745,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     switch (prop.getPlace()) {
                         case "process":
                             if ("multiselect".equals(prop.getType())) {
-                                for (String val : prop.getSelectValues()) {
+                                for (String val : prop.getMultiselectSelectedValues()) {
                                     bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), val);
                                 }
                             } else {
@@ -753,7 +754,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                             break;
                         case "work":
                             if ("multiselect".equals(prop.getType())) {
-                                for (String val : prop.getSelectValues()) {
+                                for (String val : prop.getMultiselectSelectedValues()) {
                                     bhelp.EigenschaftHinzufuegen(process.getWerkstuecke().get(0), val, prop.getExportValue());
                                 }
                             } else {
@@ -762,7 +763,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                             break;
                         case "template":
                             if ("multiselect".equals(prop.getType())) {
-                                for (String val : prop.getSelectValues()) {
+                                for (String val : prop.getMultiselectSelectedValues()) {
                                     bhelp.EigenschaftHinzufuegen(process.getVorlagen().get(0), val, prop.getExportValue());
                                 }
                             } else {
@@ -939,7 +940,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
         this.selectedWorkflow = selectedWorkflow;
     }
 
-    public void updateProperties(String propertyName, String oldValue, String newValue, String additionalValue) { //NOSONAR
+    public void updateProperties(String propertyName, String newValue, String additionalValue) { //NOSONAR
         for (AeonRecord aeonRecord : recordList) {
             for (AeonProperty prop : aeonRecord.getProcessProperties()) {
                 if (prop.getTitle().equals(propertyName)) {
@@ -948,6 +949,19 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
                     // update property value
                     prop.setValue(newValue);
                     prop.setAdditionalValue(additionalValue);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void updateMultiselectProperties(String propertyName, List<String> values) { //NOSONAR
+        for (AeonRecord aeonRecord : recordList) {
+            for (AeonProperty prop : aeonRecord.getProcessProperties()) {
+                if (prop.getTitle().equals(propertyName)) {
+                    // configure new default value
+                    prop.setDefaultSelectedValues(new ArrayList<>(values));
+                    prop.setMultiselectSelectedValues(new ArrayList<>(values));
                     break;
                 }
             }
