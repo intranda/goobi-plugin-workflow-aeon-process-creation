@@ -2,10 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.intranda.goobi.plugins.workflow</groupId>
   <artifactId>aeon_process_creation</artifactId>
-  <version>23.05.1</version>
+  <version>23.05.2</version>
   <packaging>pom</packaging>
   <properties>
-    <goobi.version>23.05.1</goobi.version>
+    <goobi.version>23.05.2</goobi.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
