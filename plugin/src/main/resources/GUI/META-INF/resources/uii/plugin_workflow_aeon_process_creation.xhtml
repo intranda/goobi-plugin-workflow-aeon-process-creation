@@ -383,7 +383,11 @@ input[type="radio"] {
       		  stickyBoxes();
       		});
 
-        
+      		jsf.ajax.addOnEvent( function( data ) {
+          	        if (data.status == "success"){
+          			stickyBoxes();
+          		} 
+          	});
         </script>
 
     </composite:implementation>
