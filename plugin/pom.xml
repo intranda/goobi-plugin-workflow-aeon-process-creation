@@ -41,8 +41,8 @@
     </dependency>
     <dependency>
       <groupId>de.intranda.goobi.plugins.opac</groupId>
-      <artifactId>goobi-plugin-opac-json-gui</artifactId>
-      <version>1.0.2-SNAPSHOT</version>
+      <artifactId>json-gui</artifactId>
+      <version>23.07.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
