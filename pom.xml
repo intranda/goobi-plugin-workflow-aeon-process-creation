@@ -11,7 +11,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>module-base</module>
-    <module>module-gui</module>
   </modules>
   <repositories>
     <repository>
@@ -25,12 +24,6 @@
       <artifactId>workflow-core</artifactId>
       <version>${project.version}</version>
       <classifier>classes</classifier>
-    </dependency>
-    <dependency>
-      <groupId>de.intranda.goobi.plugins.opac</groupId>
-      <artifactId>json-gui</artifactId>
-      <version>23.07.1</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
