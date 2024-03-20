@@ -18,6 +18,3 @@ node_modules/
 .idea
 *.iml
 
-
-/module-gui/
-/module-main/

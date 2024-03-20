@@ -1,0 +1,394 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:x="http://myfaces.apache.org/tomahawk"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
+    xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <composite:interface>
+    </composite:interface>
+
+    <composite:implementation>
+
+        <style>
+.form-control.invalid, .form-select.invalid {
+	border: 1px solid var(--clr-box-action);
+}
+
+.form-control.invalid.strict, .form-select.invalid.strict {
+	border-color: var(--clr-box-hot);
+}
+
+.warning-icon {
+    margin-right: 5px;
+    font-size: 18px;
+}
+
+.warning-icon.check {
+	background: #368ee0;
+	padding: 2px;
+	font-size: 10px;
+}
+
+.contentIsDifferent-message {
+    color: var(--clr-primary-400);
+    padding-top: 5px;
+}
+
+.validation-message {
+	color: var(--clr-box-action);
+	padding-top: 5px;
+}
+
+.font-danger.validation-message {
+	color: var(--clr-box-hot);
+}
+
+.fa-toggle-on.color-creation {
+	color: white;
+}
+
+.fa-angle-up.accepted {
+	color: white;
+}
+
+.fa-angle-down.accepted {
+	color: white;
+}
+
+.fa-toggle-on.color-deletion {
+	color: white;
+}
+
+.fa-toggle-on.bcolor-creation {
+	color: var(--clr-box-success);
+}
+
+.fa-toggle-on.bcolor-deletion {
+	color: var(--clr-box-hot);
+}
+
+.border-unselect {
+	border-color: #666 !important;
+}
+
+.btn.toggle {
+	background: none;
+}
+
+input[type="radio"] {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.greybackground {
+	background-color: #eee;
+}
+
+.modaltable{
+    border-right: 1px solid var(--clr-neutral-300);
+    border-left: 1px solid var(--clr-neutral-300);
+}
+
+.borderHot{
+    border-color: var(--clr-hot) !important;
+}
+.borderSuccess{
+    border-color: var(--clr-success) !important;
+    
+}
+</style>
+
+
+        <!-- NO ACCESS ALLOWED -->
+        <ui:fragment rendered="#{!LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
+            <h:outputText
+                styleClass="alert alert-danger alert-dismissable margin-bottom-10 margin-top-10"
+                value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation" />
+        </ui:fragment>
+        <!-- // NO ACCESS ALLOWED -->
+        
+        <!-- REQUEST AREA -->
+        <ui:fragment
+            rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'request'}">
+            <div class="row">
+                <div class="col-sm-6" id="leftarea">
+                    <div>
+                    <h:form id="requestForm" styleClass="mb-3">
+
+                        <!--  Transaction Request input Box  -->                    
+                        <intranda:box
+                            boxType="action"
+                            boxPadding="false"
+                            boxForm="true"
+                            icon="fa-plug"
+                            title="#{msgs.plugin_workflow_aeon_requestAeonForTransaction}">
+                        
+                            <!-- TYPE ROW -->
+                            <div class="row">
+                        
+                                <!-- LABEL -->
+                                <div class="col-12 col-md-3">
+                                    <intranda:formLabel label="#{msgs.plugin_workflow_aeon_selectType}" 
+                                    labelFor="typeSelection"  labelRequired="true"/>
+                                </div>
+                                <!-- // LABEL -->
+                        
+                                <!-- SELECT ONE -->
+                                <div class="col-12 col-md-9">
+                                    <h:selectOneRadio
+                                        id="typeSelection"
+                                        value="#{NavigationForm.workflowPlugin.operationType}"
+                                        styleClass="select-radio select-radio-horizontal">
+                                        <f:selectItem
+                                            pt:styleClass="focusable"
+                                            itemLabel="#{msgs.plugin_workflow_aeon_processCreation}"
+                                            itemValue="creation" />
+                                        <f:selectItem
+                                            itemClass="focusable"
+                                            itemLabel="#{msgs.plugin_workflow_aeon_processCancellation}"
+                                            itemValue="cancel" />
+                                        <f:ajax
+                                            render="requestForm"
+                                            execute="@this" />
+                                    </h:selectOneRadio>
+                                </div>
+                                <!-- SELECT ONE -->
+                        
+                            </div>
+                            <!-- TYPE ROW -->
+                        
+                        
+                            <!-- TRANSACTION ROW -->
+                            <div class="row">
+                        
+                                <!-- LABEL -->
+                                <div class="col-12 col-md-3">
+                                    <intranda:formLabel label="#{msgs.plugin_workflow_aeon_transactionIdentifier}:" 
+                                    labelFor="tn"  labelRequired="true"/>
+                                </div>
+                                <!-- // LABEL -->
+                        
+                                <!-- INPUT -->
+                                <div class="col-12 col-md-9">
+                                    <h:inputText
+                                        id="tn"
+                                        styleClass="form-control form__input"
+                                        value="#{NavigationForm.workflowPlugin.input}"
+                                        required="true"
+                                        readonly="false"
+                                        tabindex="0">
+                                    </h:inputText>
+                                </div>
+                                <!-- // INPUT -->
+                        
+                            </div>
+                            <!-- TRANSACTION ROW -->
+                            
+
+                            <!-- PROCESS TEMPLATE ROW -->
+                            <div class="row">
+                        
+                                <!-- LABEL -->
+                                <div class="col-12 col-md-3">
+                                    <intranda:formLabel label="#{msgs.prozessvorlage}" 
+                                        labelFor="processTemplate"  labelRequired="true"/>
+                                </div>
+                                <!-- // LABEL -->
+                        
+                                <!-- SELECT -->
+                                <div class="col-12 col-md-9">
+                                    <h:selectOneMenu
+                                        id="processTemplate"
+                                        styleClass="form-select"
+                                        value="#{NavigationForm.workflowPlugin.selectedWorkflow}"
+                                        tabindex="0"
+                                        readonly="false">
+                                        <f:selectItems
+                                            value="#{NavigationForm.workflowPlugin.possibleWorkflows}"
+                                            var="var"
+                                            itemLabel="#{var}"
+                                            itemValue="#{var}" />
+                                        <f:ajax
+                                            event="change"
+                                            render="@this" />
+                                    </h:selectOneMenu>
+                                </div>
+                                <!-- // SELECT -->
+                        
+                            </div>
+                            <!-- // PROCESS TEMPLATE ROW -->
+                                                    
+
+                            <!-- BUTTONS -->
+                            <div class="box__actions">
+                                <a
+                                    jsf:id="cancel"
+                                    class="btn btn-blank"
+                                    jsf:immediate="true"
+                                    jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">
+                                    <h:outputText value="#{msgs.cancel}" />
+                                </a>
+                                
+                                <button
+                                    onclick="preventDoubleSubmit(this);"
+                                    jsf:id="sendRequest"
+                                    class="btn btn-primary"
+                                    jsf:action="#{NavigationForm.workflowPlugin.sendRequest}">
+                                    <h:outputText value="#{NavigationForm.workflowPlugin.operationType == 'creation' ? msgs.plugin_workflow_aeon_startRequest : msgs.plugin_workflow_aeon_cancelRequest}"/>
+                                </button>
+                            </div>
+                            <!-- // BUTTONS -->
+                            
+                        </intranda:box>
+                    </h:form>
+            
+                    <!-- Transaction Details Box -->
+                    <ui:include src="plugin_workflow_aeon_process_creation_include_transaction_details.xhtml" />
+
+                    <!-- Edit Properties Box -->
+                    <ui:include src="plugin_workflow_aeon_process_creation_include_properties.xhtml" />
+                </div>
+
+                </div>
+                <div class="col-sm-6" id="rightarea">
+                    <div>
+                        <!-- Objects List -->
+                        <ui:include src="plugin_workflow_aeon_process_creation_include_objects_list.xhtml" />
+                    </div>
+                </div>
+            </div>
+        </ui:fragment>
+        <!-- // REQUEST AREA -->
+
+
+        <!-- SUMMARY AREA -->
+        <ui:fragment
+            rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'summary'}">
+            <div class="row">
+                <div class="col-sm-6">
+                    <ui:include src="plugin_workflow_aeon_process_creation_include_created_objects_list.xhtml" />
+                </div>
+                <div class="col-sm-6">
+                    <div class="row">
+                    
+                    
+                        <div class="col-sm-12">
+                    
+                            <intranda:box
+                                boxType="action"
+                                boxPadding="true"
+                                icon="fa-tasks"
+                                title="#{msgs.nextStep}">
+                                
+                                <h:form id="summaryForm">
+                                    
+                                    <!-- BUTTON TO GO BACK -->
+                                    <button
+                                        onclick="preventDoubleSubmit(this);"
+                                        jsf:id="back"
+                                        jsf:action="#{NavigationForm.workflowPlugin.previousPage}"
+                                        class="btn btn-blank d-block mb-3"
+                                        jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}">
+                                        <i class="fa fa-undo" />
+                                        <span>
+                                            <h:outputText value="#{msgs.plugin_workflow_aeon_backToSelection}" />
+                                        </span>
+                                    </button>
+                                    
+                                    <!-- BUTTON TO SAVE -->
+                                    <button
+                                        onclick="preventDoubleSubmit(this);"
+                                        jsf:id="createProcess"
+                                        jsf:action="#{NavigationForm.workflowPlugin.createProcesses}"
+                                        class="btn btn-success d-block"
+                                        jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}">
+                                        <i class="fa fa-save" />
+                                        <span>
+                                            <h:outputText value="#{msgs.plugin_workflow_aeon_createProcesses}" />
+                                        </span>
+                                    </button>
+                                    
+                                    <!-- BUTTON TO DOWNLOAD DOCKET -->
+                                    <button
+                                        onclick="preventDoubleSubmit(this);"
+                                        jsf:id="dockets"
+                                        jsf:action="#{NavigationForm.workflowPlugin.generateDockets}"
+                                        class="btn btn-blank d-block mb-3"
+                                        jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}">
+                                        <i class="fa fa-print" />
+                                        <span>
+                                            <h:outputText value="#{msgs.process_generateDocket}" />
+                                        </span>
+                                    </button>
+                                    
+                                     <!-- BUTTON TO START NEW REQUEST -->
+                                    <button
+                                        onclick="preventDoubleSubmit(this);"
+                                        jsf:id="startNewRequest"
+                                        jsf:action="#{NavigationForm.workflowPlugin.resetRequest}"
+                                        class="btn btn-primary d-block"
+                                        jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}">
+                                        <i class="fa fa-file-o" />
+                                        <span>
+                                            <h:outputText value="#{msgs.plugin_workflow_aeon_startNewRequest}" />
+                                        </span>
+                                    </button>
+                                            
+                                </h:form>
+                                
+                            </intranda:box>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ui:fragment>
+        <!-- // SUMMARY AREA -->
+
+
+        <script>
+      	
+        	var debug = false;
+      		function stickyBoxes() {
+      			var heightLeft = document.getElementById('leftarea').children[0].clientHeight;
+      			var heightRight = document.getElementById('rightarea').children[0].clientHeight;
+      			if (debug){
+      				console.log(heightLeft);
+      				console.log(heightRight);
+      			}
+      			document.getElementById('leftarea').style.height = heightLeft + 2 + "px";
+      			document.getElementById('rightarea').style.height = heightRight + 2 + "px";
+      			
+      			var Sticky = new hcSticky('#leftarea', {
+      		    	stickTo: '#rightarea',
+      		    	responsive: {
+      				    768: {
+      				      disable: true
+      				    }
+      				  }
+      			});
+
+      			if (debug){
+      				console.log("stickyBoxes was called ");
+      			}
+      		}
+      			
+      		document.addEventListener('DOMContentLoaded', function() {
+      		  stickyBoxes();
+      		});
+
+      		jsf.ajax.addOnEvent( function( data ) {
+          	        if (data.status == "success"){
+          			stickyBoxes();
+          		} 
+          	});
+        </script>
+
+    </composite:implementation>
+</ui:composition>
