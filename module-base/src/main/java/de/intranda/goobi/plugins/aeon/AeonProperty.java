@@ -1,23 +1,24 @@
 package de.intranda.goobi.plugins.aeon;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import de.intranda.goobi.plugins.AeonProcessCreationWorkflowPlugin;
+import de.sub.goobi.helper.Helper;
+import io.goobi.vocabulary.exchange.FieldDefinition;
+import io.goobi.vocabulary.exchange.Vocabulary;
+import io.goobi.vocabulary.exchange.VocabularySchema;
+import io.goobi.workflow.api.vocabulary.VocabularyAPIManager;
+import io.goobi.workflow.api.vocabulary.jsfwrapper.JSFVocabularyRecord;
+import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.goobi.production.cli.helper.StringPair;
-import org.goobi.vocabulary.Field;
-import org.goobi.vocabulary.VocabRecord;
-import org.goobi.vocabulary.Vocabulary;
 
-import de.intranda.goobi.plugins.AeonProcessCreationWorkflowPlugin;
-import de.sub.goobi.persistence.managers.VocabularyManager;
-import lombok.Data;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Data
 public class AeonProperty {
@@ -58,6 +59,8 @@ public class AeonProperty {
     private boolean overwriteMainField = false;
 
     private AeonProcessCreationWorkflowPlugin plugin;
+
+    private VocabularyAPIManager vocabularyAPI = VocabularyAPIManager.getInstance();
 
     /** contains the list of selected values in multiselect */
     private List<String> multiselectSelectedValues = new ArrayList<>();
@@ -133,50 +136,44 @@ public class AeonProperty {
     }
 
     private void initializeVocabulary() {
-
+        Vocabulary vocabulary = vocabularyAPI.vocabularies().findByName(vocabularyName);
         if (vocabularyField == null || vocabularyField.isEmpty()) {
-            Vocabulary currentVocabulary = VocabularyManager.getVocabularyByTitle(vocabularyName);
-
-            if (currentVocabulary != null) {
-                VocabularyManager.getAllRecords(currentVocabulary);
-                List<VocabRecord> recordList = currentVocabulary.getRecords();
-                Collections.sort(recordList);
-                selectValues = new ArrayList<>(recordList.size());
-                if (currentVocabulary != null && currentVocabulary.getId() != null) {
-                    for (VocabRecord vr : recordList) {
-                        for (Field f : vr.getFields()) {
-                            if (f.getDefinition().isMainEntry()) {
-                                selectValues.add(f.getValue());
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+            List<JSFVocabularyRecord> recordList = vocabularyAPI.vocabularyRecords().list(vocabulary.getId(), Optional.of(1000), Optional.empty()).getContent();
+            selectValues = recordList.stream()
+                    .map(JSFVocabularyRecord::getMainValue)
+                    .collect(Collectors.toList());
         } else {
-            List<StringPair> vocabularySearchFields = new ArrayList<>();
-            for (String fieldname : vocabularyField) {
-                String[] parts = fieldname.trim().split("=");
-                if (parts.length > 1) {
-                    String fieldName = parts[0];
-                    String value = parts[1];
-                    StringPair sp = new StringPair(fieldName, value);
-                    vocabularySearchFields.add(sp);
-                }
+            if (vocabularyField.size() > 1) {
+                Helper.setFehlerMeldung("vocabularyList with multiple fields is not supported right now");
+                return;
             }
-            List<VocabRecord> records = VocabularyManager.findRecords(vocabularyName, vocabularySearchFields);
-            if (records != null && records.size() > 0) {
-                Collections.sort(records);
-                selectValues = new ArrayList<>(records.size());
-                for (VocabRecord vr : records) {
-                    for (Field f : vr.getFields()) {
-                        if (f.getDefinition().isMainEntry()) {
-                            selectValues.add(f.getValue());
-                            break;
-                        }
-                    }
-                }
+
+            String[] parts = vocabularyField.get(0).trim().split("=");
+            if (parts.length != 2) {
+                Helper.setFehlerMeldung("Wrong field format");
+                return;
             }
+
+            String searchFieldName = parts[0];
+            String searchFieldValue = parts[1];
+
+            VocabularySchema schema = vocabularyAPI.vocabularySchemas().get(vocabulary.getSchemaId());
+            Optional<FieldDefinition> searchField = schema.getDefinitions().stream()
+                    .filter(d -> d.getName().equals(searchFieldName))
+                    .findFirst();
+
+            if (searchField.isEmpty()) {
+                Helper.setFehlerMeldung("Field " + searchFieldName + " not found in vocabulary " + vocabulary.getName());
+                return;
+            }
+
+            // Assume there are not than 1000 hits, otherwise it is not useful anyway..
+            List<JSFVocabularyRecord> recordList = vocabularyAPI.vocabularyRecords()
+                    .search(vocabulary.getId(), searchField.get().getId() + ":" + searchFieldValue)
+                    .getContent();
+            selectValues = recordList.stream()
+                    .map(JSFVocabularyRecord::getMainValue)
+                    .collect(Collectors.toList());
         }
     }
 
