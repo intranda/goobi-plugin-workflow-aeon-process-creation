@@ -138,7 +138,7 @@ public class AeonProperty {
     private void initializeVocabulary() {
         Vocabulary vocabulary = vocabularyAPI.vocabularies().findByName(vocabularyName);
         if (vocabularyField == null || vocabularyField.isEmpty()) {
-            List<JSFVocabularyRecord> recordList = vocabularyAPI.vocabularyRecords().list(vocabulary.getId(), Optional.of(1000), Optional.empty()).getContent();
+            List<JSFVocabularyRecord> recordList = vocabularyAPI.vocabularyRecords().all(vocabulary.getId());
             selectValues = recordList.stream()
                     .map(JSFVocabularyRecord::getMainValue)
                     .collect(Collectors.toList());
