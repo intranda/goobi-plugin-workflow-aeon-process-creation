@@ -6,7 +6,7 @@ import io.goobi.vocabulary.exchange.FieldDefinition;
 import io.goobi.vocabulary.exchange.Vocabulary;
 import io.goobi.vocabulary.exchange.VocabularySchema;
 import io.goobi.workflow.api.vocabulary.VocabularyAPIManager;
-import io.goobi.workflow.api.vocabulary.jsfwrapper.JSFVocabularyRecord;
+import io.goobi.workflow.api.vocabulary.helper.ExtendedVocabularyRecord;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -138,10 +138,7 @@ public class AeonProperty {
     private void initializeVocabulary() {
         Vocabulary vocabulary = vocabularyAPI.vocabularies().findByName(vocabularyName);
         if (vocabularyField == null || vocabularyField.isEmpty()) {
-            List<JSFVocabularyRecord> recordList = vocabularyAPI.vocabularyRecords().all(vocabulary.getId());
-            selectValues = recordList.stream()
-                    .map(JSFVocabularyRecord::getMainValue)
-                    .collect(Collectors.toList());
+            selectValues = vocabularyAPI.vocabularyRecords().getRecordMainValues(vocabulary.getId());
         } else {
             if (vocabularyField.size() > 1) {
                 Helper.setFehlerMeldung("vocabularyList with multiple fields is not supported right now");
@@ -166,14 +163,11 @@ public class AeonProperty {
                 Helper.setFehlerMeldung("Field " + searchFieldName + " not found in vocabulary " + vocabulary.getName());
                 return;
             }
-
-            // Assume there are not than 1000 hits, otherwise it is not useful anyway..
-            List<JSFVocabularyRecord> recordList = vocabularyAPI.vocabularyRecords()
-                    .search(vocabulary.getId(), searchField.get().getId() + ":" + searchFieldValue)
-                    .getContent();
-            selectValues = recordList.stream()
-                    .map(JSFVocabularyRecord::getMainValue)
-                    .collect(Collectors.toList());
+            
+            selectValues = vocabularyAPI.vocabularyRecords()
+                    .getRecordMainValues(vocabularyAPI.vocabularyRecords()
+                            .list(vocabulary.getId())
+                            .search(searchField.get().getId() + ":" + searchFieldValue));
         }
     }
 
