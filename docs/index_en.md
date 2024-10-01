@@ -1,7 +1,7 @@
 ---
 title: AEON data transfer
 identifier: intranda_workflow_aeon_process_creation
-description: This is a Workflow Plugin for Goobi workflow. It allows to create multiple Goobi processes based on an initial AEON request. It allows to manually select items from the AEON response to decide for which items a Goobi process shall be started.
+description: This workflow plugin enables Goobi processes to be created on the basis of an initial AEON request. Among other things, it enables manual selection of elements from the AEON response.
 published: true
 ---
 ## Introduction
