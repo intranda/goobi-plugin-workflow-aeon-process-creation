@@ -21,6 +21,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import de.sub.goobi.forms.HelperForm;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
@@ -204,7 +205,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
             if ("1234567890".equals(this.input)) { //(JUST FOR TESTING: checks if input is 1234567890)
                 try {
-                    map = client.target("http://localhost:8080/goobi/api/")
+                    map = client.target("http://localhost:8080" + new HelperForm().getApplicationWebsiteUrl() + "api/")
                             .path("testingRest")
                             .path("aeon")
                             .request(MediaType.APPLICATION_JSON)

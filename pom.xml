@@ -13,6 +13,7 @@
     <module>module-base</module>
     <module>module-gui</module>
     <module>module-lib</module>
+    <module>module-api</module>
   </modules>
   <repositories>
     <repository>
@@ -26,12 +27,6 @@
       <artifactId>workflow-core</artifactId>
       <version>${project.version}</version>
       <classifier>classes</classifier>
-    </dependency>
-    <dependency>
-      <groupId>io.goobi.workflow.plugin</groupId>
-      <artifactId>plugin-opac-json-lib</artifactId>
-      <version>24.06</version>
-      <scope>compile</scope>
     </dependency>
   </dependencies>
 </project>
