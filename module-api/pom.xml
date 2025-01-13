@@ -5,6 +5,6 @@
     <artifactId>plugin-workflow-aeon-process-creation</artifactId>
     <version>24.12</version>
   </parent>
-  <artifactId>plugin-workflow-aeon-process-creation-lib</artifactId>
+  <artifactId>plugin-workflow-aeon-process-creation-api</artifactId>
   <packaging>jar</packaging>
 </project>
