@@ -4,7 +4,7 @@
     xmlns:composite="http://xmlns.jcp.org/jsf/composite"
     xmlns:h="http://xmlns.jcp.org/jsf/html"
     xmlns:f="http://xmlns.jcp.org/jsf/core"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:p="http://primefaces.org/ui"
     xmlns:jsf="http://xmlns.jcp.org/jsf">
@@ -99,7 +99,7 @@ input[type="radio"] {
 }
 .borderSuccess{
     border-color: var(--clr-success) !important;
-    
+
 }
 </style>
 
@@ -111,7 +111,7 @@ input[type="radio"] {
                 value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation" />
         </ui:fragment>
         <!-- // NO ACCESS ALLOWED -->
-        
+
         <!-- REQUEST AREA -->
         <ui:fragment
             rendered="#{LoginForm.hasRole('Plugin_workflow_aeon_process_creation') and NavigationForm.workflowPlugin.screenName == 'request'}">
@@ -120,24 +120,24 @@ input[type="radio"] {
                     <div>
                     <h:form id="requestForm" styleClass="mb-3">
 
-                        <!--  Transaction Request input Box  -->                    
+                        <!--  Transaction Request input Box  -->
                         <intranda:box
                             boxType="action"
                             boxPadding="false"
                             boxForm="true"
                             icon="fa-plug"
                             title="#{msgs.plugin_workflow_aeon_requestAeonForTransaction}">
-                        
+
                             <!-- TYPE ROW -->
                             <div class="row">
-                        
+
                                 <!-- LABEL -->
                                 <div class="col-12 col-md-3">
-                                    <intranda:formLabel label="#{msgs.plugin_workflow_aeon_selectType}" 
+                                    <intranda:formLabel label="#{msgs.plugin_workflow_aeon_selectType}"
                                     labelFor="typeSelection"  labelRequired="true"/>
                                 </div>
                                 <!-- // LABEL -->
-                        
+
                                 <!-- SELECT ONE -->
                                 <div class="col-12 col-md-9">
                                     <h:selectOneRadio
@@ -158,21 +158,21 @@ input[type="radio"] {
                                     </h:selectOneRadio>
                                 </div>
                                 <!-- SELECT ONE -->
-                        
+
                             </div>
                             <!-- TYPE ROW -->
-                        
-                        
+
+
                             <!-- TRANSACTION ROW -->
                             <div class="row">
-                        
+
                                 <!-- LABEL -->
                                 <div class="col-12 col-md-3">
-                                    <intranda:formLabel label="#{msgs.plugin_workflow_aeon_transactionIdentifier}:" 
+                                    <intranda:formLabel label="#{msgs.plugin_workflow_aeon_transactionIdentifier}:"
                                     labelFor="tn"  labelRequired="true"/>
                                 </div>
                                 <!-- // LABEL -->
-                        
+
                                 <!-- INPUT -->
                                 <div class="col-12 col-md-9">
                                     <h:inputText
@@ -185,21 +185,21 @@ input[type="radio"] {
                                     </h:inputText>
                                 </div>
                                 <!-- // INPUT -->
-                        
+
                             </div>
                             <!-- TRANSACTION ROW -->
-                            
+
 
                             <!-- PROCESS TEMPLATE ROW -->
                             <div class="row">
-                        
+
                                 <!-- LABEL -->
                                 <div class="col-12 col-md-3">
-                                    <intranda:formLabel label="#{msgs.prozessvorlage}" 
+                                    <intranda:formLabel label="#{msgs.prozessvorlage}"
                                         labelFor="processTemplate"  labelRequired="true"/>
                                 </div>
                                 <!-- // LABEL -->
-                        
+
                                 <!-- SELECT -->
                                 <div class="col-12 col-md-9">
                                     <h:selectOneMenu
@@ -219,10 +219,10 @@ input[type="radio"] {
                                     </h:selectOneMenu>
                                 </div>
                                 <!-- // SELECT -->
-                        
+
                             </div>
                             <!-- // PROCESS TEMPLATE ROW -->
-                                                    
+
 
                             <!-- BUTTONS -->
                             <div class="box__actions">
@@ -233,7 +233,7 @@ input[type="radio"] {
                                     jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">
                                     <h:outputText value="#{msgs.cancel}" />
                                 </button>
-                                
+
                                 <button
                                     onclick="preventDoubleSubmit(this);"
                                     jsf:id="sendRequest"
@@ -243,10 +243,10 @@ input[type="radio"] {
                                 </button>
                             </div>
                             <!-- // BUTTONS -->
-                            
+
                         </intranda:box>
                     </h:form>
-            
+
                     <!-- Transaction Details Box -->
                     <ui:include src="plugin_workflow_aeon_process_creation_include_transaction_details.xhtml" />
 
@@ -275,18 +275,18 @@ input[type="radio"] {
                 </div>
                 <div class="col-sm-6">
                     <div class="row">
-                    
-                    
+
+
                         <div class="col-sm-12">
-                    
+
                             <intranda:box
                                 boxType="action"
                                 boxPadding="true"
                                 icon="fa-tasks"
                                 title="#{msgs.nextStep}">
-                                
+
                                 <h:form id="summaryForm">
-                                    
+
                                     <!-- BUTTON TO GO BACK -->
                                     <button
                                         onclick="preventDoubleSubmit(this);"
@@ -299,7 +299,7 @@ input[type="radio"] {
                                             <h:outputText value="#{msgs.plugin_workflow_aeon_backToSelection}" />
                                         </span>
                                     </button>
-                                    
+
                                     <!-- BUTTON TO SAVE -->
                                     <button
                                         onclick="preventDoubleSubmit(this);"
@@ -312,7 +312,7 @@ input[type="radio"] {
                                             <h:outputText value="#{msgs.plugin_workflow_aeon_createProcesses}" />
                                         </span>
                                     </button>
-                                    
+
                                     <!-- BUTTON TO DOWNLOAD DOCKET -->
                                     <button
                                         onclick="preventDoubleSubmit(this);"
@@ -325,7 +325,7 @@ input[type="radio"] {
                                             <h:outputText value="#{msgs.process_generateDocket}" />
                                         </span>
                                     </button>
-                                    
+
                                      <!-- BUTTON TO START NEW REQUEST -->
                                     <button
                                         onclick="preventDoubleSubmit(this);"
@@ -338,9 +338,9 @@ input[type="radio"] {
                                             <h:outputText value="#{msgs.plugin_workflow_aeon_startNewRequest}" />
                                         </span>
                                     </button>
-                                            
+
                                 </h:form>
-                                
+
                             </intranda:box>
 
                         </div>
@@ -352,7 +352,7 @@ input[type="radio"] {
 
 
         <script>
-      	
+
         	var debug = false;
       		function stickyBoxes() {
       			var heightLeft = document.getElementById('leftarea').children[0].clientHeight;
@@ -363,7 +363,7 @@ input[type="radio"] {
       			}
       			document.getElementById('leftarea').style.height = heightLeft + 2 + "px";
       			document.getElementById('rightarea').style.height = heightRight + 2 + "px";
-      			
+
       			var Sticky = new hcSticky('#leftarea', {
       		    	stickTo: '#rightarea',
       		    	responsive: {
@@ -377,7 +377,7 @@ input[type="radio"] {
       				console.log("stickyBoxes was called ");
       			}
       		}
-      			
+
       		document.addEventListener('DOMContentLoaded', function() {
       		  stickyBoxes();
       		});
@@ -385,7 +385,7 @@ input[type="radio"] {
       		faces.ajax.addOnEvent( function( data ) {
           	        if (data.status == "success"){
           			stickyBoxes();
-          		} 
+          		}
           	});
         </script>
 
