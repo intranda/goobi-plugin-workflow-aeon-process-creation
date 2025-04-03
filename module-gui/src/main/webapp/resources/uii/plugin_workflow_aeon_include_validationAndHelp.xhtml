@@ -4,7 +4,7 @@
     xmlns:composite="http://xmlns.jcp.org/jsf/composite"
     xmlns:h="http://xmlns.jcp.org/jsf/html"
     xmlns:f="http://xmlns.jcp.org/jsf/core"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:jsf="http://xmlns.jcp.org/jsf">
 
@@ -12,7 +12,7 @@
     </composite:interface>
 
     <composite:implementation>
-		
+
         <!-- VALIDATION MESSAGE -->
         <h:panelGroup
             layout="block"
@@ -25,13 +25,11 @@
             <h:outputText value="#{property.validationErrorMessage}"/>
         </h:panelGroup>
         <!-- // VALIDATION MESSAGE -->
-            
+
         <!-- HELP MESSAGE -->
         <intranda:formHelp content="#{property.helpMessage}" msgFor="input" />
         <!-- // HELP MESSAGE -->
-        
+
     </composite:implementation>
 
 </ui:composition>
-
-

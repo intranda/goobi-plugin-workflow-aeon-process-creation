@@ -7,14 +7,14 @@
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:jsf="http://xmlns.jcp.org/jsf"
     xmlns:c="http://java.sun.com/jstl/core"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
     xmlns:p="http://primefaces.org/ui">
 
     <composite:interface>
     </composite:interface>
 
     <composite:implementation>
-        
+
         <!-- STILL NO REQUEST SENT -->
         <ui:fragment
             rendered="#{NavigationForm.workflowPlugin.requestSuccess == false}">
@@ -23,7 +23,7 @@
                 boxPadding="false"
                 icon="fa-search"
                 title="#{msgs.plugin_workflow_aeon_objects}">
-                
+
                 <div style="background-color: #eee; height: 300px;">
                     <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
                         <h:outputText value="#{msgs.plugin_workflow_aeon_notRequestedYet}"/>
@@ -32,17 +32,17 @@
             </intranda:box>
         </ui:fragment>
         <!-- // STILL NO REQUEST SENT -->
-       
-       
+
+
         <!-- ALL OBJECTS FROM REQUEST SUCCESS -->
         <h:form rendered="#{NavigationForm.workflowPlugin.requestSuccess}"
             id="itemForm">
-            
+
             <!-- RUN THROUGH ALL FOLDERS -->
             <ui:repeat
                 var="item"
                 value="#{NavigationForm.workflowPlugin.recordList}">
-                
+
                 <!-- iterate through items from transaction -->
                 <intranda:box
                     boxType="#{item.accepted ? NavigationForm.workflowPlugin.operationType == 'creation' ? 'success' : 'hot' : 'outline'}"
@@ -50,7 +50,7 @@
                     boxForm="true"
                     icon="fa-search"
                     boxTitle="false">
-                    
+
                     <!-- TITLE  OF BOX -->
                     <div class="box__title">
                         <h2>
@@ -62,7 +62,7 @@
                                     rendered="#{p.displayInTitle}" />
                             </ui:repeat>
                         </h2>
-                        
+
                         <!-- BUTTONS IN TITLE -->
                         <div class="actions d-flex">
                             <button
@@ -79,7 +79,7 @@
                                     target="#{item.accepted}"
                                     value="#{not item.accepted}" />
                             </button>
-                            
+
                             <button
                                 type="button"
                                 class="btn d-flex align-items-center #{item.accepted ? 'btn--title-action' : 'btn--title-action-neutral'}"
@@ -96,17 +96,17 @@
                         <!-- // BUTTONS IN TITLE -->
                     </div>
                     <!--  // TITLE OF BOX -->
-                    
-                    
+
+
                     <!--  WARNING MESSAGE FOR DUPLICATE ITEMS  -->
                     <h:panelGroup rendered="#{item.duplicate and NavigationForm.workflowPlugin.operationType eq 'creation'}">
                         <a
                             href="#"
                             data-bs-toggle="modal"
                             data-bs-target="#myModal-#{item.id}">
-                            
+
                             <!-- IF NOT LOCKED -->
-                            <h:outputFormat id="titleInUse" 
+                            <h:outputFormat id="titleInUse"
                                 rendered="#{not item.locked}"
                                 styleClass="alert alert-warning p-3 d-block mb-0 rounded-0"
                                 value="#{msgs['plugin_workflow_aeon_titleInUse']}">
@@ -122,14 +122,14 @@
                         </a>
                     </h:panelGroup>
                     <!--  // WARNING MESSAGE FOR DUPLICATE ITEMS  -->
-                    
+
                     <!-- WARNING MESSAGE WHEN DELETION -->
                     <h:panelGroup rendered="#{NavigationForm.workflowPlugin.operationType ne 'creation'}">
                         <a
                             href="#"
                             data-bs-toggle="modal"
                             data-bs-target="#myModal-#{item.id}">
-                            
+
                             <!-- IF ENABLED -->
                             <h:outputText
                                 id="item-enabled"
@@ -137,7 +137,7 @@
                                 styleClass="alert alert-warning p-3 d-block mb-0 rounded-0"
                                 value="#{msgs.plugin_workflow_aeon_deletionWarning}">
                             </h:outputText>
-                            
+
                             <!-- IF DISABLED -->
                             <h:outputText
                                 id="item-disabled"
@@ -148,8 +148,8 @@
                         </a>
                     </h:panelGroup>
                     <!-- // WARNING MESSAGE WHEN DELETION -->
-                    
-                    
+
+
                     <!--  // MODAL OF EXISTING PROCESS WITH PROCESS PROPERTIES  -->
                     <div
                         class="modal fade"
@@ -183,7 +183,7 @@
                                         aria-label="Close"/>
                                 </div>
                                 <!-- // MODAL HEADER -->
-                                
+
                                 <!-- MODAL BODY -->
                                 <div class="modal-body">
 
@@ -194,22 +194,22 @@
                                             <span>#{proc.title}</span>
                                             <span class="font-light pull-right">#{proc.date}</span>
                                         </h5>
-            
+
                                         <div class="gw-table">
-                                            <div class="gw-table__wrapper">            
+                                            <div class="gw-table__wrapper">
                                                 <h:dataTable
                                                     id="props"
                                                     styleClass="table table-hover dataTable table-bordered responsive modaltable"
                                                     var="prop"
                                                     value="#{proc.duplicateProperties}">
-        
+
                                                     <h:column>
                                                         <f:facet name="header">
                                                             <h:outputText value="#{msgs.titel}" />
                                                         </f:facet>
                                                         <h:outputText value="#{prop.title}" />
                                                     </h:column>
-        
+
                                                     <h:column>
                                                         <f:facet name="header">
                                                             <h:outputText value="#{msgs.wert}" />
@@ -228,66 +228,66 @@
                     </div>
                     <!--  // MODAL OF EXISTING PROCESS WITH PROCESS PROPERTIES  -->
 
-                    
+
                     <!-- LIST OF PROPERTIES -->
                     <ui:repeat
                         value="#{item.properties}"
                         var="property">
-                        
+
                         <div class="row" jsf:rendered="#{item.showDetails or property.displayAlways}">
                             <!-- LABEL -->
                             <div class="col-12 col-md-3">
-                                <intranda:formLabel label="#{property.title}" 
+                                <intranda:formLabel label="#{property.title}"
                                     labelFor="input" labelRequired="false"/>
                             </div>
                             <!-- // LABEL -->
-                        
+
                             <div class="col-12 col-md-9 ">
-                            
+
                                 <!-- IF INPUT FIELD -->
                                 <ui:fragment rendered="#{property.type == 'input'}">
                                     <ui:include src="plugin_workflow_aeon_include_input.xhtml"/>
                                 </ui:fragment>
                                 <!-- // IF INPUT FIELD -->
-                            
+
                                 <!-- IF SELECT FIELD -->
                                 <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary'}">
                                     <ui:include src="plugin_workflow_aeon_include_select.xhtml"/>
                                 </ui:fragment>
                                 <!-- // IF SELECT FIELD -->
-                            
+
                                  <!-- IF CHECKBOX FIELD -->
                                 <ui:fragment rendered="#{property.type == 'checkbox'}">
                                    <ui:include src="plugin_workflow_aeon_include_checkbox.xhtml"/>
                                 </ui:fragment>
                                 <!-- // IF CHECKBOX FIELD -->
-                                
+
                                 <!-- IF RADIO FIELD -->
                                 <ui:fragment rendered="#{property.type == 'radio'}">
                                    <ui:include src="plugin_workflow_aeon_include_radio.xhtml"/>
                                 </ui:fragment>
                                 <!-- // IF RADIO FIELD -->
-                                
+
                                 <!-- IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
                                 <ui:fragment rendered="#{property.type == 'select+text'}">
                                      <ui:include src="plugin_workflow_aeon_include_selectAndText.xhtml"/>
                                 </ui:fragment>
                                 <!-- // IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
-                                
+
                                 <!-- IF MULTISELECT FIELD -->
                                 <ui:fragment rendered="#{property.type == 'multiselect'}">
                                      <ui:include src="plugin_workflow_aeon_include_multiselect.xhtml"/>
                                 </ui:fragment>
                                 <!-- // IF MULTISELECT FIELD -->
-                                
+
                                 <!-- VALIDATION AND HELP -->
                                 <ui:include  src="plugin_workflow_aeon_include_validationAndHelp.xhtml"/>
-                                
+
                             </div>
                         </div>
                     </ui:repeat>
                     <!-- LIST OF PROPERTIES -->
-                    
+
                     <!-- LIST OF EXPANDED PROPERTIES -->
                     <ui:fragment rendered="#{item.showDetails and NavigationForm.workflowPlugin.operationType eq 'creation'}">
                         <ui:repeat
@@ -297,49 +297,49 @@
                             <div class="row" jsf:rendered="#{item.showDetails or property.displayAlways}">
                                 <!-- LABEL -->
                                 <div class="col-12 col-md-3">
-                                    <intranda:formLabel label="#{property.title}" 
+                                    <intranda:formLabel label="#{property.title}"
                                         labelFor="input" labelRequired="false"/>
                                 </div>
                                 <!-- // LABEL -->
-                            
+
                                 <div class="col-12 col-md-9 ">
-                                
+
                                     <!-- IF INPUT FIELD -->
                                     <ui:fragment rendered="#{property.type == 'input'}">
                                         <ui:include src="plugin_workflow_aeon_include_input.xhtml"/>
                                     </ui:fragment>
                                     <!-- // IF INPUT FIELD -->
-                                
+
                                     <!-- IF SELECT FIELD -->
                                     <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary'}">
                                         <ui:include src="plugin_workflow_aeon_include_select.xhtml"/>
                                     </ui:fragment>
                                     <!-- // IF SELECT FIELD -->
-                                
+
                                      <!-- IF CHECKBOX FIELD -->
                                     <ui:fragment rendered="#{property.type == 'checkbox'}">
                                        <ui:include src="plugin_workflow_aeon_include_checkbox.xhtml"/>
                                     </ui:fragment>
                                     <!-- // IF CHECKBOX FIELD -->
-                                    
+
                                     <!-- IF RADIO FIELD -->
                                     <ui:fragment rendered="#{property.type == 'radio'}">
                                        <ui:include src="plugin_workflow_aeon_include_radio.xhtml"/>
                                     </ui:fragment>
                                     <!-- // IF RADIO FIELD -->
-                                    
+
                                     <!-- IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
                                     <ui:fragment rendered="#{property.type == 'select+text'}">
                                          <ui:include src="plugin_workflow_aeon_include_selectAndText.xhtml"/>
                                     </ui:fragment>
                                     <!-- // IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
-                                    
+
                                     <!-- IF MULTISELECT FIELD -->
                                     <ui:fragment rendered="#{property.type == 'multiselect'}">
                                          <ui:include src="plugin_workflow_aeon_include_multiselect.xhtml"/>
                                     </ui:fragment>
                                     <!-- // IF MULTISELECT FIELD -->
-                                    
+
                                     <!-- OUTPUT ONLY -->
                                     <h:outputText
                                         id="output"
@@ -351,7 +351,7 @@
                                         required="false">
                                     </h:outputText>
                                     <!-- // OUTPUT ONLY -->
-                                    
+
                                     <!-- CONTENT IS DIFFERENT -->
                                     <h:panelGroup
                                         layout="block"
@@ -361,36 +361,36 @@
                                         <h:outputText value="#{msgs.plugin_workflow_aeon_differentValue}"/>
                                     </h:panelGroup>
                                     <!-- // CONTENT IS DIFFERENT -->
-        
-        
+
+
                                     <!-- VALIDATION AND HELP -->
                                     <ui:include  src="plugin_workflow_aeon_include_validationAndHelp.xhtml"/>
-                                    
+
                                 </div>
                             </div>
                         </ui:repeat>
 
                     </ui:fragment>
                     <!-- // LIST OF EXPANDED PROPERTIES -->
-                        
+
                 </intranda:box>
-                
+
                 <div style="height:10px;"/>
             </ui:repeat>
             <!-- // RUN THROUGH ALL FOLDERS -->
-            
+
             <!-- SOME DISTANCE TO ALLOW SCROLLING -->
             <div style="height:50px;"/>
-            
+
             <!-- BUTTONS -->
             <ui:fragment rendered="#{NavigationForm.workflowPlugin.recordList != null and NavigationForm.workflowPlugin.recordList.size() > 0}">
 
                 <div class="fixed-bottom">
-                
+
                     <div class="row">
                         <div class="col-sm-6"></div>
                         <div class="col-sm-6">
-                        
+
                             <div class="p-3 bg-light border-top border-start border-end #{NavigationForm.workflowPlugin.operationType eq 'creation' ? 'borderSuccess' : 'borderHot'}">
                                 <button
                                     jsf:id="declineAll"
@@ -402,7 +402,7 @@
                                     </span>
                                     <f:ajax render=":itemForm" />
                                 </button>
-                
+
                                 <button
                                     jsf:id="acceptAll"
                                     class="btn btn-blank"
@@ -413,9 +413,9 @@
                                     </span>
                                     <f:ajax render=":itemForm" />
                                 </button>
-                
+
                                 <div class="float-end">
-                
+
                                      <button
                                         onclick="preventDoubleSubmit(this);"
                                         class="btn btn-success float-end me-4"
@@ -427,7 +427,7 @@
                                             <h:outputText value="#{msgs.weiter}" />
                                         </span>
                                     </button>
-                
+
                                     <button
                                         jsf:rendered="#{NavigationForm.workflowPlugin.operationType eq 'cancel'}"
                                         class="btn btn-hot float-end me-4"
@@ -465,13 +465,13 @@
                                 </h4>
                             </div>
                             <!-- // MODAL HEADER -->
-                            
+
                             <!-- MODAL BODY -->
                             <div class="modal-body">
                                 <p>#{msgs.plugin_workflow_aeon_deletionWarningConfirmation}</p>
                             </div>
                             <!-- // MODAL BODY -->
-                            
+
                             <div class="modal-footer">
                                 <button
                                     class="btn btn-blank"
@@ -496,6 +496,6 @@
 
         </h:form>
         <!-- // ALL OBJECTS FROM REQUEST SUCCESS -->
-        
+
     </composite:implementation>
 </ui:composition>

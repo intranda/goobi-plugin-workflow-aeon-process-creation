@@ -6,52 +6,52 @@
     xmlns:f="http://xmlns.jcp.org/jsf/core"
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:jsf="http://xmlns.jcp.org/jsf"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
     xmlns:c="http://java.sun.com/jstl/core">
 
     <composite:interface>
     </composite:interface>
 
     <composite:implementation>
-        
+
         <!-- BOX WITH TRANSACTION DETAILS -->
         <h:form id="myform" rendered="#{NavigationForm.workflowPlugin.requestSuccess and NavigationForm.workflowPlugin.operationType == 'creation'}" styleClass="mb-3">
-        
+
             <intranda:box
                 boxType="outline"
                 boxPadding="false"
                 boxForm="true"
                 icon="fa-plug"
                 title="#{msgs.plugin_workflow_aeon_requestedDetails}">
-                
+
                 <!-- RUN THROUGH ALL FIELDS -->
                 <ui:repeat
                     value="#{NavigationForm.workflowPlugin.transactionFields}"
                     var="property">
-                    
+
                     <div class="row">
-                        
+
                         <!-- LABEL -->
                         <div class="col-12 col-md-3">
-                            <intranda:formLabel label="#{property.title}" 
+                            <intranda:formLabel label="#{property.title}"
                                 labelFor="input"  labelRequired="false"/>
                         </div>
                         <!-- // LABEL -->
-                        
+
                         <div class="col-12 col-md-9 ">
-                            
+
                             <!-- IF INPUT FIELD -->
                             <ui:fragment rendered="#{property.type == 'input' or property.type == 'input-dont-overwrite'}">
                                 <ui:include  src="plugin_workflow_aeon_include_input.xhtml"/>
                             </ui:fragment>
                             <!-- // IF INPUT FIELD -->
-                            
+
                             <!-- IF SELECT FIELD -->
                             <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary' or property.type == 'select-dont-overwrite'}">
                                 <ui:include  src="plugin_workflow_aeon_include_select.xhtml"/>
                             </ui:fragment>
                             <!-- // IF SELECT FIELD -->
-                            
+
                             <!-- IF CHECKBOX FIELD -->
                             <ui:fragment rendered="#{property.type == 'checkbox'}">
                                <ui:include  src="plugin_workflow_aeon_include_checkbox.xhtml"/>
@@ -69,21 +69,21 @@
                                  <ui:include  src="plugin_workflow_aeon_include_selectAndText.xhtml"/>
                             </ui:fragment>
                             <!-- // IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
-                            
+
                             <!-- IF MULTISELECT FIELD -->
                             <ui:fragment rendered="#{property.type == 'multiselect'}">
                                  <ui:include src="plugin_workflow_aeon_include_multiselect.xhtml"/>
                             </ui:fragment>
                             <!-- // IF MULTISELECT FIELD -->
-                    
+
                             <!-- VALIDATION AND HELP -->
                             <ui:include  src="plugin_workflow_aeon_include_validationAndHelp.xhtml"/>
-                            
+
                         </div>
                     </div>
                 </ui:repeat>
                 <!-- // RUN THROUGH ALL FIELDS -->
-         
+
             </intranda:box>
         </h:form>
         <!-- // BOX WITH TRANSACTION DETAILS -->
