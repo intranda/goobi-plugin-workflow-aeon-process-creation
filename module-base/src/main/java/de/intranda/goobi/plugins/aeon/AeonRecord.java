@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.goobi.beans.GoobiProperty;
 import org.goobi.beans.Process;
-import org.goobi.beans.Processproperty;
 
 import lombok.Data;
 
@@ -50,14 +50,14 @@ public class AeonRecord implements Comparable<AeonRecord> {
         if (recordData == null && other.getRecordData() == null) {
             String orderField = "";
             String otherOrderField = "";
-            for (Processproperty pp : existingProcess.getEigenschaften()) {
-                if (PROCESS_ORDER_PROPERTY.equals(pp.getTitel())) {
-                    orderField = pp.getWert();
+            for (GoobiProperty pp : existingProcess.getProperties()) {
+                if (PROCESS_ORDER_PROPERTY.equals(pp.getPropertyName())) {
+                    orderField = pp.getPropertyValue();
                 }
             }
-            for (Processproperty pp : other.getExistingProcess().getEigenschaften()) {
-                if (PROCESS_ORDER_PROPERTY.equals(pp.getTitel())) {
-                    otherOrderField = pp.getWert();
+            for (GoobiProperty pp : other.getExistingProcess().getProperties()) {
+                if (PROCESS_ORDER_PROPERTY.equals(pp.getPropertyName())) {
+                    otherOrderField = pp.getPropertyValue();
                 }
             }
             return orderField.compareTo(otherOrderField);
