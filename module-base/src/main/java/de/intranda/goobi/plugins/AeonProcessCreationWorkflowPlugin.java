@@ -462,7 +462,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
     private boolean checkTransactionNumber() {
 
-        String sql = "SELECT COUNT(1) FROM prozesseeigenschaften WHERE titel = 'Transaction Identifier' AND wert = ?";
+        String sql =
+                "SELECT COUNT(1) FROM properties WHERE property_name = 'Transaction Identifier' and object_type = 'process' AND property_value = ?";
         Connection connection = null;
         try {
             connection = MySQLHelper.getInstance().getConnection();
@@ -485,7 +486,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     private int getNextId() {
         int value = 0;
 
-        String sql = "SELECT max(WERT) FROM prozesseeigenschaften where titel = 'OrderNumber'";
+        String sql = "SELECT max(property_value) FROM properties where property_name = 'OrderNumber' and object_type = 'process'";
         Connection connection = null;
         try {
             connection = MySQLHelper.getInstance().getConnection();
@@ -870,9 +871,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
 
         StringBuilder sql = new StringBuilder();
 
-        sql.append("(prozesse.ProzesseID in (select prozesseID from prozesseeigenschaften where prozesseeigenschaften.Titel = '");
+        sql.append("(prozesse.ProzesseID in (select object_id from properties where properties.property_value = '");
         sql.append(transactionFieldName);
-        sql.append("' AND prozesseeigenschaften.Wert = '");
+        sql.append("' and object_type = 'process' AND properties.property_value = '");
         sql.append(input);
         sql.append("')) AND projekte.projectIsArchived = false ");
 
