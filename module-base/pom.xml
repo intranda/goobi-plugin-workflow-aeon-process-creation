@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.goobi.workflow.plugin</groupId>
     <artifactId>plugin-workflow-aeon-process-creation</artifactId>
-    <version>25.08</version>
+    <version>25.09-SNAPSHOT</version>
   </parent>
   <artifactId>plugin-workflow-aeon-process-creation-base</artifactId>
   <packaging>jar</packaging>
@@ -12,13 +12,13 @@
     <dependency>
       <groupId>io.goobi.workflow.plugin</groupId>
       <artifactId>plugin-workflow-aeon-process-creation-lib</artifactId>
-      <version>25.08</version>
+      <version>25.09-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.goobi.workflow.plugin</groupId>
       <artifactId>plugin-opac-json-lib</artifactId>
-      <version>25.08</version>
+      <version>25.09-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
