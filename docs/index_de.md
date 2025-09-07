@@ -3,6 +3,10 @@ title: AEON Datenübernahme
 identifier: intranda_workflow_aeon_process_creation
 description: Dieses Workflow Plugin ermöglicht die Erstellung von Goobi Vorgängen auf der Grundlage einer ersten AEON-Anfrage. Es ermöglicht unter anderem eine manuelle Auswahl von Elementen aus der AEON-Antwort.
 published: true
+keywords:
+    - Goobi workflow
+    - Plugin
+    - Workflow Plugin
 ---
 ## Einführung
 Mit diesem Plugin können einzelne Datensätze aus AEON abgefragt werden. Nachdem ein Datensatz abgefragt wurde, werden alle Metadaten aus der sog. Metadata Cloud abgefragt und aufgelistet. Der Nutzer kann anschließend auswählen, welche Datensätze er als Goobi-Vorgang anlegen möchte.
