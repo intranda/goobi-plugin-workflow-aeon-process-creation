@@ -164,6 +164,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlug
     // defines the current operation type, possible values are creation to create new processes and cancel to disable processes
     private String operationType = "creation";
 
+    @Getter
+    @Setter
+    private String creationMode = "single";
+
     private String transactionFieldName;
 
     private String cancellationProjectName;
