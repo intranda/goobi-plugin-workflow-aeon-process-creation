@@ -3,6 +3,10 @@ title: AEON data transfer
 identifier: intranda_workflow_aeon_process_creation
 description: This workflow plugin enables Goobi processes to be created on the basis of an initial AEON request. Among other things, it enables manual selection of elements from the AEON response.
 published: true
+keywords:
+    - Goobi workflow
+    - Plugin
+    - Workflow Plugin
 ---
 ## Introduction
 This plugin can be used to query individual data sets from AEON. After a record has been queried, all metadata from the so-called Metadata Cloud are retrieved and listed. The user can then select which data sets he or she would like to create as a Goobi operation.
