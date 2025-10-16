@@ -10,6 +10,8 @@
    </aeon>
 
   <processCreation>
+    <batchDocstruct>BatchObject</batchDocstruct>
+    <processTitleMetadata>_TitleDocMain</processTitleMetadata>  
     <defaultWorkflowName>Paper workflow</defaultWorkflowName>
     <workflowName type="Audio Recording (DRMS)">Audio files</workflowName>
     <opacName>Metadata cloud</opacName>

@@ -137,6 +137,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private String opacName;
     private String batchDocstruct;
 
+    private String processTitleMetadataType;
+
     @Getter
     private String selectedWorkflow;
     @Getter
@@ -640,9 +642,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             // root data: id/title = input
             for (AeonRecord r : recordList) {
                 if (r.isAccepted()) {
-
                     String orderNumber = getOrderAsString(nextFreeId);
-                    assignProperties(r, process, r.getProcessTitle() + "_" + orderNumber + "_");
+                    String processTitle = r.getProcessTitle() + "_" + orderNumber;
+                    assignProperties(r, process, processTitle + "_");
                     nextFreeId++;
                     // for each selected record: create child docstruct, assign data
                     String recordIdentifier = r.getRecordData().get("uri"); // get uri from properties
@@ -651,9 +653,15 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
                         // get metadata for selected record
                         Fileformat fileformat = opacPlugin.search("", "", coc, prefs);
+
+                        //  save subprocess title as metadata
+                        Metadata processTitleMetadata = new Metadata(prefs.getMetadataTypeByName(processTitleMetadataType));
+                        processTitleMetadata.setValue(processTitle);
+
+                        fileformat.getDigitalDocument().getLogicalDocStruct().addMetadata(processTitleMetadata);
+
                         masterFileformat.getDigitalDocument().getLogicalDocStruct().addChild(fileformat.getDigitalDocument().getLogicalDocStruct());
 
-                        // TODO set process title as metadata?
                     } catch (Exception e) {
                         log.error(e);
                     }
@@ -841,6 +849,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         opacName = config.getString("/processCreation/opacName");
         batchDocstruct = config.getString("/processCreation/batchDocstruct");
 
+        processTitleMetadataType = config.getString("/processCreation/processTitleMetadata");
         // process cancellation
         transactionFieldName = config.getString("/processCancellation/transactionFieldName");
         cancellationProjectName = config.getString("/processCancellation/projectName");
