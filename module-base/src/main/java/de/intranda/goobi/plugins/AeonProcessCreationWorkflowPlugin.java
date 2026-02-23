@@ -29,7 +29,6 @@ import org.goobi.interfaces.ISearchField;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.flow.statistics.hibernate.FilterHelper;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
-import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 
 import de.intranda.goobi.plugins.aeon.AeonExistingProcess;
@@ -67,7 +66,7 @@ import ugh.dl.Prefs;
 
 @PluginImplementation
 @Log4j2
-public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin, IPlugin {
+public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
     //    ## Sample identifiers
     //    - 286670 - (DRMS) Book & Paper
