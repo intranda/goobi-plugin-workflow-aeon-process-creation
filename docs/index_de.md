@@ -39,7 +39,7 @@ Plugin_workflow_aeon_process_creation
 
 
 ## Überblick und Funktionsweise
-Wenn der Nutzer über die Berechtigung zur Nutzung des Plugins verfügt, kann Im Menüpunkt `Worklow` das Plugin `AEON Abfrage Plugin` geöffnet werden.
+Wenn der Nutzer über die Berechtigung zur Nutzung des Plugins verfügt, kann im Menüpunkt `Worklow` das Plugin `AEON Abfrage Plugin` geöffnet werden.
 
 ![Geöffnetes Plugin ohne ausgeführte Suche](screen3_de.png)
 
@@ -239,7 +239,7 @@ Parameter           |  Erläuterung
 `variable`          | Dieser Parameter definiert den Namen der zu erstellenden Eigenschaft. Dieser Parameter wird für Daten aus der Metadata Cloud nicht ausgewertet.
 `place`             | Hier wird der Typ der Eigenschaft festgelegt. Mögliche Werte sind `work` (Werkstückeigenschaft), `process` (Vorgangseigenschaft), `template` (Vorlageneigenschaft).
 `value`             | Mit diesem Parameter kann ein Default Wert festgelegt werden. Falls ein AEON Element konfiguriert und durch die Abfrage erhalten wurde, wird der konfigurierte default Wert mit dem Inhalt aus AEON überschrieben.
-`help`              | Mit diesem Parameter läßt sich ein Hilfetext definieren der optional angezeigt werden kann.
+`help`              | Mit diesem Parameter lässt sich ein Hilfetext definieren der optional angezeigt werden kann.
 `validation`        | Dieser Parameter definiert einen regulären Ausdruck, gegen den der Feldinhalt validiert werden kann.
 `strict`            | Die Werte `true` oder `false` definieren, ob ein Verstoß gegen die Validierung zwingend behoben werden muss, bevor Vorgänge angelegt werden können.
 `message`           | Dieser Parameter legt eine Meldung fest, die im Falle von Validierungsfehlern angezeigt werden soll.

@@ -39,7 +39,7 @@ Plugin_workflow_aeon_process_creation
 
 
 ## Overview and functionality
-If the user has the authorisation to use the plugin, the plugin `AEON Query Plugin` can be opened in the menu item `Worklow`.
+If the user has the authorisation to use the plugin, the plugin `AEON Query Plugin` can be opened in the menu item `Workflow`.
 
 ![Opened plugin without executed search](screen3_en.png)
 
