@@ -5,12 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -43,6 +38,7 @@ import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.ScriptThreadWithoutHibernate;
 import de.sub.goobi.helper.enums.StepStatus;
 import de.sub.goobi.helper.exceptions.DAOException;
+import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.persistence.managers.MySQLHelper;
 import de.sub.goobi.persistence.managers.ProcessManager;
 import de.sub.goobi.persistence.managers.ProjectManager;
@@ -61,8 +57,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
+import ugh.dl.DigitalDocument;
 import ugh.dl.Fileformat;
+import ugh.dl.Metadata;
 import ugh.dl.Prefs;
+import ugh.exceptions.PreferencesException;
+import ugh.exceptions.UGHException;
+import ugh.exceptions.WriteException;
+import ugh.fileformats.mets.MetsMods;
 
 @PluginImplementation
 @Log4j2
@@ -128,6 +130,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private String defaultWorkflowName;
     private Map<String, String> specialWorkflowNames = new HashMap<>();
     private String opacName;
+    private String batchDocstruct;
+
+    private String processTitleMetadataType;
+    private String resourceIDMetadataType;
 
     @Getter
     private String selectedWorkflow;
@@ -365,12 +371,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                             prop.setOverwriteMainField(false);
                         }
 
-                        //                        Process title: Job#-repository-AeonTN e.g 999-music-12345. The job# is an auto generated one-up number.
-                        //                        Repository pulled from Aeon field - Site
-                        //                        AeonTN pulled from Aeon field - transactionNumber
+                        // Process title: Job#-repository-AeonTN e.g 999-music-12345. The job# is an auto generated one-up number.
+                        // Repository pulled from Aeon field - Site
+                        // AeonTN pulled from Aeon field - transactionNumber
 
                         // get next free id
-                        String repository = (String) map.get("itemInfo2");
+                        final Map<String, Object> effectiveMap = map;
+                        String repository = (String) Optional.ofNullable(effectiveMap.get("itemInfo2"))
+                                .or(() -> Optional.ofNullable(effectiveMap.get("itemInfo3")))
+                                .or(() -> Optional.ofNullable(effectiveMap.get("itemInfo4")))
+                                .orElse("unknown");
                         int transactionNumber = (int) map.get("transactionNumber");
 
                         String generatedTitle = transactionNumber + "_" + repository;
@@ -438,12 +448,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                                     aep.getDuplicateProperties().add(aeonProperty);
                                     extractProcessValues(other, aeonProperty);
                                 }
-                                //                                for (AeonProperty property : aeonRecord.getProcessProperties()) {
-                                //                                    AeonProperty aeonProperty = property.cloneProperty();
-                                //                                    aeonProperty.setValue("");
-                                //                                    aep.getDuplicateProperties().add(aeonProperty);
-                                //                                    extractProcessValues(other, aeonProperty);
-                                //                                }
                                 aeonRecord.getExistingProcesses().add(aep);
                             }
                         }
@@ -601,131 +605,226 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
         Process processTemplate = ProcessManager.getProcessByExactTitle(selectedWorkflow);
         Batch batch = null;
-        for (AeonRecord rec : recordList) {
-            if (rec.isAccepted()) {
-                // create process
 
-                Process process = new Process();
-                if (batch == null) {
-                    batch = new Batch();
-                    batch.setBatchName(input);
-                    batch.setBatchLabel(input);
-                    ProcessManager.saveBatch(batch);
-                }
-                process.setBatch(batch);
+        // create a single process with all selected records in it
+        if ("single".equals(creationMode)) {
+            Process process = new Process();
+            process.setProjekt(processTemplate.getProjekt());
+            process.setRegelsatz(processTemplate.getRegelsatz());
+            process.setDocket(processTemplate.getDocket());
 
-                process.setProjekt(processTemplate.getProjekt());
-                process.setRegelsatz(processTemplate.getRegelsatz());
-                process.setDocket(processTemplate.getDocket());
+            bhelp.SchritteKopieren(processTemplate, process);
+            bhelp.EigenschaftenKopieren(processTemplate, process);
 
-                bhelp.SchritteKopieren(processTemplate, process);
-                bhelp.EigenschaftenKopieren(processTemplate, process);
+            bhelp.EigenschaftHinzufuegen(process, "Template", processTemplate.getTitel());
+            bhelp.EigenschaftHinzufuegen(process, "TemplateID", "" + processTemplate.getId());
 
-                bhelp.EigenschaftHinzufuegen(process, "Template", processTemplate.getTitel());
-                bhelp.EigenschaftHinzufuegen(process, "TemplateID", "" + processTemplate.getId());
+            process.setTitel(recordList.get(0).getProcessTitle());
 
-                // check if patron type yale was selected
-                for (AeonProperty prop : rec.getProcessProperties()) {
-                    if ("Patron type".equals(prop.getTitle()) && "Yale".equals(prop.getValue())) {
-                        // if this is the case, all steps get higher priority
-                        for (Step step : process.getSchritte()) {
-                            step.setPrioritaet(1);
+            Prefs prefs = processTemplate.getRegelsatz().getPreferences();
+            Fileformat masterFileformat = null;
+            try {
+                masterFileformat = new MetsMods(prefs);
+                DigitalDocument digDoc = new DigitalDocument();
+                masterFileformat.setDigitalDocument(digDoc);
+                digDoc.setLogicalDocStruct(digDoc.createDocStruct(prefs.getDocStrctTypeByName(batchDocstruct)));
+                digDoc.setPhysicalDocStruct(digDoc.createDocStruct(prefs.getDocStrctTypeByName("BoundBook")));
+                // add CatalogIDDigital
+                Metadata identifier = new Metadata(prefs.getMetadataTypeByName("CatalogIDDigital"));
+                identifier.setValue(input);
+                digDoc.getLogicalDocStruct().addMetadata(identifier);
+            } catch (UGHException e) {
+                log.error(e);
+            }
+
+            int nextFreeId = getNextId();
+            // create batch mets file
+            // root data: id/title = input
+            for (AeonRecord r : recordList) {
+                if (r.isAccepted()) {
+                    String orderNumber = getOrderAsString(nextFreeId);
+                    String processTitle = r.getProcessTitle() + "_" + orderNumber;
+                    assignProperties(r, process, processTitle + "_");
+                    nextFreeId++;
+                    // for each selected record: create child docstruct, assign data
+                    String recordIdentifier = r.getRecordData().get("uri"); // get uri from properties
+                    try {
+                        opacPlugin.setSelectedUrl(recordIdentifier);
+
+                        // get metadata for selected record
+                        Fileformat fileformat = opacPlugin.search("", "", coc, prefs);
+
+                        //  save subprocess title as metadata
+                        Metadata processTitleMetadata = new Metadata(prefs.getMetadataTypeByName(processTitleMetadataType));
+                        processTitleMetadata.setValue(processTitle);
+                        fileformat.getDigitalDocument().getLogicalDocStruct().addMetadata(processTitleMetadata);
+
+                        if (resourceIDMetadataType != null) {
+                            Metadata resourceIDMetadata = new Metadata(prefs.getMetadataTypeByName(resourceIDMetadataType));
+                            resourceIDMetadata.setValue(recordIdentifier);
+                            fileformat.getDigitalDocument().getLogicalDocStruct().addMetadata(resourceIDMetadata);
                         }
+
+                        masterFileformat.getDigitalDocument().getLogicalDocStruct().addChild(fileformat.getDigitalDocument().getLogicalDocStruct());
+
+                    } catch (Exception e) {
+                        log.error("Failed to create structure element for aeon record", e);
                     }
                 }
+            }
 
-                // add properties
-                for (AeonProperty prop : rec.getProperties()) {
-                    if (StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null || prop.getShippingOption().equals(shippingOption)) {
-                        if ("multiselect".equals(prop.getType())) {
-                            // get local, global value
-                            List<String> values = prop.getMultiselectSelectedValues();
-                            for (AeonProperty localProperty : rec.getProcessProperties()) {
-                                if (prop.getTitle().equals(localProperty.getTitle()) && !localProperty.getMultiselectSelectedValues().isEmpty()) {
-                                    values = localProperty.getMultiselectSelectedValues();
-                                }
-                            }
-                            for (String value : values) {
-                                bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), value);
-                            }
-                        } else {
-                            String value = prop.getExportValue();
-                            for (AeonProperty localProperty : rec.getProcessProperties()) {
-                                if (prop.getTitle().equals(localProperty.getTitle()) && StringUtils.isNoneBlank(localProperty.getExportValue())) {
-                                    value = localProperty.getExportValue();
-                                }
-                            }
+            bhelp.EigenschaftHinzufuegen(process, "OrderNumber", getOrderAsString(--nextFreeId));
+            try {
+                // save process and fileformat
+                finalizeProcess(process, masterFileformat);
+            } catch (WriteException | PreferencesException | IOException | SwapException | DAOException e) {
+                log.error(e);
+            }
 
-                            if (StringUtils.isNoneBlank(value)) {
-                                bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), value);
-                            }
-                        }
+        } else {
+            // create a process for each record
+
+            for (AeonRecord rec : recordList) {
+                if (rec.isAccepted()) {
+                    // create process
+
+                    Process process = new Process();
+                    if (batch == null) {
+                        batch = new Batch();
+                        batch.setBatchName(input);
+                        batch.setBatchLabel(input);
+                        ProcessManager.saveBatch(batch);
                     }
-                }
-                for (AeonProperty prop : transactionFields) {
-                    if (StringUtils.isNoneBlank(prop.getExportValue())) {
-                        bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getExportValue());
-                    }
-                }
+                    process.setBatch(batch);
 
-                for (AeonProperty prop : rec.getProcessProperties()) {
-                    if ("multiselect".equals(prop.getType())) {
-                        for (String val : prop.getMultiselectSelectedValues()) {
-                            bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), val);
-                        }
-                    } else {
-                        bhelp.EigenschaftHinzufuegen(process, prop.getPropertyName(), prop.getExportValue());
-                    }
-                }
+                    process.setProjekt(processTemplate.getProjekt());
+                    process.setRegelsatz(processTemplate.getRegelsatz());
+                    process.setDocket(processTemplate.getDocket());
 
-                try {
-                    // create mets file for selected record
-                    Prefs prefs = processTemplate.getRegelsatz().getPreferences();
-                    String recordIdentifier = rec.getRecordData().get("uri"); // get uri from properties
-                    opacPlugin.setSelectedUrl(recordIdentifier);
-                    Fileformat fileformat = opacPlugin.search("", "", coc, prefs); // get metadata for selected record
-                    // is additional metadata neeeded?
+                    bhelp.SchritteKopieren(processTemplate, process);
+                    bhelp.EigenschaftenKopieren(processTemplate, process);
 
-                    int nextFreeId = getNextId();
-                    String orderNumber;
-                    if (nextFreeId > 999) {
-                        orderNumber = String.valueOf(nextFreeId);
-                    } else if (nextFreeId > 99) {
-                        orderNumber = "0" + nextFreeId;
-                    } else if (nextFreeId > 9) {
-                        orderNumber = "00" + nextFreeId;
-                    } else {
-                        orderNumber = "000" + nextFreeId;
+                    bhelp.EigenschaftHinzufuegen(process, "Template", processTemplate.getTitel());
+                    bhelp.EigenschaftHinzufuegen(process, "TemplateID", "" + processTemplate.getId());
+
+                    assignProperties(rec, process, "");
+
+                    try {
+                        // create mets file for selected record
+                        Prefs prefs = processTemplate.getRegelsatz().getPreferences();
+                        String recordIdentifier = rec.getRecordData().get("uri"); // get uri from properties
+                        opacPlugin.setSelectedUrl(recordIdentifier);
+                        Fileformat fileformat = opacPlugin.search("", "", coc, prefs); // get metadata for selected record
+                        // is additional metadata neeeded?
+
+                        int nextFreeId = getNextId();
+                        String orderNumber = getOrderAsString(nextFreeId);
+
+                        process.setTitel(rec.getProcessTitle() + "_" + orderNumber);
+                        rec.setProcessTitle(process.getTitel());
+                        bhelp.EigenschaftHinzufuegen(process, "OrderNumber", orderNumber);
+
+                        // save process and fileformat
+                        finalizeProcess(process, fileformat);
+                    } catch (Exception e) {
+                        log.error("Error while creating the Goobi processes", e);
+                        Helper.setFehlerMeldung("Error while creating the Goobi processes", e);
                     }
 
-                    process.setTitel(rec.getProcessTitle() + "_" + orderNumber);
-                    rec.setProcessTitle(process.getTitel());
-                    bhelp.EigenschaftHinzufuegen(process, "OrderNumber", orderNumber);
-
-                    // save process
-                    ProcessManager.saveProcess(process);
-
-                    // save fileformat
-                    process.writeMetadataFile(fileformat);
-                    generatedProcesses.add(process);
-                    screenName = "summary";
-                    overviewMode = "saved";
-                    Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_processCreated") + ": " + process.getTitel());
-                } catch (Exception e) {
-                    log.error("Error while creating the Goobi processes", e);
-                    Helper.setFehlerMeldung("Error while creating the Goobi processes", e);
-                }
-
-                // start any open automatic tasks
-                for (Step s : process.getSchritteList()) {
-                    if (StepStatus.OPEN.equals(s.getBearbeitungsstatusEnum()) && s.isTypAutomatisch()) {
-                        ScriptThreadWithoutHibernate myThread = new ScriptThreadWithoutHibernate(s);
-                        myThread.startOrPutToQueue();
-                    }
                 }
             }
         }
 
+    }
+
+    public void finalizeProcess(Process process, Fileformat fileformat)
+            throws IOException, SwapException, WriteException, PreferencesException, DAOException {
+        ProcessManager.saveProcess(process);
+        process.writeMetadataFile(fileformat);
+        generatedProcesses.add(process);
+        screenName = "summary";
+        overviewMode = "saved";
+        Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_processCreated") + ": " + process.getTitel());
+
+        // start any open automatic tasks
+        for (Step s : process.getSchritteList()) {
+            if (StepStatus.OPEN.equals(s.getBearbeitungsstatusEnum()) && s.isTypAutomatisch()) {
+                ScriptThreadWithoutHibernate myThread = new ScriptThreadWithoutHibernate(s);
+                myThread.startOrPutToQueue();
+            }
+        }
+    }
+
+    public String getOrderAsString(int nextFreeId) {
+        String orderNumber;
+        if (nextFreeId > 999) {
+            orderNumber = String.valueOf(nextFreeId);
+        } else if (nextFreeId > 99) {
+            orderNumber = "0" + nextFreeId;
+        } else if (nextFreeId > 9) {
+            orderNumber = "00" + nextFreeId;
+        } else {
+            orderNumber = "000" + nextFreeId;
+        }
+        return orderNumber;
+    }
+
+    public void assignProperties(AeonRecord rec, Process process, String prefix) {
+
+        // check if patron type yale was selected
+        for (AeonProperty prop : rec.getProcessProperties()) {
+            if ("Patron type".equals(prop.getTitle()) && "Yale".equals(prop.getValue())) {
+                // if this is the case, all steps get higher priority
+                for (Step step : process.getSchritte()) {
+                    step.setPrioritaet(1);
+                }
+            }
+        }
+
+        // add properties
+        for (AeonProperty prop : rec.getProperties()) {
+            if (StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null
+                    || prop.getShippingOption().equals(shippingOption)) {
+                if ("multiselect".equals(prop.getType())) {
+                    // get local, global value
+                    List<String> values = prop.getMultiselectSelectedValues();
+                    for (AeonProperty localProperty : rec.getProcessProperties()) {
+                        if (prop.getTitle().equals(localProperty.getTitle()) && !localProperty.getMultiselectSelectedValues().isEmpty()) {
+                            values = localProperty.getMultiselectSelectedValues();
+                        }
+                    }
+                    for (String value : values) {
+                        bhelp.EigenschaftHinzufuegen(process, prefix + prop.getPropertyName(), value);
+                    }
+                } else {
+                    String value = prop.getExportValue();
+                    for (AeonProperty localProperty : rec.getProcessProperties()) {
+                        if (prop.getTitle().equals(localProperty.getTitle()) && StringUtils.isNoneBlank(localProperty.getExportValue())) {
+                            value = localProperty.getExportValue();
+                        }
+                    }
+
+                    if (StringUtils.isNoneBlank(value)) {
+                        bhelp.EigenschaftHinzufuegen(process, prefix + prop.getPropertyName(), value);
+                    }
+                }
+            }
+        }
+        for (AeonProperty prop : transactionFields) {
+            if (StringUtils.isNoneBlank(prop.getExportValue())) {
+                bhelp.EigenschaftHinzufuegen(process, prefix + prop.getPropertyName(), prop.getExportValue());
+            }
+        }
+
+        for (AeonProperty prop : rec.getProcessProperties()) {
+            if ("multiselect".equals(prop.getType())) {
+                for (String val : prop.getMultiselectSelectedValues()) {
+                    bhelp.EigenschaftHinzufuegen(process, prefix + prop.getPropertyName(), val);
+                }
+            } else {
+                bhelp.EigenschaftHinzufuegen(process, prefix + prop.getPropertyName(), prop.getExportValue());
+            }
+        }
     }
 
     /**
@@ -753,7 +852,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         }
 
         opacName = config.getString("/processCreation/opacName");
+        batchDocstruct = config.getString("/processCreation/batchDocstruct");
 
+        processTitleMetadataType = config.getString("/processCreation/processTitleMetadata");
+        resourceIDMetadataType = config.getString("/processCreation/resourceIDMetadata", null);
         // process cancellation
         transactionFieldName = config.getString("/processCancellation/transactionFieldName");
         cancellationProjectName = config.getString("/processCancellation/projectName");
