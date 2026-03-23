@@ -5,12 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -380,7 +375,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         // AeonTN pulled from Aeon field - transactionNumber
 
                         // get next free id
-                        String repository = (String) map.get("itemInfo2");
+                        final Map<String, Object> effectiveMap = map;
+                        String repository = (String) Optional.ofNullable(effectiveMap.get("itemInfo2"))
+                                .or(() -> Optional.ofNullable(effectiveMap.get("itemInfo3")))
+                                .or(() -> Optional.ofNullable(effectiveMap.get("itemInfo4")))
+                                .orElse("unknown");
                         int transactionNumber = (int) map.get("transactionNumber");
 
                         String generatedTitle = transactionNumber + "_" + repository;
@@ -663,7 +662,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         masterFileformat.getDigitalDocument().getLogicalDocStruct().addChild(fileformat.getDigitalDocument().getLogicalDocStruct());
 
                     } catch (Exception e) {
-                        log.error(e);
+                        log.error("Failed to create structure element for aeon record", e);
                     }
                 }
             }
