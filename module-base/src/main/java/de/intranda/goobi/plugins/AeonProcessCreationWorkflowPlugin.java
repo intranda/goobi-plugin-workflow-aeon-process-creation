@@ -133,6 +133,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private String batchDocstruct;
 
     private String processTitleMetadataType;
+    private String resourceIDMetadataType;
 
     @Getter
     private String selectedWorkflow;
@@ -656,8 +657,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         //  save subprocess title as metadata
                         Metadata processTitleMetadata = new Metadata(prefs.getMetadataTypeByName(processTitleMetadataType));
                         processTitleMetadata.setValue(processTitle);
-
                         fileformat.getDigitalDocument().getLogicalDocStruct().addMetadata(processTitleMetadata);
+
+                        if (resourceIDMetadataType != null) {
+                            Metadata resourceIDMetadata = new Metadata(prefs.getMetadataTypeByName(resourceIDMetadataType));
+                            resourceIDMetadata.setValue(recordIdentifier);
+                            fileformat.getDigitalDocument().getLogicalDocStruct().addMetadata(resourceIDMetadata);
+                        }
 
                         masterFileformat.getDigitalDocument().getLogicalDocStruct().addChild(fileformat.getDigitalDocument().getLogicalDocStruct());
 
@@ -849,6 +855,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         batchDocstruct = config.getString("/processCreation/batchDocstruct");
 
         processTitleMetadataType = config.getString("/processCreation/processTitleMetadata");
+        resourceIDMetadataType = config.getString("/processCreation/resourceIDMetadata", null);
         // process cancellation
         transactionFieldName = config.getString("/processCancellation/transactionFieldName");
         cancellationProjectName = config.getString("/processCancellation/projectName");
