@@ -8,7 +8,8 @@
     xmlns:jsf="http://xmlns.jcp.org/jsf"
     xmlns:c="http://java.sun.com/jstl/core"
     xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
-    xmlns:p="http://primefaces.org/ui">
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:util="http://goobi.io/util">
 
     <composite:interface>
     </composite:interface>
@@ -384,66 +385,48 @@
 
             <!-- BUTTONS -->
             <ui:fragment rendered="#{NavigationForm.workflowPlugin.recordList != null and NavigationForm.workflowPlugin.recordList.size() > 0}">
+                <div class="position-sticky bottom-0 z-3 section-footer p-3 bg-white border #{NavigationForm.workflowPlugin.operationType eq 'creation' ? 'border-success' : 'border-hot'}">
+                    <button
+                        jsf:id="declineAll"
+                        class="btn btn-blank"
+                        jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
+                        <i class="fa fa-toggle-off"></i>
+                        <span>
+                        <h:outputText value="#{msgs.plugin_workflow_aeon_declineAll}" />
+                        </span>
+                        <f:ajax render=":itemForm" />
+                    </button>
 
-                <div class="fixed-bottom">
+                    <button
+                        jsf:id="acceptAll"
+                        class="btn btn-blank"
+                        jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
+                        <i class="fa fa-toggle-on #{NavigationForm.workflowPlugin.operationType eq 'creation' ? 'bcolor-creation' : 'bcolor-deletion'}"></i>
+                        <span>
+                            <h:outputText value="#{msgs.plugin_workflow_aeon_acceptAll}" />
+                        </span>
+                        <f:ajax render=":itemForm" />
+                    </button>
 
-                    <div class="row">
-                        <div class="col-sm-6"></div>
-                        <div class="col-sm-6">
 
-                            <div class="p-3 bg-light border-top border-start border-end #{NavigationForm.workflowPlugin.operationType eq 'creation' ? 'borderSuccess' : 'borderHot'}">
-                                <button
-                                    jsf:id="declineAll"
-                                    class="btn btn-blank me-2 ms-3"
-                                    jsf:action="#{NavigationForm.workflowPlugin.declineAllItems}">
-                                    <i class="fa fa-toggle-off"></i>
-                                    <span>
-                                    <h:outputText value="#{msgs.plugin_workflow_aeon_declineAll}" />
-                                    </span>
-                                    <f:ajax render=":itemForm" />
-                                </button>
+                    <button
+                        onclick="preventDoubleSubmit(this);"
+                        class="btn btn-success ms-auto"
+                        jsf:id="absenden"
+                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType eq 'creation'}"
+                        jsf:action="#{NavigationForm.workflowPlugin.nextPage}">
+                        <util:icon-text icon="circle-arrow-right" text="#{msgs.weiter}" iconPosition="right" />
+                    </button>
 
-                                <button
-                                    jsf:id="acceptAll"
-                                    class="btn btn-blank"
-                                    jsf:action="#{NavigationForm.workflowPlugin.acceptAllItems}">
-                                    <i class="fa fa-toggle-on #{NavigationForm.workflowPlugin.operationType eq 'creation' ? 'bcolor-creation' : 'bcolor-deletion'}"></i>
-                                    <span>
-                                        <h:outputText value="#{msgs.plugin_workflow_aeon_acceptAll}" />
-                                    </span>
-                                    <f:ajax render=":itemForm" />
-                                </button>
-
-                                <div class="float-end">
-
-                                     <button
-                                        onclick="preventDoubleSubmit(this);"
-                                        class="btn btn-success float-end me-4"
-                                        jsf:id="absenden"
-                                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType eq 'creation'}"
-                                        jsf:action="#{NavigationForm.workflowPlugin.nextPage}">
-                                        <i class="fa fa-arrow-circle-o-right"></i>
-                                        <span>
-                                            <h:outputText value="#{msgs.weiter}" />
-                                        </span>
-                                    </button>
-
-                                    <button
-                                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType eq 'cancel'}"
-                                        class="btn btn-hot float-end me-4"
-                                        jsf:id="disable"
-                                        type="button"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal">
-                                        <i class="fa fa-trash-o" />
-                                        <span>
-                                            <h:outputText value="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
-                                        </span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <button
+                        jsf:rendered="#{NavigationForm.workflowPlugin.operationType eq 'cancel'}"
+                        class="btn btn-hot ms-auto"
+                        jsf:id="disable"
+                        type="button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal">
+                        <util:icon-text icon="trash" text="#{msgs.plugin_workflow_aeon_cancelProcesses}" />
+                    </button>
                 </div>
 
                 <div
