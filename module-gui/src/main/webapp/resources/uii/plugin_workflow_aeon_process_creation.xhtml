@@ -7,7 +7,11 @@
     xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:p="http://primefaces.org/ui"
-    xmlns:jsf="http://xmlns.jcp.org/jsf">
+    xmlns:jsf="http://xmlns.jcp.org/jsf"
+    xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+    xmlns:util="http://goobi.io/util"
+    xmlns:section="http://goobi.io/section"
+    xmlns:form="http://goobi.io/form">
 
     <composite:interface>
     </composite:interface>
@@ -105,11 +109,7 @@ input[type="radio"] {
 
 
         <!-- NO ACCESS ALLOWED -->
-        <ui:fragment rendered="#{!LoginForm.hasRole('Plugin_workflow_aeon_process_creation')}">
-            <h:outputText
-                styleClass="alert alert-danger alert-dismissable margin-bottom-10 margin-top-10"
-                value="#{msgs.plugin_administration_missingPermission} Plugin_workflow_aeon_process_creation" />
-        </ui:fragment>
+        <util:missing-rights rights="Plugin_workflow_aeon_process_creation" />
         <!-- // NO ACCESS ALLOWED -->
 
         <!-- REQUEST AREA -->
@@ -125,27 +125,18 @@ input[type="radio"] {
                             styleClass="mb-3">
 
                             <!--  Transaction Request input Box  -->
-                            <intranda:box
-                                boxType="action"
-                                boxPadding="false"
-                                boxForm="true"
-                                icon="fa-plug"
-                                title="#{msgs.plugin_workflow_aeon_requestAeonForTransaction}">
-
-                                <!-- TYPE ROW -->
-                                <div class="row">
-
-                                    <!-- LABEL -->
-                                    <div class="col-12 col-md-3">
-                                        <intranda:formLabel
-                                            label="#{msgs.plugin_workflow_aeon_selectType}"
-                                            labelFor="typeSelection"
-                                            labelRequired="true" />
-                                    </div>
-                                    <!-- // LABEL -->
-
-                                    <!-- SELECT ONE -->
-                                    <div class="col-12 col-md-9">
+                            <section:section
+                                type="action">
+                                <section:header
+                                    icon="plug"
+                                    title="#{msgs.plugin_workflow_aeon_requestAeonForTransaction}"
+                                />
+                                <section:body>
+                                    <!-- TYPE ROW -->
+                                    <form:field
+                                        label="#{msgs.plugin_workflow_aeon_selectType}"
+                                        required="true"
+                                        group="true">
                                         <h:selectOneRadio
                                             id="typeSelection"
                                             value="#{NavigationForm.workflowPlugin.operationType}"
@@ -162,56 +153,27 @@ input[type="radio"] {
                                                 render="requestForm"
                                                 execute="@this" />
                                         </h:selectOneRadio>
-                                    </div>
-                                    <!-- SELECT ONE -->
-
-                                </div>
-                                <!-- TYPE ROW -->
-
-
-                                <!-- TRANSACTION ROW -->
-                                <div class="row">
-
-                                    <!-- LABEL -->
-                                    <div class="col-12 col-md-3">
-                                        <intranda:formLabel
-                                            label="#{msgs.plugin_workflow_aeon_transactionIdentifier}:"
-                                            labelFor="tn"
-                                            labelRequired="true" />
-                                    </div>
-                                    <!-- // LABEL -->
-
-                                    <!-- INPUT -->
-                                    <div class="col-12 col-md-9">
+                                    </form:field>
+                                    <!-- TYPE ROW -->
+                                    <!-- TRANSACTION ROW -->
+                                    <form:field
+                                        label="#{msgs.plugin_workflow_aeon_transactionIdentifier}"
+                                        required="true"
+                                    >
                                         <h:inputText
                                             id="tn"
-                                            styleClass="form-control form__input"
+                                            styleClass="form-control"
                                             value="#{NavigationForm.workflowPlugin.input}"
                                             required="true"
                                             readonly="false"
                                             tabindex="0">
                                         </h:inputText>
-                                    </div>
-                                    <!-- // INPUT -->
-
-                                </div>
-                                <!-- TRANSACTION ROW -->
-
-
-                                <!-- PROCESS TEMPLATE ROW -->
-                                <div class="row">
-
-                                    <!-- LABEL -->
-                                    <div class="col-12 col-md-3">
-                                        <intranda:formLabel
-                                            label="#{msgs.prozessvorlage}"
-                                            labelFor="processTemplate"
-                                            labelRequired="true" />
-                                    </div>
-                                    <!-- // LABEL -->
-
-                                    <!-- SELECT -->
-                                    <div class="col-12 col-md-9">
+                                    </form:field>
+                                    <!-- TRANSACTION ROW -->
+                                    <!-- PROCESS TEMPLATE ROW -->
+                                    <form:field
+                                        label="#{msgs.prozessvorlage}"
+                                        required="true">
                                         <h:selectOneMenu
                                             id="processTemplate"
                                             styleClass="form-select"
@@ -227,45 +189,34 @@ input[type="radio"] {
                                                 event="change"
                                                 render="@this" />
                                         </h:selectOneMenu>
-                                    </div>
-                                    <!-- // SELECT -->
-
-                                </div>
-                                <!-- // PROCESS TEMPLATE ROW -->
-
-
-                                <!-- for creation: single process creation of process for each box -->
-                                <h:panelGroup
-                                    rendered="#{NavigationForm.workflowPlugin.operationType=='creation'}"
-                                    styleClass="row">
-                                    <div class="col-12 col-md-3">
-                                        <intranda:formLabel
+                                    </form:field>
+                                    <!-- // PROCESS TEMPLATE ROW -->
+                                    <!-- for creation: single process creation of process for each box -->
+                                    <c:if test="#{NavigationForm.workflowPlugin.operationType=='creation'}">
+                                        <form:field
                                             label="#{msgs.plugin_workflow_aeon_creationMode}"
-                                            labelFor="creationMode"
-                                            labelRequired="true" />
-                                    </div>
-                                    <div class="col-12 col-md-9">
-                                        <h:selectOneRadio
-                                            id="creationMode"
-                                            value="#{NavigationForm.workflowPlugin.creationMode}"
-                                            styleClass="select-radio select-radio-horizontal">
-                                            <f:selectItem
-                                                pt:styleClass="focusable"
-                                                itemLabel="#{msgs.plugin_workflow_aeon_creationModeSingle}"
-                                                itemValue="single" />
-                                            <f:selectItem
-                                                itemClass="focusable"
-                                                itemLabel="#{msgs.plugin_workflow_aeon_creationModeSingleMulti}"
-                                                itemValue="multi" />
-                                            <f:ajax
-                                                render="requestForm"
-                                                execute="@this" />
-                                        </h:selectOneRadio>
-                                    </div>
-                                </h:panelGroup>
-
-                                <!-- BUTTONS -->
-                                <div class="box__actions">
+                                            required="true"
+                                            group="true">
+                                            <h:selectOneRadio
+                                                id="creationMode"
+                                                value="#{NavigationForm.workflowPlugin.creationMode}"
+                                                styleClass="select-radio select-radio-horizontal">
+                                                <f:selectItem
+                                                    pt:styleClass="focusable"
+                                                    itemLabel="#{msgs.plugin_workflow_aeon_creationModeSingle}"
+                                                    itemValue="single" />
+                                                <f:selectItem
+                                                    itemClass="focusable"
+                                                    itemLabel="#{msgs.plugin_workflow_aeon_creationModeSingleMulti}"
+                                                    itemValue="multi" />
+                                                <f:ajax
+                                                    render="requestForm"
+                                                    execute="@this" />
+                                            </h:selectOneRadio>
+                                        </form:field>
+                                    </c:if>
+                                </section:body>
+                                <section:footer>
                                     <button
                                         jsf:id="cancel"
                                         class="btn btn-blank"
@@ -273,7 +224,6 @@ input[type="radio"] {
                                         jsf:action="#{NavigationForm.workflowPlugin.resetRequest}">
                                         <h:outputText value="#{msgs.cancel}" />
                                     </button>
-
                                     <button
                                         onclick="preventDoubleSubmit(this);"
                                         jsf:id="sendRequest"
@@ -282,10 +232,8 @@ input[type="radio"] {
                                         <h:outputText
                                             value="#{NavigationForm.workflowPlugin.operationType == 'creation' ? msgs.plugin_workflow_aeon_startRequest : msgs.plugin_workflow_aeon_cancelRequest}" />
                                     </button>
-                                </div>
-                                <!-- // BUTTONS -->
-
-                            </intranda:box>
+                                </section:footer>
+                            </section:section>
                         </h:form>
 
                         <!-- Transaction Details Box -->
@@ -317,77 +265,56 @@ input[type="radio"] {
                     <ui:include src="plugin_workflow_aeon_process_creation_include_created_objects_list.xhtml" />
                 </div>
                 <div class="col-sm-6">
-                    <div class="row">
+                    <section:section type="action">
+                        <section:header
+                            icon="list-check"
+                            title="#{msgs.nextStep}">
+                        </section:header>
+                        <h:form id="summaryForm">
+                            <section:footer>
+                                <!-- BUTTON TO GO BACK -->
+                                <button
+                                    onclick="preventDoubleSubmit(this);"
+                                    jsf:id="back"
+                                    jsf:action="#{NavigationForm.workflowPlugin.previousPage}"
+                                    class="btn btn-blank"
+                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}">
+                                    <util:icon-text icon="arrow-back-up" text="#{msgs.plugin_workflow_aeon_backToSelection}" />
+                                </button>
 
+                                <!-- BUTTON TO SAVE -->
+                                <button
+                                    onclick="preventDoubleSubmit(this);"
+                                    jsf:id="createProcess"
+                                    jsf:action="#{NavigationForm.workflowPlugin.createProcesses}"
+                                    class="btn btn-success"
+                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}">
+                                    <util:icon-text icon="device-floppy" text="#{msgs.plugin_workflow_aeon_createProcesses}" />
+                                </button>
 
-                        <div class="col-sm-12">
+                                <!-- BUTTON TO DOWNLOAD DOCKET -->
+                                <button
+                                    onclick="preventDoubleSubmit(this);"
+                                    jsf:id="dockets"
+                                    jsf:action="#{NavigationForm.workflowPlugin.generateDockets}"
+                                    class="btn btn-blank"
+                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}">
+                                    <util:icon-text icon="printer" text="#{msgs.process_generateDocket}" />
+                                </button>
 
-                            <intranda:box
-                                boxType="action"
-                                boxPadding="true"
-                                icon="fa-tasks"
-                                title="#{msgs.nextStep}">
+                                <!-- BUTTON TO START NEW REQUEST -->
+                                <button
+                                    onclick="preventDoubleSubmit(this);"
+                                    jsf:id="startNewRequest"
+                                    jsf:action="#{NavigationForm.workflowPlugin.resetRequest}"
+                                    class="btn btn-primary"
+                                    jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}">
+                                    <util:icon-text icon="file" text="#{msgs.plugin_workflow_aeon_startNewRequest}" />
+                                </button>
 
-                                <h:form id="summaryForm">
-
-                                    <!-- BUTTON TO GO BACK -->
-                                    <button
-                                        onclick="preventDoubleSubmit(this);"
-                                        jsf:id="back"
-                                        jsf:action="#{NavigationForm.workflowPlugin.previousPage}"
-                                        class="btn btn-blank d-block mb-3"
-                                        jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}">
-                                        <i class="fa fa-undo" />
-                                        <span>
-                                            <h:outputText value="#{msgs.plugin_workflow_aeon_backToSelection}" />
-                                        </span>
-                                    </button>
-
-                                    <!-- BUTTON TO SAVE -->
-                                    <button
-                                        onclick="preventDoubleSubmit(this);"
-                                        jsf:id="createProcess"
-                                        jsf:action="#{NavigationForm.workflowPlugin.createProcesses}"
-                                        class="btn btn-success d-block"
-                                        jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == ''}">
-                                        <i class="fa fa-save" />
-                                        <span>
-                                            <h:outputText value="#{msgs.plugin_workflow_aeon_createProcesses}" />
-                                        </span>
-                                    </button>
-
-                                    <!-- BUTTON TO DOWNLOAD DOCKET -->
-                                    <button
-                                        onclick="preventDoubleSubmit(this);"
-                                        jsf:id="dockets"
-                                        jsf:action="#{NavigationForm.workflowPlugin.generateDockets}"
-                                        class="btn btn-blank d-block mb-3"
-                                        jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}">
-                                        <i class="fa fa-print" />
-                                        <span>
-                                            <h:outputText value="#{msgs.process_generateDocket}" />
-                                        </span>
-                                    </button>
-
-                                    <!-- BUTTON TO START NEW REQUEST -->
-                                    <button
-                                        onclick="preventDoubleSubmit(this);"
-                                        jsf:id="startNewRequest"
-                                        jsf:action="#{NavigationForm.workflowPlugin.resetRequest}"
-                                        class="btn btn-primary d-block"
-                                        jsf:rendered="#{NavigationForm.workflowPlugin.overviewMode == 'saved'}">
-                                        <i class="fa fa-file-o" />
-                                        <span>
-                                            <h:outputText value="#{msgs.plugin_workflow_aeon_startNewRequest}" />
-                                        </span>
-                                    </button>
-
-                                </h:form>
-
-                            </intranda:box>
-
-                        </div>
-                    </div>
+                            </section:footer>
+                        </h:form>
+                    </section:section>
                 </div>
             </div>
         </ui:fragment>

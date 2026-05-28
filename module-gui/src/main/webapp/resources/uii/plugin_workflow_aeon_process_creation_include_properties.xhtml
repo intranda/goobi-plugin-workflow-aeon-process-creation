@@ -6,7 +6,9 @@
     xmlns:f="http://xmlns.jcp.org/jsf/core"
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
     xmlns:jsf="http://xmlns.jcp.org/jsf"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites">
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
+    xmlns:section="http://goobi.io/section"
+    xmlns:form="http://goobi.io/form">
 
     <composite:interface>
     </composite:interface>
@@ -15,75 +17,64 @@
 
         <!-- PROCESS PROPERTIES -->
         <h:form id="properties" rendered="#{NavigationForm.workflowPlugin.requestSuccess and NavigationForm.workflowPlugin.operationType == 'creation'}">
+            <section:section type="neutral">
+                <section:header title="#{msgs.plugin_workflow_aeon_propertiesForAllProcesses}" icon="plug" />
+                <section:body>
+                    <ui:repeat
+                        value="#{NavigationForm.workflowPlugin.propertyFields}"
+                        var="property">
+                        <ui:fragment rendered="#{property.shippingOption == null or property.shippingOption == NavigationForm.workflowPlugin.shippingOption}">
+                            <ui:fragment rendered="#{property.type == 'checkbox' || property.type == 'radio' or property.type == 'radio-dont-overwrite' || property.type == 'select+text'}">
+                                <form:field
+                                    label="#{property.title}"
+                                    group="true">
+                                    <!-- IF CHECKBOX FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'checkbox'}">
+                                    <ui:include src="plugin_workflow_aeon_include_checkbox.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF CHECKBOX FIELD -->
 
-            <intranda:box
-                boxType="action"
-                boxPadding="false"
-                boxForm="true"
-                icon="fa-plug"
-                title="#{msgs.plugin_workflow_aeon_propertiesForAllProcesses}">
+                                    <!-- IF RADIO FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'radio' or property.type == 'radio-dont-overwrite'}">
+                                    <ui:include src="plugin_workflow_aeon_include_radio.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF RADIO FIELD -->
 
-                <ui:repeat
-                    value="#{NavigationForm.workflowPlugin.propertyFields}"
-                    var="property">
+                                    <!-- IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'select+text'}">
+                                        <ui:include src="plugin_workflow_aeon_include_selectAndText.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+                                </form:field>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{property.type != 'checkbox' and property.type != 'radio' and property.type != 'radio-dont-overwrite' and property.type != 'select+text'}">
+                                <form:field label="#{property.title}">
+                                    <!-- IF INPUT FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'input' or property.type == 'input-dont-overwrite'}">
+                                        <ui:include src="plugin_workflow_aeon_include_input.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF INPUT FIELD -->
 
-                    <ui:fragment rendered="#{property.shippingOption == null or property.shippingOption == NavigationForm.workflowPlugin.shippingOption}">
+                                    <!-- IF SELECT FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary' or property.type == 'select-dont-overwrite'}">
+                                        <ui:include src="plugin_workflow_aeon_include_select.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF SELECT FIELD -->
 
-                        <div class="row">
-                            <!-- LABEL -->
-                            <div class="col-12 col-md-3">
-                                <intranda:formLabel label="#{property.title}"
-                                    labelFor="input" labelRequired="false"/>
-                            </div>
-                            <!-- // LABEL -->
+                                    <!-- IF MULTISELECT FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'multiselect'}">
+                                        <ui:include src="plugin_workflow_aeon_include_multiselect.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF MULTISELECT FIELD -->
 
-                            <div class="col-12 col-md-9 ">
-
-                                <!-- IF INPUT FIELD -->
-                                <ui:fragment rendered="#{property.type == 'input' or property.type == 'input-dont-overwrite'}">
-                                    <ui:include src="plugin_workflow_aeon_include_input.xhtml"/>
-                                </ui:fragment>
-                                <!-- // IF INPUT FIELD -->
-
-                                <!-- IF SELECT FIELD -->
-                                <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary' or property.type == 'select-dont-overwrite'}">
-                                    <ui:include src="plugin_workflow_aeon_include_select.xhtml"/>
-                                </ui:fragment>
-                                <!-- // IF SELECT FIELD -->
-
-                                <!-- IF CHECKBOX FIELD -->
-                                <ui:fragment rendered="#{property.type == 'checkbox'}">
-                                   <ui:include src="plugin_workflow_aeon_include_checkbox.xhtml"/>
-                                </ui:fragment>
-                                <!-- // IF CHECKBOX FIELD -->
-
-                                <!-- IF RADIO FIELD -->
-                                <ui:fragment rendered="#{property.type == 'radio' or property.type == 'radio-dont-overwrite'}">
-                                   <ui:include src="plugin_workflow_aeon_include_radio.xhtml"/>
-                                </ui:fragment>
-                                <!-- // IF RADIO FIELD -->
-
-                                <!-- IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
-                                <ui:fragment rendered="#{property.type == 'select+text'}">
-                                     <ui:include src="plugin_workflow_aeon_include_selectAndText.xhtml"/>
-                                </ui:fragment>
-                                <!-- // IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
-
-                                <!-- IF MULTISELECT FIELD -->
-                                <ui:fragment rendered="#{property.type == 'multiselect'}">
-                                     <ui:include src="plugin_workflow_aeon_include_multiselect.xhtml"/>
-                                </ui:fragment>
-                                <!-- // IF MULTISELECT FIELD -->
-
-                                <!-- VALIDATION AND HELP -->
-                                <ui:include  src="plugin_workflow_aeon_include_validationAndHelp.xhtml"/>
-
-                            </div>
-                        </div>
-
-                    </ui:fragment>
-                </ui:repeat>
-            </intranda:box>
+                                    <!-- VALIDATION AND HELP -->
+                                    <ui:include  src="plugin_workflow_aeon_include_validationAndHelp.xhtml"/>
+                                </form:field>
+                            </ui:fragment>
+                        </ui:fragment>
+                    </ui:repeat>
+                </section:body>
+            </section:section>
         </h:form>
         <!-- // PROCESS PROPERTIES -->
 

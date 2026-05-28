@@ -6,7 +6,8 @@
     xmlns:f="http://xmlns.jcp.org/jsf/core"
     xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-    xmlns:jsf="http://xmlns.jcp.org/jsf">
+    xmlns:jsf="http://xmlns.jcp.org/jsf"
+    xmlns:util="http://goobi.io/util">
 
     <composite:interface>
     </composite:interface>
@@ -18,10 +19,12 @@
             layout="block"
             rendered="#{!property.valid}"
             styleClass="w-100 #{property.strictValidation ? 'font-danger' : ''} validation-message">
-            <i class="fa fa-exclamation-triangle warning-icon"
-              jsf:rendered="#{!property.valid and !property.strictValidation}" />
-            <i class="fa fa-exclamation-circle warning-icon error"
-               jsf:rendered="#{!property.valid and property.strictValidation}" />
+            <ui:fragment rendered="#{!property.valid and !property.strictValidation}">
+                <util:icon name="exclamation-triangle" class="warning-icon" />
+            </ui:fragment>
+            <ui:fragment rendered="#{!property.valid and property.strictValidation}">
+                <util:icon name="exclamation-circle" class="warning-icon error" />
+            </ui:fragment>
             <h:outputText value="#{property.validationErrorMessage}"/>
         </h:panelGroup>
         <!-- // VALIDATION MESSAGE -->
