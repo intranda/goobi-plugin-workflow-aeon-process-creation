@@ -43,6 +43,13 @@ public class AeonRecord implements Comparable<AeonRecord> {
 
     private List<AeonExistingProcess> existingProcesses = new ArrayList<>();
 
+    public String getDisplayTitle() {
+        return String.join(" – ", properties.stream()
+                .filter(p -> p != null && p.isDisplayInTitle() && StringUtils.isNotBlank(p.getValue()))
+                .map(AeonProperty::getValue)
+                .toList());
+    }
+
     @Override
     public int compareTo(AeonRecord other) {
 
