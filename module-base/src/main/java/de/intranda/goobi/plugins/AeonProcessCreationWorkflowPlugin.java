@@ -52,7 +52,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -220,13 +222,24 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                 }
 
             } else if (StringUtils.isNotBlank(apiKey)) {
-                try {
-                    map = client.target(apiUrl)
-                            .path("Requests")
-                            .path(input)
-                            .request(MediaType.APPLICATION_JSON)
-                            .header("X-AEON-API-KEY", apiKey)
-                            .get(Map.class);
+                try (Response response = client.target(apiUrl)
+                        .path("Requests")
+                        .path(input)
+                        .request(MediaType.APPLICATION_JSON)
+                        .header("X-AEON-API-KEY", apiKey)
+                        .get()) {
+                    MediaType contentType = response.getMediaType();
+                    if (response.getStatus() != Response.Status.OK.getStatusCode() || contentType == null
+                            || !contentType.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
+                        String body = response.readEntity(String.class);
+                        log.error("AEON API request to {}/Requests/{} failed: HTTP {}, Content-Type {}, body: {}", apiUrl, input,
+                                response.getStatus(), contentType, StringUtils.abbreviate(body, 2000));
+                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_identifier_not_found") + ": HTTP "
+                                + response.getStatus());
+                        return;
+                    }
+                    map = response.readEntity(new GenericType<Map<String, Object>>() {
+                    });
                 } catch (Exception e) {
                     Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_identifier_not_found") + ": " + e.getMessage());
                     return;
