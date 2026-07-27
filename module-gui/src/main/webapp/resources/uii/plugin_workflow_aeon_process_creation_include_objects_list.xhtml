@@ -87,19 +87,20 @@
                                 data-bs-target="#myModal-#{item.id}">
 
                                 <!-- IF NOT LOCKED -->
-                                <h:outputFormat id="titleInUse"
+                                <util:alert
                                     rendered="#{not item.locked}"
-                                    styleClass="alert alert-warning p-3 d-block mb-0 rounded-0"
-                                    value="#{msgs['plugin_workflow_aeon_titleInUse']}">
-                                    <f:param value="#{item.duplicateTitle}" />
-                                </h:outputFormat>
+                                    type="warning"
+                                    styleClass="p-3 d-block mb-0 rounded-0">
+                                    <h:outputFormat value="#{msgs['plugin_workflow_aeon_titleInUse']}">
+                                        <f:param value="#{item.duplicateTitle}" />
+                                    </h:outputFormat>
+                                </util:alert>
                                 <!-- IF LOCKED -->
-                                <h:outputText
-                                    id="titleLocked"
+                                <util:alert
                                     rendered="#{item.locked}"
-                                    styleClass="alert alert-danger p-3 d-block mb-0 rounded-0"
-                                    value="#{msgs['plugin_workflow_aeon_titleLocked']}">
-                                </h:outputText>
+                                    type="danger"
+                                    styleClass="p-3 d-block mb-0 rounded-0"
+                                    message="#{msgs['plugin_workflow_aeon_titleLocked']}" />
                             </a>
                         </h:panelGroup>
                         <!--  // WARNING MESSAGE FOR DUPLICATE ITEMS  -->
@@ -112,20 +113,18 @@
                                 data-bs-target="#myModal-#{item.id}">
 
                                 <!-- IF ENABLED -->
-                                <h:outputText
-                                    id="item-enabled"
+                                <util:alert
                                     rendered="#{not item.disabled}"
-                                    styleClass="alert alert-warning p-3 d-block mb-0 rounded-0"
-                                    value="#{msgs.plugin_workflow_aeon_deletionWarning}">
-                                </h:outputText>
+                                    type="warning"
+                                    styleClass="p-3 d-block mb-0 rounded-0"
+                                    message="#{msgs.plugin_workflow_aeon_deletionWarning}" />
 
                                 <!-- IF DISABLED -->
-                                <h:outputText
-                                    id="item-disabled"
+                                <util:alert
                                     rendered="#{item.disabled}"
-                                    styleClass="alert alert-danger p-3 d-block mb-0 rounded-0"
-                                    value="#{msgs.plugin_workflow_aeon_deletionDisabled}">
-                                </h:outputText>
+                                    type="danger"
+                                    styleClass="p-3 d-block mb-0 rounded-0"
+                                    message="#{msgs.plugin_workflow_aeon_deletionDisabled}" />
                             </a>
                         </h:panelGroup>
                         <!-- // WARNING MESSAGE WHEN DELETION -->
