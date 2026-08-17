@@ -11,10 +11,34 @@
 
   <processCreation>
     <batchDocstruct>BatchObject</batchDocstruct>
-    <processTitleMetadata>_TitleDocMain</processTitleMetadata>  
+    <processTitleMetadata>_TitleDocMain</processTitleMetadata>
     <defaultWorkflowName>Paper workflow</defaultWorkflowName>
     <workflowName type="Audio Recording (DRMS)">Audio files</workflowName>
     <opacName>Metadata cloud</opacName>
+
+    <!-- Name of the aeon field holding the material type. Its value is matched against the 'type' attribute
+    of the <properties> fields below and therefore decides which properties are displayed and required.
+    Default: customFieldValues/MaterialType
+    A slash separated path addresses a field inside a nested map. Older aeon versions kept the material type
+    in the flat field shippingOption, which would be configured as:
+    <materialTypeField>shippingOption</materialTypeField> -->
+
+    <!-- Name of the aeon field holding the home site. Its value becomes the repository part of the
+    generated process title. Default: customFieldValues/HomeSite
+    Older aeon versions kept it in the flat field itemInfo2:
+    <homeSiteField>itemInfo2</homeSiteField> -->
+
+    <!-- Name of the aeon field holding the transaction number. Its value opens the generated process
+    title. Default: transactionNumber
+    <transactionNumberField>transactionNumber</transactionNumberField> -->
+
+    <!-- Name of the aeon field holding the patron user name, used to look up last name and mail
+    address at the aeon Users endpoint. Default: username
+    <usernameField>username</usernameField> -->
+
+    <!-- Name of the aeon field holding the barcode that the catalogue is queried with.
+    Default: referenceNumber
+    <referenceNumberField>referenceNumber</referenceNumberField> -->
   </processCreation>
 
 
@@ -32,12 +56,12 @@
   </processCancellation>
 
   <requiredFields>
-    <field>itemInfo2</field>
+    <field>customFieldValues/HomeSite</field>
     <field>transactionNumber</field>
     <field>creationDate</field>
     <field>callNumber</field>
     <field>itemTitle</field>
-    <field>shippingOption</field>
+    <field>customFieldValues/MaterialType</field>
     <field>referenceNumber</field>
     <field>location</field>
   </requiredFields>
@@ -70,7 +94,7 @@
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-    <field aeon="shippingOption">
+    <field aeon="customFieldValues/MaterialType">
       <title>Material type</title>
       <type readonly="true">input</type>
       <variable place="process">Material type</variable>
@@ -119,7 +143,7 @@
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
-    <field aeon="itemInfo2">
+    <field aeon="customFieldValues/HomeSite">
       <title>Home site</title>
       <type readonly="true">input</type>
       <variable place="process">Home site</variable>

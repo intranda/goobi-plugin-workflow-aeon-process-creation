@@ -77,6 +77,8 @@ Die Konfiguration des Plugins erfolgt über die Konfigurationsdatei `plugin_intr
     <processCreation>
         <workflowName>digitisation on demand</workflowName>
         <opacName>metadata cloud</opacName>
+        <materialTypeField>customFieldValues/MaterialType</materialTypeField>
+        <homeSiteField>customFieldValues/HomeSite</homeSiteField>
     </processCreation>
 
     <transaction>
@@ -222,7 +224,17 @@ Die Konfiguration des Plugins erfolgt über die Konfigurationsdatei `plugin_intr
 
 Innerhalb des Bereiches `<aeon>` werden die Zugangsdaten verwaltet. Hier müssen die URL zur RESTful API von AEON sowie Nutzername und Passwort hinterlegt werden. Soll alternativ ein Key für die Verwendung der API genutzt werden muss dieser angegeben werden.
 
-Im Block `<processCreation>` kann definiert werden, welche OPAC-Konfiguration zur Anfrage von Katalogdaten genutzt werden soll und auf Basis welcher Produktionsvorlage die einzelnen Vorgänge erzeugt werden sollen.
+Im Block `<processCreation>` kann definiert werden, welche OPAC-Konfiguration zur Anfrage von Katalogdaten genutzt werden soll und auf Basis welcher Produktionsvorlage die einzelnen Vorgänge erzeugt werden sollen. Zwei seiner Parameter benennen AEON-Felder und keine Goobi-Einstellungen:
+
+Parameter           |  Erläuterung
+------------------- | -----------------------------------------------------
+`materialTypeField` | Name des AEON-Feldes, das den Materialtyp enthält. Sein Wert wird mit dem Attribut `type` der Felder in `<properties>` verglichen und entscheidet damit, welche Eigenschaften angezeigt und validiert werden. Enthält der AEON-Record keinen Materialtyp, wird die Anfrage mit einer Fehlermeldung abgewiesen, da nicht ermittelt werden kann, welche Eigenschaften gelten. Standardwert: `customFieldValues/MaterialType`.
+`homeSiteField`     | Name des AEON-Feldes, das den Home Site enthält. Sein Wert bildet den Repository-Teil des erzeugten Vorgangstitels. Standardwert: `customFieldValues/HomeSite`.
+`transactionNumberField` | Name des AEON-Feldes, das die Transaktionsnummer enthält. Sein Wert bildet den Anfang des erzeugten Vorgangstitels. Enthält der AEON-Record keine Transaktionsnummer, wird die Anfrage mit einer Fehlermeldung abgewiesen, da kein brauchbarer Vorgangstitel gebildet werden kann. Standardwert: `transactionNumber`.
+`usernameField`     | Name des AEON-Feldes, das den Benutzernamen des Patrons enthält. Damit werden Nachname und Mailadresse am AEON-Endpunkt `Users` nachgeschlagen. Standardwert: `username`.
+`referenceNumberField` | Name des AEON-Feldes, das den Barcode enthält, mit dem der konfigurierte Katalog abgefragt wird. Standardwert: `referenceNumber`.
+
+Alle akzeptieren einen mit Schrägstrichen getrennten Pfad, um ein Feld innerhalb einer verschachtelten Map anzusprechen. Ältere AEON-Versionen hielten den Materialtyp und den Home Site in den flachen Feldern `shippingOption` und `itemInfo2`, was als `<materialTypeField>shippingOption</materialTypeField>` und `<homeSiteField>itemInfo2</homeSiteField>` zu konfigurieren wäre.
 
 Anschließend erfolgt die Konfiguration der angezeigten und importierbaren Felder. Dies ist in 3 Bereiche aufgeteilt. Der Bereich `<transaction>` enthält diejenigen Felder, die aus dem AEON-Record gelesen werden. Der Bereich `<properties>` enthält frei definierbare Eigenschaften, die zu den zu erzeugenden Vorgängen gehören. Und der Bereich `<processes>` enthält die Felder, die bei der Abfrage der Daten aus der Metadata Cloud bezogen wurden.
 
@@ -233,7 +245,7 @@ Parameter           |  Erläuterung
 `title`             | Anzeigename des Feldes
 `type`              | Typ des Feldes, mögliche Werte sind `input` (Textfeld), `select` (Auswahlfeld), `vocabulary` (Auswahlfeld aus einem Vokabular), `checkbox` (Checkbox), `input-dont-overwrite` (Textfeld, das im linken Bereich editierbar ist, aber nicht im rechten Bereich), `radio-dont-overwrite` (Radio-Buttons, die im linken Bereich editierbar sind, aber nicht im rechten Bereich)
 `readonly`          | Die Werte `true` oder `false` definieren, ob der Inhalt des Feldes bearbeitet werden darf.
-`aeon`              | Name des json Elements, aus dem das Feld befüllt wird. Dieser Parameter wird für die frei definierbare Eigenschaften nicht ausgewertet.
+`aeon`              | Name des json Elements, aus dem das Feld befüllt wird. Ein mit Schrägstrichen getrennter Pfad spricht ein Element innerhalb einer verschachtelten Map an, zum Beispiel `customFieldValues/MaterialType`. Dieser Parameter wird für die frei definierbare Eigenschaften nicht ausgewertet.
 `displayAlways`     | Die Werte `true` oder `false` definieren, ob das Feld angezeigt wird, wenn nur ein minimierter Datensatz angezeigt wird. Dieser Parameter wird ausschließlich für die Felder aus der Metadata Cloud ausgewertet.
 `displayInTitle`    | Die Werte `true` oder `false` definieren, ob das Feld innerhalb der Kopfzeile der Box aufgeführt wird. Dieser Parameter wird ausschließlich für die Felder aus der Metadata Cloud ausgewertet.
 `variable`          | Dieser Parameter definiert den Namen der zu erstellenden Eigenschaft. Dieser Parameter wird für Daten aus der Metadata Cloud nicht ausgewertet.

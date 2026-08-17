@@ -27,6 +27,7 @@ import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 
 import de.intranda.goobi.plugins.aeon.AeonExistingProcess;
+import de.intranda.goobi.plugins.aeon.AeonFieldResolver;
 import de.intranda.goobi.plugins.aeon.AeonProperty;
 import de.intranda.goobi.plugins.aeon.AeonRecord;
 import de.sub.goobi.config.ConfigPlugins;
@@ -137,6 +138,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private String processTitleMetadataType;
     private String resourceIDMetadataType;
 
+    // names of the AEON response fields this plugin needs to know by itself, as opposed to the ones the configured
+    // <field> elements point at. All are configurable because AEON renames and relocates them: the material type and
+    // the home site were once the flat fields shippingOption and itemInfo2 and now live inside the nested
+    // customFieldValues map. A slash separated path addresses a field inside a nested map.
+    private String materialTypeField;
+    private String homeSiteField;
+    private String usernameField;
+    private String referenceNumberField;
+    private String transactionNumberField;
+
     @Getter
     private String selectedWorkflow;
     @Getter
@@ -153,8 +164,21 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private IJsonPlugin opacPlugin;
     private transient ConfigOpacCatalogue coc = null;
 
+    // material type of the current transaction, as delivered by aeon. Aeon used to ship this value in a field called
+    // shippingOption, which is where the old name of this field came from.
     @Getter
-    private String shippingOption;
+    private String materialType;
+
+    /**
+     * A property field applies to the current transaction when it is not restricted to a material type, or when its
+     * restriction matches the material type of this transaction.
+     *
+     * Display, validation, cloning and export all have to ask this same question. When they disagree, a field can end
+     * up hidden and mandatory at the same time, which makes process creation impossible with nothing to correct.
+     */
+    public boolean appliesToMaterialType(AeonProperty property) {
+        return property.getMaterialTypeRestriction() == null || property.getMaterialTypeRestriction().equals(materialType);
+    }
 
     @Override
     public PluginType getType() {
@@ -259,7 +283,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             if (map != null) {
                 try {
                     // get data from user table
-                    String username = (String) map.get("username");
+                    String username = AeonFieldResolver.resolveString(map, usernameField);
                     if (StringUtils.isNotBlank(username) && !username.contains("\\")) {
                         Map<String, Object> userDataMap = client.target(apiUrl)
                                 .path("Users")
@@ -267,6 +291,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                                 .request(MediaType.APPLICATION_JSON)
                                 .header("X-AEON-API-KEY", apiKey)
                                 .get(Map.class);
+                        // these two names serve double duty: they read from the Users response and they are the keys
+                        // that a configured aeon="lastName" / aeon="eMailAddress" field resolves against, so they
+                        // cannot be made configurable without also renaming what the configuration refers to
                         map.put("lastName", userDataMap.get("lastName"));
                         map.put("eMailAddress", userDataMap.get("eMailAddress"));
                     }
@@ -274,45 +301,49 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                     log.error(e);
                 }
 
-                // validate if required fields are available
+                // validate if required fields are available; a field that is missing entirely is reported apart from
+                // one that is merely empty, as the first usually means it got renamed in AEON
                 for (String fieldname : requiredFields) {
-                    if (map.containsKey(fieldname) && (map.get(fieldname) == null || StringUtils.isBlank(map.get(fieldname).toString()))) {
-                        Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldNull", fieldname));
+                    if (!AeonFieldResolver.containsPath(map, fieldname)) {
+                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldMissing", fieldname));
+                    } else if (StringUtils.isBlank(AeonFieldResolver.resolveString(map, fieldname))) {
+                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldNull", fieldname));
                     }
                 }
 
-                shippingOption = (String) map.get("shippingOption");
+                // the material type decides which property fields apply, so without it there is neither anything
+                // sensible to display nor anything to validate against
+                materialType = AeonFieldResolver.resolveString(map, materialTypeField);
+                if (StringUtils.isBlank(materialType)) {
+                    Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_materialTypeMissing", materialTypeField));
+                    return;
+                }
+
+                // the transaction number opens every generated process title, so an empty one would produce unusable
+                // titles and break the duplicate detection that matches on them
+                String transactionNumber = AeonFieldResolver.resolveString(map, transactionNumberField);
+                if (StringUtils.isBlank(transactionNumber)) {
+                    Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_transactionNumberMissing", transactionNumberField));
+                    return;
+                }
+
                 for (AeonProperty property : transactionFields) {
                     if (StringUtils.isNotBlank(property.getAeonField())) {
-                        Object value = map.get(property.getAeonField());
-                        if (value instanceof String) {
-                            property.setValue((String) value);
-                        } else if (value instanceof Integer) {
-                            property.setValue(((Integer) value).toString());
-                        } else {
-                            property.setValue((String) value);
-                        }
+                        property.setValue(AeonFieldResolver.resolveString(map, property.getAeonField()));
                     }
                 }
 
                 for (AeonProperty property : propertyFields) {
                     if (StringUtils.isNotBlank(property.getAeonField())) {
-                        Object value = map.get(property.getAeonField());
-                        if (value instanceof String) {
-                            property.setValue((String) value);
-                        } else if (value instanceof Integer) {
-                            property.setValue(((Integer) value).toString());
-                        } else {
-                            property.setValue((String) value);
-                        }
+                        property.setValue(AeonFieldResolver.resolveString(map, property.getAeonField()));
                     }
                 }
 
                 // use configured default template name
                 selectedWorkflow = null;
                 // first, check if a special workflow name was configured for the current type
-                if (specialWorkflowNames.containsKey(shippingOption)) {
-                    String workflowName = specialWorkflowNames.get(shippingOption);
+                if (specialWorkflowNames.containsKey(materialType)) {
+                    String workflowName = specialWorkflowNames.get(materialType);
                     if (possibleWorkflows.contains(workflowName)) {
                         selectedWorkflow = workflowName;
                     }
@@ -327,7 +358,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                     selectedWorkflow = possibleWorkflows.get(0);
                 }
 
-                String catalogueIdentifier = (String) map.get("referenceNumber");
+                String catalogueIdentifier = AeonFieldResolver.resolveString(map, referenceNumberField);
 
                 IOpacPlugin myImportOpac = null;
 
@@ -389,20 +420,14 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         // AeonTN pulled from Aeon field - transactionNumber
 
                         // get next free id
-                        final Map<String, Object> effectiveMap = map;
-                        String repository = (String) Optional.ofNullable(effectiveMap.get("itemInfo2"))
-                                .or(() -> Optional.ofNullable(effectiveMap.get("itemInfo3")))
-                                .or(() -> Optional.ofNullable(effectiveMap.get("itemInfo4")))
-                                .orElse("unknown");
-                        int transactionNumber = (int) map.get("transactionNumber");
+                        String repository = Optional.ofNullable(AeonFieldResolver.resolveString(map, homeSiteField)).orElse("unknown");
 
                         String generatedTitle = transactionNumber + "_" + repository;
                         aeonRecord.setProcessTitle(generatedTitle);
 
                         // copy properties
                         for (AeonProperty p : propertyFields) {
-                            if (StringUtils.isBlank(shippingOption) || p.getShippingOption() == null
-                                    || p.getShippingOption().equals(shippingOption)) {
+                            if (appliesToMaterialType(p)) {
                                 AeonProperty prop = p.cloneProperty();
                                 prop.setOverwriteMainField(true);
                                 prop.setValue(p.getValue());
@@ -579,8 +604,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         //  validate properties, details, process values
 
         for (AeonProperty prop : propertyFields) {
-            if ((StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null || prop.getShippingOption().equals(shippingOption))
-                    && (!prop.isValid() && prop.isStrictValidation())) {
+            if (appliesToMaterialType(prop) && !prop.isValid() && prop.isStrictValidation()) {
                 Helper.setFehlerMeldung("plugin_workflow_aeon_invalid_process_properties");
                 return false;
             }
@@ -796,8 +820,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
         // add properties
         for (AeonProperty prop : rec.getProperties()) {
-            if (StringUtils.isBlank(shippingOption) || prop.getShippingOption() == null
-                    || prop.getShippingOption().equals(shippingOption)) {
+            if (appliesToMaterialType(prop)) {
                 if ("multiselect".equals(prop.getType())) {
                     // get local, global value
                     List<String> values = prop.getMultiselectSelectedValues();
@@ -869,6 +892,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
         processTitleMetadataType = config.getString("/processCreation/processTitleMetadata");
         resourceIDMetadataType = config.getString("/processCreation/resourceIDMetadata", null);
+        materialTypeField = config.getString("/processCreation/materialTypeField", "customFieldValues/MaterialType");
+        homeSiteField = config.getString("/processCreation/homeSiteField", "customFieldValues/HomeSite");
+        usernameField = config.getString("/processCreation/usernameField", "username");
+        referenceNumberField = config.getString("/processCreation/referenceNumberField", "referenceNumber");
+        transactionNumberField = config.getString("/processCreation/transactionNumberField", "transactionNumber");
         // process cancellation
         transactionFieldName = config.getString("/processCancellation/transactionFieldName");
         cancellationProjectName = config.getString("/processCancellation/projectName");

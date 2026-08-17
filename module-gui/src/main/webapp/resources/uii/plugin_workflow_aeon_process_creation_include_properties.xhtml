@@ -23,7 +23,9 @@
                     <ui:repeat
                         value="#{NavigationForm.workflowPlugin.propertyFields}"
                         var="property">
-                        <ui:fragment rendered="#{property.shippingOption == null or property.shippingOption == NavigationForm.workflowPlugin.shippingOption}">
+                        <!-- the same check the bean uses for validation, cloning and export: writing it as an EL
+                             comparison here made a null material type hide the field while it stayed mandatory -->
+                        <ui:fragment rendered="#{NavigationForm.workflowPlugin.appliesToMaterialType(property)}">
                             <ui:fragment rendered="#{property.type == 'checkbox' || property.type == 'radio' or property.type == 'radio-dont-overwrite' || property.type == 'select+text'}">
                                 <form:field
                                     label="#{property.title}"
@@ -45,6 +47,9 @@
                                         <ui:include src="plugin_workflow_aeon_include_selectAndText.xhtml"/>
                                     </ui:fragment>
                                     <!-- // IF SELECT MENU WITH ADDITIONAL INPUT FIELD -->
+
+                                    <!-- VALIDATION AND HELP -->
+                                    <ui:include src="plugin_workflow_aeon_include_validationAndHelp.xhtml"/>
                                 </form:field>
                             </ui:fragment>
                             <ui:fragment rendered="#{property.type != 'checkbox' and property.type != 'radio' and property.type != 'radio-dont-overwrite' and property.type != 'select+text'}">

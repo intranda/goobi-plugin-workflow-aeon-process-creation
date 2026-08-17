@@ -77,6 +77,8 @@ The plugin is configured via the configuration file `plugin_intranda_workflow_ae
     <processCreation>
         <workflowName>digitisation on demand</workflowName>
         <opacName>metadata cloud</opacName>
+        <materialTypeField>customFieldValues/MaterialType</materialTypeField>
+        <homeSiteField>customFieldValues/HomeSite</homeSiteField>
     </processCreation>
 
     <transaction>
@@ -222,7 +224,17 @@ The plugin is configured via the configuration file `plugin_intranda_workflow_ae
 
 The access data is managed within the `<aeon>` area. The URL to the RESTful API of AEON as well as the user name and password must be stored here. If, alternatively, a key is to be used for the use of the API, this must be specified.
 
-In the block `<processCreation>` it can be defined which OPAC configuration is to be used to request catalogue data and on the basis of which production template the individual processes are to be created.
+In the block `<processCreation>` it can be defined which OPAC configuration is to be used to request catalogue data and on the basis of which production template the individual processes are to be created. Two of its parameters name AEON fields rather than Goobi settings:
+
+Parameter           |  Explanation
+------------------- | -----------------------------------------------------
+`materialTypeField` | Name of the AEON field holding the material type. Its value is matched against the `type` attribute of the fields in `<properties>` and therefore decides which properties are displayed and validated. If the AEON record carries no material type, the request is rejected with an error, because it cannot be determined which properties apply. Default: `customFieldValues/MaterialType`.
+`homeSiteField` | Name of the AEON field holding the home site. Its value becomes the repository part of the generated process title. Default: `customFieldValues/HomeSite`.
+`transactionNumberField` | Name of the AEON field holding the transaction number. Its value opens the generated process title. If the AEON record carries no transaction number, the request is rejected with an error, because no usable process title can be built. Default: `transactionNumber`.
+`usernameField` | Name of the AEON field holding the patron user name. It is used to look up the last name and the mail address at the AEON `Users` endpoint. Default: `username`.
+`referenceNumberField` | Name of the AEON field holding the barcode that the configured catalogue is queried with. Default: `referenceNumber`.
+
+All of them accept a slash separated path to address a field inside a nested map. Older AEON versions kept the material type and the home site in the flat fields `shippingOption` and `itemInfo2`, which would be configured as `<materialTypeField>shippingOption</materialTypeField>` and `<homeSiteField>itemInfo2</homeSiteField>`.
 
 This is followed by the configuration of the fields that are displayed and can be imported. This is divided into 3 areas. The area `<transaction>` contains those fields that are read from the AEON record. The area `<properties>` contains freely definable properties that belong to the transactions to be created. And the area `<processes>` contains the fields that were obtained from the Metadata Cloud when querying the data.
 
@@ -233,7 +245,7 @@ Parameter           |  Explanation
 `title` | display name of the field
 `type` | Type of field, possible values are `input` (text field), `select` (selection field), `vocabulary` (selection field from a vocabulary), `checkbox` (checkbox), `input-dont-overwrite` (text field editable on the left but not on the right),`radio-dont-overwrite` (radio buttons editable in the left area but not in the right area).
 `readonly` | The values `true` or `false` define whether the content of the field may be edited.
-`aeon` | Name of the json element from which the field is filled. This parameter is not evaluated for the freely definable properties.
+`aeon` | Name of the json element from which the field is filled. A slash separated path addresses an element inside a nested map, for example `customFieldValues/MaterialType`. This parameter is not evaluated for the freely definable properties.
 `displayAlways` | The values `true` or `false` define whether the field is displayed when only a minimised record is displayed. This parameter is only evaluated for the fields from the Metadata Cloud.
 `displayInTitle` | The values `true` or `false` define whether the field is listed within the header of the box. This parameter is only evaluated for the fields from the Metadata Cloud.
 `variable` | This parameter defines the name of the property to be created. This parameter is not evaluated for data from the Metadata Cloud.

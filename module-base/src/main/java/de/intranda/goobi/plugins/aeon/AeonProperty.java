@@ -50,7 +50,8 @@ public class AeonProperty {
 
     private boolean displayInTitle = false;
 
-    private String shippingOption;
+    /** material type this field is restricted to, from the 'type' attribute; null means it applies to every one */
+    private String materialTypeRestriction; // @type
 
     private HierarchicalConfiguration config;
 
@@ -128,7 +129,7 @@ public class AeonProperty {
             initializeVocabulary();
         }
 
-        shippingOption = config.getString("@type", null);
+        materialTypeRestriction = config.getString("@type", null);
         this.plugin = plugin;
 
     }
