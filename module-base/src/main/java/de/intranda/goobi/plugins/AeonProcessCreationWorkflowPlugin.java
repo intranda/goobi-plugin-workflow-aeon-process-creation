@@ -304,26 +304,31 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                     log.error(e);
                 }
 
-                // validate if required fields are available; a field that is missing entirely is reported apart from
-                // one that is merely empty, as the first usually means it got renamed in AEON
+                // report the required fields AEON does not deliver; a field that is missing entirely is reported apart
+                // from one that is merely empty, as the first usually means it got renamed in AEON. Both are notices
+                // and neither stops the request: AEON drops and renames fields, and the plugin has to stay usable when
+                // it does
                 for (String fieldname : requiredFields) {
                     if (!AeonFieldResolver.containsPath(map, fieldname)) {
-                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldMissing", fieldname));
+                        Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldMissing", fieldname));
                     } else if (StringUtils.isBlank(AeonFieldResolver.resolveString(map, fieldname))) {
-                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldNull", fieldname));
+                        Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_fieldNull", fieldname));
                     }
                 }
 
-                // the material type decides which property fields apply, so without it there is neither anything
-                // sensible to display nor anything to validate against
+                // the material type decides which property fields apply. Without one, no field restricted to a material
+                // type applies, and the request goes on carrying the unrestricted properties alone - a reduced result
+                // rather than a broken one, hence a notice rather than a rejection. What makes that safe is that
+                // display, validation, cloning and export all read the restriction through appliesToMaterialType, so a
+                // field left out is left out everywhere instead of turning invisible while staying mandatory
                 materialType = AeonFieldResolver.resolveString(map, materialTypeField);
                 if (StringUtils.isBlank(materialType)) {
-                    Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_materialTypeMissing", materialTypeField));
-                    return;
+                    Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_materialTypeMissing", materialTypeField));
                 }
 
                 // the transaction number opens every generated process title, so an empty one would produce unusable
-                // titles and break the duplicate detection that matches on them
+                // titles and break the duplicate detection that matches on them. It is the one field the request
+                // cannot go on without
                 String transactionNumber = AeonFieldResolver.resolveString(map, transactionNumberField);
                 if (StringUtils.isBlank(transactionNumber)) {
                     Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_transactionNumberMissing", transactionNumberField));

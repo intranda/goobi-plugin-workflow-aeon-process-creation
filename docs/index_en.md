@@ -228,7 +228,7 @@ In the block `<processCreation>` it can be defined which OPAC configuration is t
 
 Parameter           |  Explanation
 ------------------- | -----------------------------------------------------
-`materialTypeField` | Name of the AEON field holding the material type. Its value is matched against the `type` attribute of the fields in `<properties>` and therefore decides which properties are displayed and validated. If the AEON record carries no material type, the request is rejected with an error, because it cannot be determined which properties apply. Default: `customFieldValues/MaterialType`.
+`materialTypeField` | Name of the AEON field holding the material type. Its value is matched against the `type` attribute of the fields in `<properties>` and therefore decides which properties are displayed and validated. If the AEON record carries no material type, a note is displayed and the request continues: no field restricted to a material type applies then, so the created processes carry the unrestricted properties alone. Default: `customFieldValues/MaterialType`.
 `homeSiteField` | Name of the AEON field holding the home site. Its value becomes the repository part of the generated process title. Default: `customFieldValues/HomeSite`.
 `transactionNumberField` | Name of the AEON field holding the transaction number. Its value opens the generated process title. If the AEON record carries no transaction number, the request is rejected with an error, because no usable process title can be built. Default: `transactionNumber`.
 `usernameField` | Name of the AEON field holding the patron user name. It is used to look up the last name and the mail address at the AEON `Users` endpoint. Default: `username`.
