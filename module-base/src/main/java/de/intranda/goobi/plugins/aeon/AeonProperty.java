@@ -59,7 +59,9 @@ public class AeonProperty {
 
     private AeonProcessCreationWorkflowPlugin plugin;
 
-    private VocabularyAPIManager vocabularyAPI = VocabularyAPIManager.getInstance();
+    // fetched when a vocabulary field is initialized rather than in a field initializer: the manager reaches into the
+    // central goobi configuration, which a field of any other type has no reason to need
+    private VocabularyAPIManager vocabularyAPI;
 
     /** contains the list of selected values in multiselect */
     private List<String> multiselectSelectedValues = new ArrayList<>();
@@ -135,6 +137,7 @@ public class AeonProperty {
     }
 
     private void initializeVocabulary() {
+        vocabularyAPI = VocabularyAPIManager.getInstance();
         Vocabulary vocabulary = vocabularyAPI.vocabularies().findByName(vocabularyName);
         if (vocabularyField == null || vocabularyField.isEmpty()) {
             selectValues = vocabularyAPI.vocabularyRecords().getRecordMainValues(vocabulary.getId());
@@ -172,6 +175,18 @@ public class AeonProperty {
 
     public AeonProperty cloneProperty() {
         return new AeonProperty(config, plugin);
+    }
+
+    /**
+     * Tells whether this field takes part in a transaction of the given material type. A field without a restriction
+     * applies to every material type; a restricted field applies to an exactly matching one only, and therefore to
+     * none at all when AEON delivers no material type.
+     *
+     * Display, validation, cloning and export all decide from here, so a field can never end up hidden and required at
+     * the same time.
+     */
+    public boolean appliesTo(String materialType) {
+        return materialTypeRestriction == null || materialTypeRestriction.equals(materialType);
     }
 
     public boolean isValid() {

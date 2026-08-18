@@ -175,9 +175,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
      *
      * Display, validation, cloning and export all have to ask this same question. When they disagree, a field can end
      * up hidden and mandatory at the same time, which makes process creation impossible with nothing to correct.
+     *
+     * The decision itself belongs to the property; this method exists because the xhtml has no other way to pass the
+     * material type of the transaction.
      */
     public boolean appliesToMaterialType(AeonProperty property) {
-        return property.getMaterialTypeRestriction() == null || property.getMaterialTypeRestriction().equals(materialType);
+        return property.appliesTo(materialType);
     }
 
     @Override
