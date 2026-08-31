@@ -21,6 +21,7 @@ import org.goobi.beans.Project;
 import org.goobi.beans.Step;
 import org.goobi.interfaces.IJsonPlugin;
 import org.goobi.interfaces.ISearchField;
+import org.goobi.production.cli.helper.StringPair;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.flow.statistics.hibernate.FilterHelper;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
@@ -538,9 +539,27 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
      * The lookup goes through the metadata index, which Goobi fills from the top level docstruct whenever a process
      * writes its mets file. validateConfiguration makes sure the transaction number is configured as metadata, so
      * there is no second store to consult here.
+     *
+     * MetadataManager.getProcessesWithMetadata matches the value as a substring, so its result is only a candidate
+     * list: transaction number 1234 also matches 12345. Each candidate is therefore compared exactly before it counts.
      */
     private boolean checkTransactionNumber() {
-        return MetadataManager.getProcessesWithMetadata(transactionFieldName, input).isEmpty();
+        for (Integer processId : MetadataManager.getProcessesWithMetadata(transactionFieldName, input)) {
+            if (carriesTransactionNumber(processId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** true when the process carries exactly this transaction number, not merely one containing it */
+    private boolean carriesTransactionNumber(Integer processId) {
+        for (StringPair metadata : MetadataManager.getMetadata(processId)) {
+            if (transactionFieldName.equals(metadata.getOne()) && input.equals(metadata.getTwo())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private int getNextId() {
@@ -1244,7 +1263,14 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         // the old query compared property_value against the field name and against the searched number at the same
         // time, which no row can satisfy, so it never matched anything. The lookup now goes through the metadata
         // index, the same one the duplicate check reads.
-        List<Integer> processIds = MetadataManager.getProcessesWithMetadata(transactionFieldName, input);
+        List<Integer> candidateIds = MetadataManager.getProcessesWithMetadata(transactionFieldName, input);
+        if (candidateIds.isEmpty()) {
+            return;
+        }
+
+        // that lookup matches the value as a substring, so searching for 123 also returns 1234 and 91234. These
+        // records are what cancelProcesses acts on, so an inexact match here cancels a process nobody asked about.
+        List<Integer> processIds = candidateIds.stream().filter(this::carriesTransactionNumber).toList();
         if (processIds.isEmpty()) {
             return;
         }

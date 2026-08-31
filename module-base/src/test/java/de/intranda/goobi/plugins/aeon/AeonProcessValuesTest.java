@@ -70,6 +70,28 @@ public class AeonProcessValuesTest {
         assertEquals(List.of("Classroom use", "Throwaway"), values.all(field("metadata", "TypeOfRequest")));
     }
 
+    /**
+     * A stored value may be null. Returning that null would NPE in the caller that compares it, and would be written
+     * straight into a displayed field, so it is coalesced on the way out.
+     */
+    @Test
+    public void testNullMetadataValueReadsAsEmpty() throws Exception {
+        AeonProcessValues values = new AeonProcessValues(
+                List.of(new StringPair("TitleDocMain", null)),
+                List.of());
+        assertEquals("", values.first(field("metadata", "TitleDocMain")));
+        assertEquals(List.of(""), values.all(field("metadata", "TitleDocMain")));
+    }
+
+    @Test
+    public void testNullPropertyValueReadsAsEmpty() throws Exception {
+        AeonProcessValues values = new AeonProcessValues(
+                List.of(),
+                List.of(property("Patron type", null)));
+        assertEquals("", values.first(field("process", "Patron type")));
+        assertEquals(List.of(""), values.all(field("process", "Patron type")));
+    }
+
     @Test
     public void testNullStoresAreTreatedAsEmpty() throws Exception {
         AeonProcessValues values = new AeonProcessValues(null, null);
