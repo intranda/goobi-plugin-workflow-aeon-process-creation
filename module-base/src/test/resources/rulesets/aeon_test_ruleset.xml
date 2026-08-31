@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Preferences>
+  <MetadataType>
+    <Name>TitleDocMain</Name>
+    <language name="de">Haupttitel</language>
+    <language name="en">Main title</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>TransactionIdentifier</Name>
+    <language name="de">Transaktionsnummer</language>
+    <language name="en">Transaction identifier</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>TypeOfRequest</Name>
+    <language name="de">Art der Anfrage</language>
+    <language name="en">Type of request</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>CallNumber</Name>
+    <language name="de">Signatur</language>
+    <language name="en">Call number</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>physPageNumber</Name>
+    <language name="de">Physische Seitenzahl</language>
+    <language name="en">Physical page number</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>logicalPageNumber</Name>
+    <language name="de">Logische Seitenzahl</language>
+    <language name="en">Logical page number</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>pathimagefiles</Name>
+    <language name="de">Pfad der Imagedaten</language>
+    <language name="en">Path of image data</language>
+  </MetadataType>
+  <DocStrctType>
+    <Name>Monograph</Name>
+    <language name="de">Monographie</language>
+    <language name="en">Monograph</language>
+    <metadata DefaultDisplay="true" num="*">TitleDocMain</metadata>
+    <metadata num="*">TransactionIdentifier</metadata>
+    <metadata num="*">TypeOfRequest</metadata>
+  </DocStrctType>
+  <DocStrctType topStruct="false" anchor="false">
+    <Name>BoundBook</Name>
+    <language name="de">Gebundenes Buch</language>
+    <language name="en">Bound book</language>
+    <allowedchildtype>page</allowedchildtype>
+    <metadata num="1o">pathimagefiles</metadata>
+  </DocStrctType>
+  <DocStrctType topStruct="false" anchor="false">
+    <Name>page</Name>
+    <language name="de">Seite</language>
+    <language name="en">Page</language>
+    <metadata num="1o">physPageNumber</metadata>
+    <metadata num="1o">logicalPageNumber</metadata>
+  </DocStrctType>
+</Preferences>
