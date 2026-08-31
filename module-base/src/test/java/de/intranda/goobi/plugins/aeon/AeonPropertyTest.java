@@ -1,5 +1,6 @@
 package de.intranda.goobi.plugins.aeon;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -31,6 +32,20 @@ public class AeonPropertyTest {
             + "<title>Return location</title>"
             + "<type readonly=\"false\">input</type>"
             + "<variable place=\"process\">Return location</variable>"
+            + "<value></value>"
+            + "</field>";
+
+    private static final String METADATA_FIELD = "<field aeon=\"title\">"
+            + "<title>Title</title>"
+            + "<type readonly=\"true\">input</type>"
+            + "<variable place=\"metadata\">TitleDocMain</variable>"
+            + "<value></value>"
+            + "</field>";
+
+    private static final String MISSPELLED_PLACE_FIELD = "<field aeon=\"title\">"
+            + "<title>Title</title>"
+            + "<type readonly=\"true\">input</type>"
+            + "<variable place=\"metdata\">TitleDocMain</variable>"
             + "<value></value>"
             + "</field>";
 
@@ -82,5 +97,59 @@ public class AeonPropertyTest {
     @Test
     public void testRestrictedFieldDoesNotApplyWhenMaterialTypeIsEmpty() throws Exception {
         assertFalse(propertyFrom(RESTRICTED_FIELD).appliesTo(""));
+    }
+
+    // ----- the place attribute decides which store a field is written to -----
+
+    /**
+     * An existing configuration names no place at all. It has to keep writing process properties, so that this change
+     * stays additive rather than silently moving every field into the METS file.
+     */
+    @Test
+    public void testFieldWithoutPlaceIsAProperty() throws Exception {
+        AeonProperty property = propertyFrom(UNRESTRICTED_FIELD);
+        assertFalse(property.isMetadata());
+        assertTrue(property.isPlaceValid());
+    }
+
+    @Test
+    public void testFieldWithMetadataPlaceIsMetadata() throws Exception {
+        assertTrue(propertyFrom(METADATA_FIELD).isMetadata());
+    }
+
+    /**
+     * A typo in the place attribute must not quietly fall back to writing a property: the configured value would then
+     * be stored somewhere the reader never looks.
+     */
+    @Test
+    public void testMisspelledPlaceIsRejected() throws Exception {
+        assertFalse(propertyFrom(MISSPELLED_PLACE_FIELD).isPlaceValid());
+    }
+
+    /**
+     * The documentation offers place='work' and place='template' and its own examples use them, while nothing has ever
+     * acted on either - BeanHelper creates process properties and nothing else. They stay accepted so that an
+     * installation which followed the documentation is not blocked, and they keep behaving as they always have.
+     */
+    @Test
+    public void testDocumentedLegacyPlacesStayValidAndAreNotMetadata() throws Exception {
+        String workField = "<field><title>CoWorker</title><variable place=\"work\">CoWorker</variable><value></value></field>";
+        AeonProperty property = propertyFrom(workField);
+        assertTrue(property.isPlaceValid());
+        assertFalse(property.isMetadata());
+    }
+
+    /**
+     * For a metadata field the variable names a ruleset metadata type rather than a process property.
+     */
+    @Test
+    public void testVariableNameIsReadFromTheVariableElement() throws Exception {
+        assertEquals("TitleDocMain", propertyFrom(METADATA_FIELD).getVariableName());
+    }
+
+    @Test
+    public void testVariableNameFallsBackToTheTitle() throws Exception {
+        String withoutVariable = "<field aeon=\"title\"><title>Title</title><value></value></field>";
+        assertEquals("Title", propertyFrom(withoutVariable).getVariableName());
     }
 }

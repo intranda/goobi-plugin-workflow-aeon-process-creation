@@ -418,11 +418,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                 String ilsVolumeNumber = "";
                 for (AeonProperty ap : recordFields) {
                     if ("bibId".equals(ap.getAeonField())) {
-                        ilsBibId = ap.getPropertyName();
+                        ilsBibId = ap.getVariableName();
                     } else if ("volume".equals(ap.getAeonField())) {
-                        ilsVolumeNumber = ap.getPropertyName();
+                        ilsVolumeNumber = ap.getVariableName();
                     } else if ("uri".equals(ap.getAeonField())) {
-                        aspaceResourceIDProperty = ap.getPropertyName();
+                        aspaceResourceIDProperty = ap.getVariableName();
                     }
                 }
 
@@ -582,7 +582,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private void extractProcessValues(Process other, AeonProperty aeonProperty) {
 
         for (GoobiProperty processProperty : other.getProperties()) {
-            if (processProperty.getPropertyName().equals(aeonProperty.getPropertyName())) {
+            if (processProperty.getPropertyName().equals(aeonProperty.getVariableName())) {
                 aeonProperty.setValue(processProperty.getPropertyValue());
                 break;
             }
@@ -921,7 +921,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         }
                     }
                     for (String value : values) {
-                        bhelp.EigenschaftHinzufuegen(process, prefix + prop.getPropertyName(), value);
+                        bhelp.EigenschaftHinzufuegen(process, prefix + prop.getVariableName(), value);
                     }
                 } else {
                     String value = prop.getExportValue();
@@ -932,24 +932,24 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                     }
 
                     if (StringUtils.isNoneBlank(value)) {
-                        bhelp.EigenschaftHinzufuegen(process, prefix + prop.getPropertyName(), value);
+                        bhelp.EigenschaftHinzufuegen(process, prefix + prop.getVariableName(), value);
                     }
                 }
             }
         }
         for (AeonProperty prop : transactionFields) {
             if (StringUtils.isNoneBlank(prop.getExportValue())) {
-                bhelp.EigenschaftHinzufuegen(process, prefix + prop.getPropertyName(), prop.getExportValue());
+                bhelp.EigenschaftHinzufuegen(process, prefix + prop.getVariableName(), prop.getExportValue());
             }
         }
 
         for (AeonProperty prop : rec.getProcessProperties()) {
             if ("multiselect".equals(prop.getType())) {
                 for (String val : prop.getMultiselectSelectedValues()) {
-                    bhelp.EigenschaftHinzufuegen(process, prefix + prop.getPropertyName(), val);
+                    bhelp.EigenschaftHinzufuegen(process, prefix + prop.getVariableName(), val);
                 }
             } else {
-                bhelp.EigenschaftHinzufuegen(process, prefix + prop.getPropertyName(), prop.getExportValue());
+                bhelp.EigenschaftHinzufuegen(process, prefix + prop.getVariableName(), prop.getExportValue());
             }
         }
     }

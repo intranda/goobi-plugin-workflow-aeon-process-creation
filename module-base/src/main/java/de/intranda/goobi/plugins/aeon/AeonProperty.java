@@ -27,7 +27,11 @@ public class AeonProperty {
     private String type; // /type
     private boolean readonly; // /type/@readonly
 
-    private String propertyName; // /variable
+    /**
+     * Name of the process property this field is written to when place is 'process', or the name of the ruleset
+     * metadata type it is written to when place is 'metadata'.
+     */
+    private String variableName; // /variable
     private String place; // /variable/@place
 
     private String defaultValue;
@@ -106,7 +110,7 @@ public class AeonProperty {
 
         displayAlways = config.getBoolean("@displayAlways", false);
         displayInTitle = config.getBoolean("@displayInTitle", false);
-        propertyName = config.getString("variable", title);
+        variableName = config.getString("variable", title);
         place = config.getString("variable/@place", "process");
 
         value = config.getString("value", "");
@@ -187,6 +191,28 @@ public class AeonProperty {
      */
     public boolean appliesTo(String materialType) {
         return materialTypeRestriction == null || materialTypeRestriction.equals(materialType);
+    }
+
+    /**
+     * Tells whether this field is written into the METS file as metadata rather than as a Goobi process property.
+     *
+     * The default is 'process', so a configuration written before metadata support existed keeps behaving exactly as
+     * it did. Only an explicit place='metadata' moves a field.
+     */
+    public boolean isMetadata() {
+        return "metadata".equals(place);
+    }
+
+    /**
+     * Tells whether the place attribute names a store that exists. A misspelled value would otherwise fall through to
+     * writing a process property, storing the value somewhere nothing reads it back from.
+     *
+     * 'work' and 'template' are accepted because the plugin documentation offers them and its own examples use them.
+     * Nothing has ever acted on either: BeanHelper only creates process properties, so both behave exactly like
+     * 'process'. Rejecting them here would block installations that followed the documentation.
+     */
+    public boolean isPlaceValid() {
+        return "metadata".equals(place) || "process".equals(place) || "work".equals(place) || "template".equals(place);
     }
 
     public boolean isValid() {
