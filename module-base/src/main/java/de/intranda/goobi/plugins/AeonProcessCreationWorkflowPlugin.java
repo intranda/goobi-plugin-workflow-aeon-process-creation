@@ -26,8 +26,11 @@ import org.goobi.production.flow.statistics.hibernate.FilterHelper;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 
+import de.intranda.goobi.plugins.aeon.AeonConfigValidator;
 import de.intranda.goobi.plugins.aeon.AeonExistingProcess;
 import de.intranda.goobi.plugins.aeon.AeonFieldResolver;
+import de.intranda.goobi.plugins.aeon.AeonMetadataException;
+import de.intranda.goobi.plugins.aeon.AeonMetadataWriter;
 import de.intranda.goobi.plugins.aeon.AeonProperty;
 import de.intranda.goobi.plugins.aeon.AeonRecord;
 import de.sub.goobi.config.ConfigPlugins;
@@ -61,6 +64,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.DigitalDocument;
+import ugh.dl.DocStruct;
 import ugh.dl.Fileformat;
 import ugh.dl.Metadata;
 import ugh.dl.Prefs;
@@ -219,6 +223,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private String creationMode = "single";
 
     private String transactionFieldName;
+
+    // configuration defects found at load time. They block process creation rather than being reported once and
+    // forgotten, because each of them makes the plugin do the wrong thing without producing an error of its own.
+    private List<String> configurationErrors = new ArrayList<>();
 
     private String cancellationProjectName;
 
@@ -661,12 +669,36 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
     public void createProcesses() {
 
+        if (!configurationErrors.isEmpty()) {
+            for (String error : configurationErrors) {
+                Helper.setFehlerMeldung(error);
+            }
+            return;
+        }
+
         if (!validateSelection()) {
             return;
         }
 
         Process processTemplate = ProcessManager.getProcessByExactTitle(selectedWorkflow);
         Batch batch = null;
+
+        // the ruleset is the same for every process of this request, so it is resolved once here rather than inside
+        // each branch, and the metadata types are checked against it before anything is created: a missing ruleset
+        // entry is a configuration defect, and stopping here means no process is written with part of its data
+        // silently dropped
+        Prefs prefs = processTemplate.getRegelsatz().getPreferences();
+
+        List<AeonProperty> configuredFields = new ArrayList<>();
+        configuredFields.addAll(transactionFields);
+        configuredFields.addAll(recordFields);
+        configuredFields.addAll(propertyFields);
+        List<String> unknownTypes = AeonMetadataWriter.unknownTypes(prefs, configuredFields);
+        if (!unknownTypes.isEmpty()) {
+            Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_unknownMetadataType",
+                    String.join(", ", unknownTypes)));
+            return;
+        }
 
         // create a single process with all selected records in it
         if ("single".equals(creationMode)) {
@@ -683,7 +715,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
             process.setTitel(getBatchProcessTitle());
 
-            Prefs prefs = processTemplate.getRegelsatz().getPreferences();
             Fileformat masterFileformat = null;
             try {
                 masterFileformat = new MetsMods(prefs);
@@ -699,6 +730,25 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                 log.error(e);
             }
 
+            if (masterFileformat == null) {
+                // the catch above already logged why. Without a fileformat there is nothing to attach metadata to,
+                // and every later use of it would fail on a null anyway.
+                Helper.setFehlerMeldung("Error while creating the Goobi processes");
+                return;
+            }
+
+            // the transaction fields describe the request rather than any one record, so they go once onto the root of
+            // the batch. That is also the docstruct Goobi indexes, which is what the duplicate check reads back.
+            try {
+                assignTransactionFields(process, masterFileformat.getDigitalDocument().getLogicalDocStruct(), prefs);
+            } catch (AeonMetadataException e) {
+                Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_metadataNotAllowed", e.getMetadataType()));
+                return;
+            } catch (PreferencesException e) {
+                log.error(e);
+                return;
+            }
+
             int nextFreeId = getNextId();
             // create batch mets file
             // root data: id/title = input
@@ -708,7 +758,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                     // deliberately not a predicted child title - the split processes plugin composes the titles itself, from metadata that is not
                     // available here.
                     String orderNumber = getOrderAsString(nextFreeId);
-                    assignProperties(r, process, orderNumber + "_");
                     nextFreeId++;
                     // for each selected record: create child docstruct, assign data
                     String recordIdentifier = r.getRecordData().get("uri"); // get uri from properties
@@ -717,6 +766,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
                         // get metadata for selected record
                         Fileformat fileformat = opacPlugin.search("", "", coc, prefs);
+
+                        // the record fields belong to this record, so they go onto its own docstruct. The fields that
+                        // stay process properties keep the per-record prefix - the correlation key - which is the only
+                        // way a property can say which record of the batch it came from.
+                        assignRecordFields(r, process, fileformat.getDigitalDocument().getLogicalDocStruct(), prefs, orderNumber + "_");
 
                         //  save the correlation key as metadata, so the split processes plugin can match this child's properties
                         Metadata childKeyMetadata = new Metadata(prefs.getMetadataTypeByName(childKeyMetadataType));
@@ -731,6 +785,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
                         masterFileformat.getDigitalDocument().getLogicalDocStruct().addChild(fileformat.getDigitalDocument().getLogicalDocStruct());
 
+                    } catch (AeonMetadataException e) {
+                        // nothing has been saved yet in this branch, so returning here creates nothing at all
+                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_metadataNotAllowed", e.getMetadataType()));
+                        return;
                     } catch (Exception e) {
                         log.error("Failed to create structure element for aeon record", e);
                         Helper.setFehlerMeldung("Failed to create structure element for aeon record - check that the metadata type '"
@@ -774,15 +832,17 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                     bhelp.EigenschaftHinzufuegen(process, "Template", processTemplate.getTitel());
                     bhelp.EigenschaftHinzufuegen(process, "TemplateID", "" + processTemplate.getId());
 
-                    assignProperties(rec, process, "");
-
                     try {
                         // create mets file for selected record
-                        Prefs prefs = processTemplate.getRegelsatz().getPreferences();
                         String recordIdentifier = rec.getRecordData().get("uri"); // get uri from properties
                         opacPlugin.setSelectedUrl(recordIdentifier);
                         Fileformat fileformat = opacPlugin.search("", "", coc, prefs); // get metadata for selected record
-                        // is additional metadata neeeded?
+
+                        // this process holds a single record, so everything goes onto its own docstruct, which is the
+                        // top level one and therefore the one Goobi indexes
+                        DocStruct recordStruct = fileformat.getDigitalDocument().getLogicalDocStruct();
+                        assignTransactionFields(process, recordStruct, prefs);
+                        assignRecordFields(rec, process, recordStruct, prefs, "");
 
                         int nextFreeId = getNextId();
                         String orderNumber = getOrderAsString(nextFreeId);
@@ -793,6 +853,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
                         // save process and fileformat
                         finalizeProcess(process, fileformat);
+                    } catch (AeonMetadataException e) {
+                        // processes created earlier in this loop are already saved and stay; the message says so
+                        Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_metadataNotAllowed", e.getMetadataType()));
+                        return;
                     } catch (Exception e) {
                         log.error("Error while creating the Goobi processes", e);
                         Helper.setFehlerMeldung("Error while creating the Goobi processes", e);
@@ -897,7 +961,13 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         return orderNumber;
     }
 
-    public void assignProperties(AeonRecord rec, Process process, String prefix) {
+    /**
+     * Writes the fields of one record. The value resolution is unchanged: a record field takes its value from the
+     * matching per-record property when the operator edited one. Only where the value ends up is new - a field goes to
+     * the METS file or to a process property according to the place it declares.
+     */
+    public void assignRecordFields(AeonRecord rec, Process process, DocStruct docStruct, Prefs prefs, String prefix)
+            throws AeonMetadataException {
 
         // check if patron type yale was selected
         for (AeonProperty prop : rec.getProcessProperties()) {
@@ -909,7 +979,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             }
         }
 
-        // add properties
         for (AeonProperty prop : rec.getProperties()) {
             if (appliesToMaterialType(prop)) {
                 if ("multiselect".equals(prop.getType())) {
@@ -921,7 +990,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         }
                     }
                     for (String value : values) {
-                        bhelp.EigenschaftHinzufuegen(process, prefix + prop.getVariableName(), value);
+                        write(prop, value, process, docStruct, prefs, prefix);
                     }
                 } else {
                     String value = prop.getExportValue();
@@ -932,25 +1001,51 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                     }
 
                     if (StringUtils.isNoneBlank(value)) {
-                        bhelp.EigenschaftHinzufuegen(process, prefix + prop.getVariableName(), value);
+                        write(prop, value, process, docStruct, prefs, prefix);
                     }
                 }
-            }
-        }
-        for (AeonProperty prop : transactionFields) {
-            if (StringUtils.isNoneBlank(prop.getExportValue())) {
-                bhelp.EigenschaftHinzufuegen(process, prefix + prop.getVariableName(), prop.getExportValue());
             }
         }
 
         for (AeonProperty prop : rec.getProcessProperties()) {
             if ("multiselect".equals(prop.getType())) {
                 for (String val : prop.getMultiselectSelectedValues()) {
-                    bhelp.EigenschaftHinzufuegen(process, prefix + prop.getVariableName(), val);
+                    write(prop, val, process, docStruct, prefs, prefix);
                 }
             } else {
-                bhelp.EigenschaftHinzufuegen(process, prefix + prop.getVariableName(), prop.getExportValue());
+                write(prop, prop.getExportValue(), process, docStruct, prefs, prefix);
             }
+        }
+    }
+
+    /**
+     * Writes the transaction fields. They are the same for every record of a request, so they are written once per
+     * process rather than once per record - in batch mode the old code wrote each of them once per record under a
+     * different prefix, which stored the same value as many times as the batch had records.
+     */
+    private void assignTransactionFields(Process process, DocStruct docStruct, Prefs prefs) throws AeonMetadataException {
+        for (AeonProperty prop : transactionFields) {
+            if (StringUtils.isNoneBlank(prop.getExportValue())) {
+                write(prop, prop.getExportValue(), process, docStruct, prefs, "");
+            }
+        }
+    }
+
+    /**
+     * Routes one value to the store its field declares.
+     *
+     * A blank value is skipped for metadata but still written as a property: an empty metadatum has no meaning in a
+     * METS file, while an empty property is what the plugin has always written and something downstream may rely on
+     * the row existing.
+     */
+    private void write(AeonProperty field, String value, Process process, DocStruct docStruct, Prefs prefs, String prefix)
+            throws AeonMetadataException {
+        if (field.isMetadata()) {
+            if (StringUtils.isNotBlank(value)) {
+                AeonMetadataWriter.add(docStruct, prefs, field.getVariableName(), value);
+            }
+        } else {
+            bhelp.EigenschaftHinzufuegen(process, prefix + field.getVariableName(), value);
         }
     }
 
@@ -1032,6 +1127,41 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         List<Process> templates = ProcessManager.getProcesses("prozesse.titel", sql, null);
         for (Process p : templates) {
             possibleWorkflows.add(p.getTitel());
+        }
+
+        validateConfiguration();
+    }
+
+    /**
+     * Checks the parts of the configuration whose mistakes produce no error of their own: a place attribute naming a
+     * store that does not exist, and a transaction field name that does not match the field carrying the transaction
+     * number. Both are collected rather than thrown, so that the request screen can name all of them at once.
+     */
+    private void validateConfiguration() {
+        configurationErrors.clear();
+
+        List<AeonProperty> allFields = new ArrayList<>();
+        allFields.addAll(transactionFields);
+        allFields.addAll(recordFields);
+        allFields.addAll(propertyFields);
+        allFields.addAll(existingProcessFields);
+
+        for (String fieldTitle : AeonConfigValidator.invalidPlaces(allFields)) {
+            configurationErrors.add(Helper.getTranslation("plugin_workflow_aeon_invalidPlace", fieldTitle));
+        }
+
+        AeonProperty transactionNumber = AeonConfigValidator.transactionNumberField(transactionFields, transactionNumberField);
+        if (transactionNumber != null) {
+            if (!transactionNumber.getVariableName().equals(transactionFieldName)) {
+                configurationErrors.add(Helper.getTranslation("plugin_workflow_aeon_transactionFieldNameMismatch",
+                        transactionFieldName, transactionNumber.getVariableName()));
+            }
+            // the duplicate check and the cancellation search look the transaction number up through the metadata
+            // index, which only holds fields written as metadata
+            if (!transactionNumber.isMetadata()) {
+                configurationErrors.add(Helper.getTranslation("plugin_workflow_aeon_transactionFieldNotMetadata",
+                        transactionNumber.getTitle()));
+            }
         }
     }
 
