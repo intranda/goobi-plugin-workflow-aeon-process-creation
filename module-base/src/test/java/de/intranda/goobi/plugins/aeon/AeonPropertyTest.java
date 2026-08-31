@@ -49,6 +49,13 @@ public class AeonPropertyTest {
             + "<value></value>"
             + "</field>";
 
+    private static final String NO_PLACE_FIELD = "<field aeon=\"location\">"
+            + "<title>Return location</title>"
+            + "<type readonly=\"false\">input</type>"
+            + "<variable>Return location</variable>"
+            + "<value></value>"
+            + "</field>";
+
     /**
      * Builds a property the same way the plugin does, from a &lt;field&gt; element of the plugin configuration. The
      * plugin itself cannot be instantiated here: its constructor reads the configuration through ConfigPlugins and
@@ -102,12 +109,24 @@ public class AeonPropertyTest {
     // ----- the place attribute decides which store a field is written to -----
 
     /**
-     * An existing configuration names no place at all. It has to keep writing process properties, so that this change
-     * stays additive rather than silently moving every field into the METS file.
+     * An existing configuration names an explicit place="process". It has to keep writing process properties, so that
+     * this change stays additive rather than silently moving every field into the METS file.
      */
     @Test
-    public void testFieldWithoutPlaceIsAProperty() throws Exception {
+    public void testFieldWithExplicitProcessPlaceIsAProperty() throws Exception {
         AeonProperty property = propertyFrom(UNRESTRICTED_FIELD);
+        assertFalse(property.isMetadata());
+        assertTrue(property.isPlaceValid());
+    }
+
+    /**
+     * The property this whole change rests on: a configuration that names no place keeps writing process properties.
+     * If the default ever moved to metadata, every existing installation would silently start writing its values into
+     * mets files instead. UNRESTRICTED_FIELD cannot cover this - it sets place="process" explicitly.
+     */
+    @Test
+    public void testFieldWithNoPlaceAttributeDefaultsToProperty() throws Exception {
+        AeonProperty property = propertyFrom(NO_PLACE_FIELD);
         assertFalse(property.isMetadata());
         assertTrue(property.isPlaceValid());
     }
