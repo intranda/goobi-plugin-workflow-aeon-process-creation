@@ -254,6 +254,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             return;
         }
 
+        if (hasConfigurationErrors()) {
+            return;
+        }
+
         if ("creation".equals(operationType)) {
 
             if (!checkTransactionNumber()) {
@@ -664,12 +668,23 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         screenName = "request";
     }
 
+    /**
+     * Reports any configuration defect found at load time and tells the caller to stop.
+     *
+     * Both entry points ask: creating processes and searching for ones to cancel. A broken configuration otherwise
+     * produces an empty screen on the cancellation path rather than saying what is wrong, which is the silent failure
+     * this validation exists to remove.
+     */
+    private boolean hasConfigurationErrors() {
+        for (String error : configurationErrors) {
+            Helper.setFehlerMeldung(error);
+        }
+        return !configurationErrors.isEmpty();
+    }
+
     public void createProcesses() {
 
-        if (!configurationErrors.isEmpty()) {
-            for (String error : configurationErrors) {
-                Helper.setFehlerMeldung(error);
-            }
+        if (hasConfigurationErrors()) {
             return;
         }
 
