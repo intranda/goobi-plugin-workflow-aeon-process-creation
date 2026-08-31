@@ -127,10 +127,13 @@
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>
+    <!-- This call number comes from the AEON request, while the <processes> field of the same name
+    comes from the catalogue record. In single-process mode both are written to the same docstruct,
+    so they need distinct metadata types here unless the ruleset declares the type num="*". -->
     <field aeon="callNumber">
       <title>Call number</title>
       <type readonly="true">input</type>
-      <variable place="metadata">CallNumber</variable>
+      <variable place="metadata">TransactionCallNumber</variable>
       <value></value>
       <help>This is my description for the field so that everyone gets some help.</help>
     </field>

@@ -305,6 +305,11 @@ einziges Vorkommen beschränkt, wirft der zweite ausgewählte Wert eine Exceptio
 abbricht; das wird vorher an keiner Stelle geprüft. Ein `multiselect`-Feld mit `place="metadata"`
 braucht deshalb einen Metadatentyp, der Wiederholung erlaubt (`num="*"`).
 
+Dieselbe Kollision kann auch bei zwei völlig unterschiedlichen Feldern auftreten: Zwei Felder, die mit
+demselben Metadatentyp konfiguriert sind, werden im Einzelvorgangs-Modus beide auf denselben
+Dokumentstruktur-Knoten geschrieben. Daher entweder unterschiedliche Typnamen vergeben oder den Typ im
+Regelsatz mit `num="*"` deklarieren.
+
 Die Transaktionsnummer ist ein Sonderfall: Sie muss mit `place="metadata"` konfiguriert werden.
 `<processCancellation><transactionFieldName>` ist optional; ist es vorhanden, muss es genau denselben
 `variable`-Wert tragen, und fehlt es, leitet das Plugin denselben Namen selbstständig aus der

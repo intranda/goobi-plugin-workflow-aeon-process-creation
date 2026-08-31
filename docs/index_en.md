@@ -303,6 +303,10 @@ occurrence, the second selected value throws an exception that aborts the whole 
 checks for this ahead of time. A `multiselect` field configured with `place="metadata"` therefore
 needs a metadata type that allows repetition (`num="*"`).
 
+The same collision can happen with two entirely different fields: two fields configured with the same
+metadata type name are both written to the same docstruct in single-process mode, so either give them
+distinct type names or declare the type `num="*"` in the ruleset.
+
 The transaction number is a special case: it must be configured with `place="metadata"`.
 `<processCancellation><transactionFieldName>` is optional; when it is present it must be set to
 exactly the same `variable`, and when it is absent the plugin derives the same name from the
