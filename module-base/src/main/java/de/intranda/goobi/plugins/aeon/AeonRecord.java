@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.goobi.beans.GoobiProperty;
 import org.goobi.beans.Process;
 
 import lombok.Data;
@@ -14,7 +13,6 @@ import lombok.Data;
 public class AeonRecord implements Comparable<AeonRecord> {
 
     private static final String JSON_ORDER_PROPERTY = "containerGrouping";
-    private static final String PROCESS_ORDER_PROPERTY = "Box and Folder";
 
     private List<AeonProperty> properties = new ArrayList<>();
 
@@ -43,6 +41,13 @@ public class AeonRecord implements Comparable<AeonRecord> {
 
     private List<AeonExistingProcess> existingProcesses = new ArrayList<>();
 
+    /**
+     * Value the cancellation list is sorted by, read from the existing process when the record is built. It used to be
+     * looked up in the process properties on every comparison, under a name hardcoded here rather than taken from the
+     * configuration.
+     */
+    private String orderValue = "";
+
     public String getDisplayTitle() {
         return String.join(" – ", properties.stream()
                 .filter(p -> p != null && p.isDisplayInTitle() && StringUtils.isNotBlank(p.getValue()))
@@ -55,19 +60,7 @@ public class AeonRecord implements Comparable<AeonRecord> {
 
         // comparing cancel records
         if (recordData == null && other.getRecordData() == null) {
-            String orderField = "";
-            String otherOrderField = "";
-            for (GoobiProperty pp : existingProcess.getProperties()) {
-                if (PROCESS_ORDER_PROPERTY.equals(pp.getPropertyName())) {
-                    orderField = pp.getPropertyValue();
-                }
-            }
-            for (GoobiProperty pp : other.getExistingProcess().getProperties()) {
-                if (PROCESS_ORDER_PROPERTY.equals(pp.getPropertyName())) {
-                    otherOrderField = pp.getPropertyValue();
-                }
-            }
-            return orderField.compareTo(otherOrderField);
+            return orderValue.compareTo(other.getOrderValue());
         }
 
         // compare new records
