@@ -730,9 +730,20 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                 log.error(e);
             }
 
-            if (masterFileformat == null) {
-                // the catch above already logged why. Without a fileformat there is nothing to attach metadata to,
-                // and every later use of it would fail on a null anyway.
+            DocStruct batchRoot = null;
+            try {
+                if (masterFileformat != null && masterFileformat.getDigitalDocument() != null) {
+                    batchRoot = masterFileformat.getDigitalDocument().getLogicalDocStruct();
+                }
+            } catch (PreferencesException e) {
+                log.error(e);
+                return;
+            }
+
+            if (batchRoot == null) {
+                // the catch above already logged why. The fileformat is assigned before the docstruct is built, so a
+                // failure in that try - a batchDocstruct the ruleset does not define, for instance - leaves the
+                // reference set and the root missing. Either way there is nothing to attach metadata to.
                 Helper.setFehlerMeldung("Error while creating the Goobi processes");
                 return;
             }
@@ -740,12 +751,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             // the transaction fields describe the request rather than any one record, so they go once onto the root of
             // the batch. That is also the docstruct Goobi indexes, which is what the duplicate check reads back.
             try {
-                assignTransactionFields(process, masterFileformat.getDigitalDocument().getLogicalDocStruct(), prefs);
+                assignTransactionFields(process, batchRoot, prefs);
             } catch (AeonMetadataException e) {
                 Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_metadataNotAllowed", e.getMetadataType()));
-                return;
-            } catch (PreferencesException e) {
-                log.error(e);
                 return;
             }
 
@@ -1151,6 +1159,14 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         }
 
         AeonProperty transactionNumber = AeonConfigValidator.transactionNumberField(transactionFields, transactionNumberField);
+
+        // the config need not carry a <processCancellation> section at all - the documented sample does
+        // not. Deriving the name from the transaction field keeps the duplicate check and the
+        // cancellation search working instead of leaving them searching for null.
+        if (transactionNumber != null && StringUtils.isBlank(transactionFieldName)) {
+            transactionFieldName = transactionNumber.getVariableName();
+        }
+
         if (transactionNumber != null) {
             if (!transactionNumber.getVariableName().equals(transactionFieldName)) {
                 configurationErrors.add(Helper.getTranslation("plugin_workflow_aeon_transactionFieldNameMismatch",
