@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -15,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.goobi.aeon.LoginResponse;
 import org.goobi.aeon.User;
 import org.goobi.beans.Batch;
-import org.goobi.beans.GoobiProperty;
 import org.goobi.beans.Process;
 import org.goobi.beans.Project;
 import org.goobi.beans.Step;
@@ -31,6 +31,7 @@ import de.intranda.goobi.plugins.aeon.AeonExistingProcess;
 import de.intranda.goobi.plugins.aeon.AeonFieldResolver;
 import de.intranda.goobi.plugins.aeon.AeonMetadataException;
 import de.intranda.goobi.plugins.aeon.AeonMetadataWriter;
+import de.intranda.goobi.plugins.aeon.AeonProcessValues;
 import de.intranda.goobi.plugins.aeon.AeonProperty;
 import de.intranda.goobi.plugins.aeon.AeonRecord;
 import de.sub.goobi.config.ConfigPlugins;
@@ -43,6 +44,7 @@ import de.sub.goobi.helper.ScriptThreadWithoutHibernate;
 import de.sub.goobi.helper.enums.StepStatus;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
+import de.sub.goobi.persistence.managers.MetadataManager;
 import de.sub.goobi.persistence.managers.MySQLHelper;
 import de.sub.goobi.persistence.managers.ProcessManager;
 import de.sub.goobi.persistence.managers.ProjectManager;
@@ -421,16 +423,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                 // Bib ID and Volume number (bibId, volume)
                 // ASpace resource ID (uri)
                 // preparation for duplicate checks
-                String aspaceResourceIDProperty = "";
-                String ilsBibId = "";
-                String ilsVolumeNumber = "";
+                AeonProperty aspaceResourceIDField = null;
+                AeonProperty ilsBibIdField = null;
+                AeonProperty ilsVolumeNumberField = null;
                 for (AeonProperty ap : recordFields) {
                     if ("bibId".equals(ap.getAeonField())) {
-                        ilsBibId = ap.getVariableName();
+                        ilsBibIdField = ap;
                     } else if ("volume".equals(ap.getAeonField())) {
-                        ilsVolumeNumber = ap.getVariableName();
+                        ilsVolumeNumberField = ap;
                     } else if ("uri".equals(ap.getAeonField())) {
-                        aspaceResourceIDProperty = ap.getVariableName();
+                        aspaceResourceIDField = ap;
                     }
                 }
 
@@ -479,26 +481,18 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                             boolean isDuplicate = false;
                             boolean isBlocked = false;
 
-                            if ("ils".matches(overview.get("recordType"))) {
-                                String bib = "";
-                                String vol = "";
+                            // both stores are read once for this process, then every field is answered from whichever
+                            // one it is configured for
+                            AeonProcessValues values =
+                                    new AeonProcessValues(MetadataManager.getMetadata(other.getId()), other.getProperties());
 
-                                for (GoobiProperty pp : other.getProperties()) {
-                                    if (ilsBibId.equals(pp.getPropertyName())) {
-                                        bib = pp.getPropertyValue();
-                                    } else if (ilsVolumeNumber.equals(pp.getPropertyName())) {
-                                        vol = pp.getPropertyValue();
-                                    }
-                                }
-                                if (bib.equals(overview.get("bibId")) && vol.equals(overview.get("volume"))) {
-                                    isDuplicate = true;
-                                }
+                            if ("ils".matches(overview.get("recordType"))) {
+                                isDuplicate = ilsBibIdField != null && ilsVolumeNumberField != null
+                                        && values.first(ilsBibIdField).equals(overview.get("bibId"))
+                                        && values.first(ilsVolumeNumberField).equals(overview.get("volume"));
                             } else {
-                                for (GoobiProperty pp : other.getProperties()) {
-                                    if (aspaceResourceIDProperty.equals(pp.getPropertyName()) && pp.getPropertyValue().equals(overview.get("uri"))) {
-                                        isDuplicate = true;
-                                    }
-                                }
+                                isDuplicate = aspaceResourceIDField != null
+                                        && values.all(aspaceResourceIDField).contains(overview.get("uri"));
                             }
 
                             if (isDuplicate) {
@@ -517,7 +511,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                                     AeonProperty aeonProperty = property.cloneProperty();
                                     aeonProperty.setValue("");
                                     aep.getDuplicateProperties().add(aeonProperty);
-                                    extractProcessValues(other, aeonProperty);
+                                    extractProcessValues(values, aeonProperty);
                                 }
                                 aeonRecord.getExistingProcesses().add(aep);
                             }
@@ -538,27 +532,15 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         }
     }
 
+    /**
+     * True when no process carries this transaction number yet.
+     *
+     * The lookup goes through the metadata index, which Goobi fills from the top level docstruct whenever a process
+     * writes its mets file. validateConfiguration makes sure the transaction number is configured as metadata, so
+     * there is no second store to consult here.
+     */
     private boolean checkTransactionNumber() {
-
-        String sql =
-                "SELECT COUNT(1) FROM properties WHERE property_name = 'Transaction Identifier' and object_type = 'process' AND property_value = ?";
-        Connection connection = null;
-        try {
-            connection = MySQLHelper.getInstance().getConnection();
-            int numberOfProcesses = new QueryRunner().query(connection, sql, MySQLHelper.resultSetToIntegerHandler, input);
-            return numberOfProcesses == 0;
-        } catch (SQLException e) {
-            log.error(e);
-        } finally {
-            if (connection != null) {
-                try {
-                    MySQLHelper.closeConnection(connection);
-                } catch (SQLException e) {
-                    // do nothing
-                }
-            }
-        }
-        return false;
+        return MetadataManager.getProcessesWithMetadata(transactionFieldName, input).isEmpty();
     }
 
     private int getNextId() {
@@ -587,15 +569,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         return value + 1;
     }
 
-    private void extractProcessValues(Process other, AeonProperty aeonProperty) {
-
-        for (GoobiProperty processProperty : other.getProperties()) {
-            if (processProperty.getPropertyName().equals(aeonProperty.getVariableName())) {
-                aeonProperty.setValue(processProperty.getPropertyValue());
-                break;
-            }
-        }
-
+    /**
+     * Copies the value the existing process carries into the field used to display it.
+     */
+    private void extractProcessValues(AeonProcessValues values, AeonProperty aeonProperty) {
+        aeonProperty.setValue(values.first(aeonProperty));
     }
 
     /*
@@ -1179,6 +1157,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         transactionNumber.getTitle()));
             }
         }
+
+        // without a name to search by, the duplicate check and the cancellation search would return nothing
+        // and read as "no existing process" for every request
+        if (StringUtils.isBlank(transactionFieldName)) {
+            configurationErrors.add(Helper.getTranslation("plugin_workflow_aeon_transactionFieldMissing"));
+        }
     }
 
     public void acceptAllItems() {
@@ -1255,34 +1239,50 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
     public void searchForDeactivateProcess() {
 
-        StringBuilder sql = new StringBuilder();
-
-        sql.append("(prozesse.ProzesseID in (select object_id from properties where properties.property_value = '");
-        sql.append(transactionFieldName);
-        sql.append("' and object_type = 'process' AND properties.property_value = '");
-        sql.append(input);
-        sql.append("')) AND projekte.projectIsArchived = false ");
-
         recordList.clear();
 
-        List<Process> processList = ProcessManager.getProcesses("prozesse.titel", sql.toString(), null);
+        // the old query compared property_value against the field name and against the searched number at the same
+        // time, which no row can satisfy, so it never matched anything. The lookup now goes through the metadata
+        // index, the same one the duplicate check reads.
+        List<Integer> processIds = MetadataManager.getProcessesWithMetadata(transactionFieldName, input);
+        if (processIds.isEmpty()) {
+            return;
+        }
+
+        String sql = "prozesse.ProzesseID in ("
+                + processIds.stream().map(String::valueOf).collect(Collectors.joining(","))
+                + ") AND projekte.projectIsArchived = false ";
+
+        List<Process> processList = ProcessManager.getProcesses("prozesse.titel", sql, null);
+
+        // the field the cancellation list is sorted by, taken from the configuration rather than hardcoded
+        AeonProperty orderField = null;
+        for (AeonProperty ap : recordFields) {
+            if ("containerGrouping".equals(ap.getAeonField())) {
+                orderField = ap;
+            }
+        }
 
         for (Process process : processList) {
             AeonRecord aeonRecord = new AeonRecord();
             aeonRecord.setProcessTitle(process.getTitel());
             aeonRecord.setExistingProcess(process);
 
+            AeonProcessValues values =
+                    new AeonProcessValues(MetadataManager.getMetadata(process.getId()), process.getProperties());
+            aeonRecord.setOrderValue(orderField == null ? "" : values.first(orderField));
+
             for (AeonProperty p : recordFields) {
                 AeonProperty prop = p.cloneProperty();
                 prop.setOverwriteMainField(true);
-                extractProcessValues(process, prop);
+                extractProcessValues(values, prop);
                 aeonRecord.getProperties().add(prop);
 
             }
             for (AeonProperty property : propertyFields) {
                 AeonProperty aeonProperty = property.cloneProperty();
                 aeonProperty.setOverwriteMainField(true);
-                extractProcessValues(process, aeonProperty);
+                extractProcessValues(values, aeonProperty);
 
                 aeonRecord.getProcessProperties().add(aeonProperty);
             }
@@ -1314,7 +1314,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                 AeonProperty aeonProperty = property.cloneProperty();
                 aeonProperty.setValue("");
                 aep.getDuplicateProperties().add(aeonProperty);
-                extractProcessValues(process, aeonProperty);
+                extractProcessValues(values, aeonProperty);
             }
 
             aeonRecord.getExistingProcesses().add(aep);
