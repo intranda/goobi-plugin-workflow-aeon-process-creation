@@ -272,7 +272,7 @@ Parameter           |  Erläuterung
 `displayAlways`     | Die Werte `true` oder `false` definieren, ob das Feld angezeigt wird, wenn nur ein minimierter Datensatz angezeigt wird. Dieser Parameter wird ausschließlich für die Felder aus der Metadata Cloud ausgewertet.
 `displayInTitle`    | Die Werte `true` oder `false` definieren, ob das Feld innerhalb der Kopfzeile der Box aufgeführt wird. Dieser Parameter wird ausschließlich für die Felder aus der Metadata Cloud ausgewertet.
 `variable`          | Dieser Parameter definiert den Namen der zu erstellenden Eigenschaft. Dieser Parameter wird für Daten aus der Metadata Cloud nicht ausgewertet.
-`place`             | Hier wird der Typ der Eigenschaft festgelegt. Mögliche Werte sind `work` (Werkstückeigenschaft), `process` (Vorgangseigenschaft), `template` (Vorlageneigenschaft).
+`place`             | Legt fest, wo der Wert gespeichert wird. `metadata` schreibt ein Metadatum in die METS-Datei; `variable` ist dann der Name eines Metadatentyps, den der Regelsatz des Workflows definieren muss und der am Dokumentstrukturtyp des Datensatzes erlaubt sein muss. `process` schreibt eine Goobi-Vorgangseigenschaft, `variable` ist dann der Name der Eigenschaft. Voreinstellung ist `process`. `work` und `template` werden aus Kompatibilitätsgründen weiterhin akzeptiert und verhalten sich wie `process`; die damit benannten Werkstück- und Vorlageneigenschaften wurden nie umgesetzt.
 `value`             | Mit diesem Parameter kann ein Default Wert festgelegt werden. Falls ein AEON Element konfiguriert und durch die Abfrage erhalten wurde, wird der konfigurierte default Wert mit dem Inhalt aus AEON überschrieben.
 `help`              | Mit diesem Parameter lässt sich ein Hilfetext definieren der optional angezeigt werden kann.
 `validation`        | Dieser Parameter definiert einen regulären Ausdruck, gegen den der Feldinhalt validiert werden kann.
@@ -280,3 +280,47 @@ Parameter           |  Erläuterung
 `message`           | Dieser Parameter legt eine Meldung fest, die im Falle von Validierungsfehlern angezeigt werden soll.
 `vocabularyName`    | Dieser Parameter definiert ein zu nutzendes Vokabular.
 `vocabularyField`   | Mit dem Parameter `fieldname=value` kann das Trefferset auf Werte eingeschränkt werden, die diese Definition erfüllen. Das Feld ist wiederholbar, um mehrere Einschränkungen gleichzeitig zu definieren.
+
+### Werte als Metadaten speichern
+
+Ein Feld, das mit `place="metadata"` konfiguriert ist, wird in die METS-Datei des Vorgangs geschrieben,
+anstatt zu einer Vorgangseigenschaft zu werden. Sein `variable` benennt einen Metadatentyp, den der
+Regelsatz des gewählten Workflows definieren muss und der am Dokumentstrukturtyp erlaubt sein muss, als
+der der Datensatz importiert wird. Fehlt eines von beidem, bricht die Vorgangserstellung mit einer
+Fehlermeldung ab und legt nichts an, statt einen Vorgang zu erzeugen, bei dem ein Teil der Daten
+stillschweigend fehlt.
+
+Die Wahl des Speicherorts richtet sich danach, was der Wert ist. Katalog- und Transaktionsdaten
+beschreiben das Objekt und gehören in die METS-Datei. Werte, die den Workflow steuern - Ausgabeformate,
+OCR-Optionen, der Patronentyp - sind Jobparameter und bleiben Vorgangseigenschaften, wo sie auf den
+Aufgabenbildschirmen angezeigt und bearbeitet werden können.
+
+**Metadaten werden exportiert, Eigenschaften nicht.** METS-Dateien werden beim Export an den Viewer
+oder das DMS weitergegeben, daher dürfen Patronennamen oder andere personenbezogene Daten nicht als
+Metadaten konfiguriert werden.
+
+**Ein als Metadatum geschriebenes `multiselect`-Feld erzeugt ein Metadatum pro ausgewähltem Wert.** Ist
+der Metadatentyp im Regelsatz mit `num="1o"` oder einer anderen Einstellung definiert, die ihn auf ein
+einziges Vorkommen beschränkt, wirft der zweite ausgewählte Wert eine Exception, die die gesamte Anfrage
+abbricht; das wird vorher an keiner Stelle geprüft. Ein `multiselect`-Feld mit `place="metadata"`
+braucht deshalb einen Metadatentyp, der Wiederholung erlaubt (`num="*"`).
+
+Die Transaktionsnummer ist ein Sonderfall: Sie muss mit `place="metadata"` konfiguriert werden.
+`<processCancellation><transactionFieldName>` ist optional; ist es vorhanden, muss es genau denselben
+`variable`-Wert tragen, und fehlt es, leitet das Plugin denselben Namen selbstständig aus der
+`variable` des Transaktionsnummernfeldes ab. Sowohl die Dublettenprüfung als auch die Prozesssuche
+schlagen die Transaktionsnummer im Metadatenindex von Goobi nach, und eine Abweichung würde dazu
+führen, dass beide nichts finden. Das Plugin verweigert die Vorgangserstellung, wenn der konfigurierte
+Name und die Variable nicht übereinstimmen.
+
+Zwei Einschränkungen sollte man kennen, bevor eine bestehende Installation umgestellt wird:
+
+* **Vorgänge, die vor der Umstellung angelegt wurden, tragen Eigenschaften und keine Metadaten.** Die
+  Dublettenprüfung und die Prozesssuche finden sie nicht, sodass eine erneut angefragte alte Transaktion
+  nicht als Dublette gemeldet wird und ein alter Vorgang nicht über das Plugin storniert werden kann.
+* **Im Batch-Modus sind Metadaten je Datensatz nicht durchsuchbar.** Die Werte jedes Datensatzes werden
+  auf den Dokumentstruktur-Knoten dieses Datensatzes geschrieben, der ein Kind des Batch-Objekts ist.
+  Goobi indiziert nur den obersten Dokumentstruktur-Knoten, und `$(meta....)` löst nur gegen die oberste
+  Ebene und das erste Kind auf. Die Datensatz-Metadaten sind in der METS-Datei vorhanden, können aber
+  nicht durchsucht oder in Skripten verwendet werden. Die Transaktionsfelder liegen auf der Batch-Wurzel
+  und sind davon nicht betroffen.

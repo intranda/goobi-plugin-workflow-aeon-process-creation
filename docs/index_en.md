@@ -272,7 +272,7 @@ Parameter           |  Explanation
 `displayAlways` | The values `true` or `false` define whether the field is displayed when only a minimised record is displayed. This parameter is only evaluated for the fields from the Metadata Cloud.
 `displayInTitle` | The values `true` or `false` define whether the field is listed within the header of the box. This parameter is only evaluated for the fields from the Metadata Cloud.
 `variable` | This parameter defines the name of the property to be created. This parameter is not evaluated for data from the Metadata Cloud.
-`place` | This parameter defines the type of the property. Possible values are `work` (workpiece property), `process` (process property), `template` (template property).
+`place` | Defines where the value is stored. `metadata` writes a metadatum into the METS file; the `variable` is then the name of a metadata type that the workflow's ruleset must define and that must be allowed on the docstruct of the record. `process` writes a Goobi process property, and the `variable` is the property name. The default is `process`. `work` and `template` are accepted for backwards compatibility and behave like `process`; the workpiece and template properties they name were never implemented.
 `value` | This parameter can be used to set a default value. If an AEON element is configured and obtained by the query, the configured default value is overwritten with the content from AEON.
 `help` | This parameter can be used to define a help text that can optionally be displayed.
 `validation` | This parameter defines a regular expression against which the field content can be validated.
@@ -281,3 +281,42 @@ Parameter           |  Explanation
 `vocabularyName` |  This parameter defines a vocabulary to be used.
 `vocabularyField` | The parameter `fieldname=value` can be used to restrict the hit set to values that meet this definition. The field is repeatable to define several restrictions at the same time.
 
+### Storing values as metadata
+
+A field configured with `place="metadata"` is written into the process's METS file instead of
+becoming a process property. Its `variable` names a metadata type, which the ruleset of the selected
+workflow has to define and which has to be allowed on the docstruct the record is imported as. If
+either is missing, process creation stops with an error and creates nothing, rather than creating a
+process with part of its data silently dropped.
+
+Choose the store by what the value is. Catalogue and transaction data describes the object and
+belongs in the METS file. Values that steer the workflow — output formats, OCR options, the patron
+type — are job parameters and stay process properties, where they can be displayed and edited on the
+task screens.
+
+**Metadata is exported, properties are not.** METS files are handed to the viewer or DMS on export,
+so do not configure patron names or other personal data as metadata.
+
+**A `multiselect` field written as metadata emits one metadatum per selected value.** If the metadata
+type is declared in the ruleset with `num="1o"` or another setting that limits it to a single
+occurrence, the second selected value throws an exception that aborts the whole request; nothing
+checks for this ahead of time. A `multiselect` field configured with `place="metadata"` therefore
+needs a metadata type that allows repetition (`num="*"`).
+
+The transaction number is a special case: it must be configured with `place="metadata"`.
+`<processCancellation><transactionFieldName>` is optional; when it is present it must be set to
+exactly the same `variable`, and when it is absent the plugin derives the same name from the
+transaction number field's `variable` on its own. Both the duplicate check and the process search
+look the transaction number up in Goobi's metadata index, and a mismatch would make them find nothing
+at all. The plugin refuses to create processes when the configured name and the variable disagree.
+
+Two limitations are worth knowing before switching an existing installation over:
+
+* **Processes created before the change carry properties and no metadata.** The duplicate check and
+  the process search will not find them, so a re-requested old transaction is not reported as a
+  duplicate and an old process cannot be cancelled through the plugin.
+* **In batch mode, per-record metadata is not searchable.** Each record's values are written to the
+  docstruct of that record, which is a child of the batch object. Goobi indexes only the top level
+  docstruct, and `$(meta....)` resolves only against the top level and the first child. The record
+  metadata is present in the METS file but cannot be searched for or used in scripts. The transaction
+  fields sit on the batch root and are not affected.
