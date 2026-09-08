@@ -136,7 +136,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private String batchDocstruct;
     private String batchTitleSuffix;
 
-    private String processTitleMetadataType;
+    private String childKeyMetadataType;
     private String resourceIDMetadataType;
 
     // names of the AEON response fields this plugin needs to know by itself, as opposed to the ones the configured
@@ -688,9 +688,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             // root data: id/title = input
             for (AeonRecord r : recordList) {
                 if (r.isAccepted()) {
+                    // The order number is the correlation key: it links a property of the batch to the child process it belongs to. It is
+                    // deliberately not a predicted child title - the split processes plugin composes the titles itself, from metadata that is not
+                    // available here.
                     String orderNumber = getOrderAsString(nextFreeId);
-                    String processTitle = r.getProcessTitle() + "_" + orderNumber;
-                    assignProperties(r, process, processTitle + "_");
+                    assignProperties(r, process, orderNumber + "_");
                     nextFreeId++;
                     // for each selected record: create child docstruct, assign data
                     String recordIdentifier = r.getRecordData().get("uri"); // get uri from properties
@@ -700,10 +702,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         // get metadata for selected record
                         Fileformat fileformat = opacPlugin.search("", "", coc, prefs);
 
-                        //  save subprocess title as metadata
-                        Metadata processTitleMetadata = new Metadata(prefs.getMetadataTypeByName(processTitleMetadataType));
-                        processTitleMetadata.setValue(processTitle);
-                        fileformat.getDigitalDocument().getLogicalDocStruct().addMetadata(processTitleMetadata);
+                        //  save the correlation key as metadata, so the split processes plugin can match this child's properties
+                        Metadata childKeyMetadata = new Metadata(prefs.getMetadataTypeByName(childKeyMetadataType));
+                        childKeyMetadata.setValue(orderNumber);
+                        fileformat.getDigitalDocument().getLogicalDocStruct().addMetadata(childKeyMetadata);
 
                         if (resourceIDMetadataType != null) {
                             Metadata resourceIDMetadata = new Metadata(prefs.getMetadataTypeByName(resourceIDMetadataType));
@@ -914,7 +916,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         batchDocstruct = config.getString("/processCreation/batchDocstruct");
         batchTitleSuffix = config.getString("/processCreation/batchTitleSuffix", "");
 
-        processTitleMetadataType = config.getString("/processCreation/processTitleMetadata");
+        childKeyMetadataType = config.getString("/processCreation/childKeyMetadata");
         resourceIDMetadataType = config.getString("/processCreation/resourceIDMetadata", null);
         materialTypeField = config.getString("/processCreation/materialTypeField", "customFieldValues/MaterialType");
         homeSiteField = config.getString("/processCreation/homeSiteField", "customFieldValues/HomeSite");

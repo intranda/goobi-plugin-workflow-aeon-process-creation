@@ -17,7 +17,11 @@
          must agree.
          Absent or empty leaves the batch title unchanged. -->
     <batchTitleSuffix>_group</batchTitleSuffix>
-    <processTitleMetadata>_TitleDocMain</processTitleMetadata>
+    <!-- Metadata field on each child structure element that receives the order number. It is the key
+         the split processes plugin matches this child's properties on, and it must name the same
+         field as that plugin's childKeyMetadata. The metadata type must exist in the ruleset and be
+         allowed on the child docstruct types. -->
+    <childKeyMetadata>_OrderNumber</childKeyMetadata>
     <defaultWorkflowName>Paper workflow</defaultWorkflowName>
     <workflowName type="Audio Recording (DRMS)">Audio files</workflowName>
     <opacName>Metadata cloud</opacName>
