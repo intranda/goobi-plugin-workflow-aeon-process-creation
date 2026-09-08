@@ -1,5 +1,6 @@
 package de.intranda.goobi.plugins;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
@@ -30,5 +31,25 @@ public class AeonProcessCreationPluginTest {
     public void testVersion() throws IOException {
         String s = "xyz";
         assertNotNull(s);
+    }
+
+    @Test
+    public void appendsTheConfiguredBatchTitleSuffix() {
+        assertEquals("txn123_music_group", AeonProcessCreationWorkflowPlugin.composeBatchTitle("txn123_music", "_group"));
+    }
+
+    @Test
+    public void leavesTheBatchTitleAloneWithoutASuffix() {
+        assertEquals("txn123_music", AeonProcessCreationWorkflowPlugin.composeBatchTitle("txn123_music", null));
+    }
+
+    @Test
+    public void leavesTheBatchTitleAloneWithABlankSuffix() {
+        assertEquals("txn123_music", AeonProcessCreationWorkflowPlugin.composeBatchTitle("txn123_music", "   "));
+    }
+
+    @Test
+    public void trimsWhitespaceAroundTheSuffix() {
+        assertEquals("txn123_music_group", AeonProcessCreationWorkflowPlugin.composeBatchTitle("txn123_music", "  _group  "));
     }
 }

@@ -134,6 +134,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private Map<String, String> specialWorkflowNames = new HashMap<>();
     private String opacName;
     private String batchDocstruct;
+    private String batchTitleSuffix;
 
     private String processTitleMetadataType;
     private String resourceIDMetadataType;
@@ -664,7 +665,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             bhelp.EigenschaftHinzufuegen(process, "Template", processTemplate.getTitel());
             bhelp.EigenschaftHinzufuegen(process, "TemplateID", "" + processTemplate.getId());
 
-            process.setTitel(recordList.get(0).getProcessTitle());
+            process.setTitel(composeBatchTitle(recordList.get(0).getProcessTitle(), batchTitleSuffix));
 
             Prefs prefs = processTemplate.getRegelsatz().getPreferences();
             Fileformat masterFileformat = null;
@@ -800,6 +801,20 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         }
     }
 
+    /**
+     * Appends the configured suffix to the title of a batch process. The suffix marks a process that is meant to be split into child processes; the
+     * split plugin strips it again when it derives the child titles.
+     *
+     * @param recordTitle the composed title of the first record of the batch
+     * @param suffix the configured suffix, may be null or blank
+     */
+    static String composeBatchTitle(String recordTitle, String suffix) {
+        if (StringUtils.isBlank(suffix)) {
+            return recordTitle;
+        }
+        return recordTitle + suffix.trim();
+    }
+
     public String getOrderAsString(int nextFreeId) {
         String orderNumber;
         if (nextFreeId > 999) {
@@ -897,6 +912,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
         opacName = config.getString("/processCreation/opacName");
         batchDocstruct = config.getString("/processCreation/batchDocstruct");
+        batchTitleSuffix = config.getString("/processCreation/batchTitleSuffix", "");
 
         processTitleMetadataType = config.getString("/processCreation/processTitleMetadata");
         resourceIDMetadataType = config.getString("/processCreation/resourceIDMetadata", null);

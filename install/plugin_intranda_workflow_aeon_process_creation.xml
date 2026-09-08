@@ -11,6 +11,12 @@
 
   <processCreation>
     <batchDocstruct>BatchObject</batchDocstruct>
+    <!-- Optional suffix appended to the title of a batch process, marking it as one that will be
+         split into child processes. The split processes plugin strips it again when it derives
+         the child titles, so the strip attribute of its {parent} title part and this value
+         must agree.
+         Absent or empty leaves the batch title unchanged. -->
+    <batchTitleSuffix>_group</batchTitleSuffix>
     <processTitleMetadata>_TitleDocMain</processTitleMetadata>
     <defaultWorkflowName>Paper workflow</defaultWorkflowName>
     <workflowName type="Audio Recording (DRMS)">Audio files</workflowName>
