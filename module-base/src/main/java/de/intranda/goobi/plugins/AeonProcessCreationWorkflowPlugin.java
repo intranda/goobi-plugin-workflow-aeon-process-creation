@@ -717,6 +717,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
                     } catch (Exception e) {
                         log.error("Failed to create structure element for aeon record", e);
+                        Helper.setFehlerMeldung("Failed to create structure element for aeon record - check that the metadata type '"
+                                + childKeyMetadataType
+                                + "' configured as <childKeyMetadata> exists in the ruleset and is allowed on the child docstruct types", e);
                     }
                 }
             }
