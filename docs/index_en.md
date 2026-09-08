@@ -62,6 +62,26 @@ Provided at least one record has been selected and there are no unfulfilled stri
 The left-hand pane lists the records for which processes have been created in Goobi. The right-hand pane offers the option of generating and downloading a docket for all created processes, where the associated processes are all listed together within a common batch.
 
 
+## Handover to the split processes plugin
+
+In batch creation mode this plugin creates one process containing a child structure element per selected record, which the step plugin `intranda_step_split_processes` later splits into one process per child.
+
+The child process titles are **not** decided here. They are composed at split time from configured title parts, because the metadata they are based on is only fetched into the batch's METS file and is not available when the batch is created.
+
+What this plugin does provide is the link between them: every child structure element receives its order number in the metadata field named by `<childKeyMetadata>`, and the properties of the batch process are named `<orderNumber>_<propertyName>`. The split plugin reads that key off each child and uses it to decide which properties belong to which child process.
+
+Both plugins must therefore be configured consistently:
+
+| AEON | split processes |
+|------|-----------------|
+| `<childKeyMetadata>_OrderNumber</childKeyMetadata>` | `<childKeyMetadata>_OrderNumber</childKeyMetadata>` |
+| `<batchTitleSuffix>_group</batchTitleSuffix>` | `<title name="{parent}" strip="_group"/>` |
+
+Neither plugin can validate the other's configuration.
+
+> **Upgrade note:** this version replaces the earlier `<processTitleMetadata>`, which wrote a predicted child process title. The two plugins must be deployed together, at a moment when no batch is waiting to be split. A batch created by the earlier version carries property names prefixed with the predicted title, which the new split plugin does not look for, and its properties would silently fail to copy.
+
+
 ## Configuration
 The plugin is configured via the configuration file `plugin_intranda_workflow_aeon_process_creation.xml` and can be adapted during operation. The following is an example configuration file:
 
@@ -233,6 +253,8 @@ Parameter           |  Explanation
 `transactionNumberField` | Name of the AEON field holding the transaction number. Its value opens the generated process title. If the AEON record carries no transaction number, the request is rejected with an error, because no usable process title can be built. Default: `transactionNumber`.
 `usernameField` | Name of the AEON field holding the patron user name. It is used to look up the last name and the mail address at the AEON `Users` endpoint. Default: `username`.
 `referenceNumberField` | Name of the AEON field holding the barcode that the configured catalogue is queried with. Default: `referenceNumber`.
+`batchTitleSuffix` | Optional suffix appended to the title of a batch process, for example `_group`, marking it as a process that will be split into child processes. The split processes plugin strips it again when deriving the child titles, so this value and that plugin's `strip` attribute must agree. Absent or empty leaves the batch title unchanged. Applies only to batch creation; processes created one per record are never split and are unaffected.
+`childKeyMetadata` | Name of the metadata field written onto every child structure element of a batch, receiving that child's order number. It is the correlation key that the split processes plugin matches the child's properties on, and it must name the same field as that plugin's `childKeyMetadata`. The metadata type must exist in the ruleset and be allowed on the child docstruct types.
 
 All of them accept a slash separated path to address a field inside a nested map. Older AEON versions kept the material type and the home site in the flat fields `shippingOption` and `itemInfo2`, which would be configured as `<materialTypeField>shippingOption</materialTypeField>` and `<homeSiteField>itemInfo2</homeSiteField>`.
 

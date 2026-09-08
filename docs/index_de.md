@@ -62,6 +62,26 @@ Sofern mindestens ein Datensatz ausgewählt wurde und keine unerfüllten strikte
 Hier werden im linken Bereich noch einmal diejenigen Datensätze aufgeführt, für die Vorgänge in Goobi angelegt wurden. Im rechten Bereich steht die Möglichkeit zur Verfügung einen Laufzettel für alle erzeugten Vorgänge zu generieren und herunterzuladen, wo die zugehörigen Vorgänge alle innerhalb eines gemeinsamen Batches zusammengefasst aufgeführt werden.
 
 
+## Übergabe an das Plugin zum Aufteilen von Vorgängen
+
+Im Batch-Modus erzeugt dieses Plugin einen Vorgang, der pro ausgewähltem Datensatz ein Kind-Strukturelement enthält. Das Step-Plugin `intranda_step_split_processes` teilt diesen später in einen Vorgang pro Kindelement auf.
+
+Die Titel der Teilvorgänge werden **nicht** hier festgelegt. Sie werden beim Aufteilen aus konfigurierten Titelbestandteilen zusammengesetzt, da die zugrunde liegenden Metadaten erst in die METS-Datei des Batches geladen werden und bei dessen Erstellung noch nicht vorliegen.
+
+Dieses Plugin liefert die Verknüpfung: Jedes Kind-Strukturelement erhält seine Ordnungsnummer in dem unter `<childKeyMetadata>` genannten Metadatenfeld, und die Eigenschaften des Batch-Vorgangs werden als `<Ordnungsnummer>_<Eigenschaftsname>` benannt. Das aufteilende Plugin liest diesen Schlüssel aus jedem Kindelement und entscheidet damit, welche Eigenschaften zu welchem Teilvorgang gehören.
+
+Beide Plugins müssen daher übereinstimmend konfiguriert werden:
+
+| AEON | Vorgänge aufteilen |
+|------|--------------------|
+| `<childKeyMetadata>_OrderNumber</childKeyMetadata>` | `<childKeyMetadata>_OrderNumber</childKeyMetadata>` |
+| `<batchTitleSuffix>_group</batchTitleSuffix>` | `<title name="{parent}" strip="_group"/>` |
+
+Keines der beiden Plugins kann die Konfiguration des anderen prüfen.
+
+> **Hinweis zur Aktualisierung:** Diese Version ersetzt das frühere `<processTitleMetadata>`, das einen vorab berechneten Titel des Teilvorgangs geschrieben hat. Die beiden Plugins müssen gemeinsam ausgeliefert werden, zu einem Zeitpunkt, an dem kein Batch auf das Aufteilen wartet. Ein von der früheren Version erzeugter Batch trägt Eigenschaftsnamen mit dem vorab berechneten Titel als Präfix, nach dem das neue Plugin nicht sucht; seine Eigenschaften würden stillschweigend nicht kopiert.
+
+
 ## Konfiguration
 Die Konfiguration des Plugins erfolgt über die Konfigurationsdatei `plugin_intranda_workflow_aeon_process_creation.xml` und kann im laufenden Betrieb angepasst werden. Im folgenden ist eine beispielhafte Konfigurationsdatei aufgeführt:
 
@@ -233,6 +253,8 @@ Parameter           |  Erläuterung
 `transactionNumberField` | Name des AEON-Feldes, das die Transaktionsnummer enthält. Sein Wert bildet den Anfang des erzeugten Vorgangstitels. Enthält der AEON-Record keine Transaktionsnummer, wird die Anfrage mit einer Fehlermeldung abgewiesen, da kein brauchbarer Vorgangstitel gebildet werden kann. Standardwert: `transactionNumber`.
 `usernameField`     | Name des AEON-Feldes, das den Benutzernamen des Patrons enthält. Damit werden Nachname und Mailadresse am AEON-Endpunkt `Users` nachgeschlagen. Standardwert: `username`.
 `referenceNumberField` | Name des AEON-Feldes, das den Barcode enthält, mit dem der konfigurierte Katalog abgefragt wird. Standardwert: `referenceNumber`.
+`batchTitleSuffix`  | Optionales Suffix, das an den Titel eines Batch-Vorgangs angehängt wird, zum Beispiel `_group`, um ihn als Vorgang zu kennzeichnen, der in Teilvorgänge aufgeteilt werden soll. Das Plugin zum Aufteilen von Vorgängen entfernt es beim Ableiten der Titel der Teilvorgänge wieder, daher müssen dieser Wert und das `strip`-Attribut jenes Plugins übereinstimmen. Fehlt der Wert oder ist er leer, bleibt der Batch-Titel unverändert. Gilt nur für die Batch-Erstellung; Vorgänge, die einzeln pro Datensatz erzeugt werden, werden nie aufgeteilt und sind davon nicht betroffen.
+`childKeyMetadata`  | Name des Metadatenfeldes, das auf jedes Kind-Strukturelement eines Batches geschrieben wird und dessen Ordnungsnummer erhält. Es ist der Korrelationsschlüssel, anhand dessen das Plugin zum Aufteilen von Vorgängen die Eigenschaften den Kindelementen zuordnet, und es muss dasselbe Feld benennen wie das `childKeyMetadata` jenes Plugins. Der Metadatentyp muss im Regelsatz vorhanden und für die Kind-Docstruct-Typen zugelassen sein.
 
 Alle akzeptieren einen mit Schrägstrichen getrennten Pfad, um ein Feld innerhalb einer verschachtelten Map anzusprechen. Ältere AEON-Versionen hielten den Materialtyp und den Home Site in den flachen Feldern `shippingOption` und `itemInfo2`, was als `<materialTypeField>shippingOption</materialTypeField>` und `<homeSiteField>itemInfo2</homeSiteField>` zu konfigurieren wäre.
 
