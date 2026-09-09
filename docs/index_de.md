@@ -61,6 +61,8 @@ Sofern mindestens ein Datensatz ausgewählt wurde und keine unerfüllten strikte
 
 Hier werden im linken Bereich noch einmal diejenigen Datensätze aufgeführt, für die Vorgänge in Goobi angelegt wurden. Im rechten Bereich steht die Möglichkeit zur Verfügung einen Laufzettel für alle erzeugten Vorgänge zu generieren und herunterzuladen, wo die zugehörigen Vorgänge alle innerhalb eines gemeinsamen Batches zusammengefasst aufgeführt werden.
 
+Im linken Bereich werden außerdem die Vorgangstitel benannt. Vor dem Anlegen der Vorgänge wird im Modus für Batch-Vorgänge der einzelne Titel des Batch-Vorgangs einschließlich `<batchTitleSuffix>` angezeigt und kein Titel pro Datensatz: die Kindvorgänge, in die der Batch später aufgeteilt wird, werden hier nicht benannt, da ihre Titel erst beim Aufteilen zusammengesetzt werden. Wird für jeden Datensatz ein eigener Vorgang angelegt, endet jeder Titel auf `_…` als Platzhalter für die Ordnungsnummer, die erst beim Anlegen des Vorgangs vergeben wird. Sobald die Vorgänge existieren, werden die tatsächlichen Titel angezeigt.
+
 
 ## Übergabe an das Plugin zum Aufteilen von Vorgängen
 

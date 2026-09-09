@@ -136,6 +136,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private String batchDocstruct;
     private String batchTitleSuffix;
 
+    // stands in for the part of a process title that is only decided when the process is created
+    private static final String UNKNOWN_TITLE_PART = "\u2026";
+
     private String childKeyMetadataType;
     private String resourceIDMetadataType;
 
@@ -665,7 +668,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             bhelp.EigenschaftHinzufuegen(process, "Template", processTemplate.getTitel());
             bhelp.EigenschaftHinzufuegen(process, "TemplateID", "" + processTemplate.getId());
 
-            process.setTitel(composeBatchTitle(recordList.get(0).getProcessTitle(), batchTitleSuffix));
+            process.setTitel(getBatchProcessTitle());
 
             Prefs prefs = processTemplate.getRegelsatz().getPreferences();
             Fileformat masterFileformat = null;
@@ -818,6 +821,53 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             return recordTitle;
         }
         return recordTitle + suffix.trim();
+    }
+
+    /**
+     * Appends the configured suffix to the title of the batch process the given records will be combined into. All records of a transaction carry
+     * the same title, so the first one decides.
+     *
+     * @param records the records of the current transaction, may be empty
+     * @param suffix the configured suffix, may be null or blank
+     */
+    static String composeBatchTitle(List<AeonRecord> records, String suffix) {
+        if (records.isEmpty()) {
+            return "";
+        }
+        return composeBatchTitle(records.get(0).getProcessTitle(), suffix);
+    }
+
+    /**
+     * The title of a process created for a single record. Its order number is drawn from the database when the process is created, so beforehand
+     * the title can only be shown with that part marked as still open. Passing the incomplete title off as the final one would be a claim this
+     * plugin cannot keep.
+     *
+     * @param recordTitle the title of the record, which after creation is the title of its process
+     * @param processCreated whether the process exists already
+     */
+    static String composeRecordTitle(String recordTitle, boolean processCreated) {
+        if (processCreated) {
+            return recordTitle;
+        }
+        return recordTitle + "_" + UNKNOWN_TITLE_PART;
+    }
+
+    /**
+     * The title of the batch process the accepted records are combined into, suffix included. Creation reads it from here as well, so what the
+     * summary screen announces and what is created cannot drift apart.
+     */
+    public String getBatchProcessTitle() {
+        return composeBatchTitle(recordList, batchTitleSuffix);
+    }
+
+    /**
+     * The process title to show for a single record. Only used in per record creation mode: a batch has one title for all records, and the titles
+     * of the child processes it is split into are not decided here.
+     *
+     * The decision needs the creation state of the request, which the xhtml has no other way to pass.
+     */
+    public String processTitleFor(AeonRecord record) {
+        return composeRecordTitle(record.getProcessTitle(), "saved".equals(overviewMode));
     }
 
     public String getOrderAsString(int nextFreeId) {

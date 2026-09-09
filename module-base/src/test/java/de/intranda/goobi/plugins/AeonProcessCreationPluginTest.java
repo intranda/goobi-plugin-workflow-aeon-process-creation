@@ -6,9 +6,13 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import de.intranda.goobi.plugins.aeon.AeonRecord;
 
 public class AeonProcessCreationPluginTest {
 
@@ -51,5 +55,38 @@ public class AeonProcessCreationPluginTest {
     @Test
     public void trimsWhitespaceAroundTheSuffix() {
         assertEquals("txn123_music_group", AeonProcessCreationWorkflowPlugin.composeBatchTitle("txn123_music", "  _group  "));
+    }
+
+    @Test
+    public void batchTitlePreviewCarriesTheConfiguredSuffix() {
+        assertEquals("txn123_music_group",
+                AeonProcessCreationWorkflowPlugin.composeBatchTitle(List.of(recordTitled("txn123_music")), "_group"));
+    }
+
+    @Test
+    public void batchTitlePreviewTakesTheTitleOfTheFirstRecord() {
+        assertEquals("txn123_music_group", AeonProcessCreationWorkflowPlugin
+                .composeBatchTitle(List.of(recordTitled("txn123_music"), recordTitled("txn123_music")), "_group"));
+    }
+
+    @Test
+    public void batchTitlePreviewIsBlankWithoutRecords() {
+        assertEquals("", AeonProcessCreationWorkflowPlugin.composeBatchTitle(Collections.<AeonRecord> emptyList(), "_group"));
+    }
+
+    @Test
+    public void recordTitleMarksTheOrderNumberAsUnknownBeforeCreation() {
+        assertEquals("txn123_music_\u2026", AeonProcessCreationWorkflowPlugin.composeRecordTitle("txn123_music", false));
+    }
+
+    @Test
+    public void recordTitleIsShownUnchangedAfterCreation() {
+        assertEquals("txn123_music_001", AeonProcessCreationWorkflowPlugin.composeRecordTitle("txn123_music_001", true));
+    }
+
+    private static AeonRecord recordTitled(String processTitle) {
+        AeonRecord record = new AeonRecord();
+        record.setProcessTitle(processTitle);
+        return record;
     }
 }

@@ -61,6 +61,8 @@ Provided at least one record has been selected and there are no unfulfilled stri
 
 The left-hand pane lists the records for which processes have been created in Goobi. The right-hand pane offers the option of generating and downloading a docket for all created processes, where the associated processes are all listed together within a common batch.
 
+The left-hand pane also names the process titles. Before the processes are created it shows, in batch creation mode, the single title of the batch process including its `<batchTitleSuffix>`, and no title per record: the child processes the batch is later split into are not named here, because their titles are only composed at split time. Where a process is created for each record, each title ends in `_…` as a placeholder for the order number, which is only drawn when the process is created. Once the processes exist, the actual titles are shown.
+
 
 ## Handover to the split processes plugin
 

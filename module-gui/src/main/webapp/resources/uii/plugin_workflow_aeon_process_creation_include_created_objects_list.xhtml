@@ -21,6 +21,20 @@
         <!-- All Objects List (REQUEST SUCCESS) -->
         <div>
             <h:form id="itemSummaryForm" styleClass="d-flex flex-column gap-3">
+
+                <!-- TITLE OF THE BATCH PROCESS ALL ACCEPTED RECORDS ARE COMBINED INTO -->
+                <ui:fragment rendered="#{NavigationForm.workflowPlugin.creationMode == 'single'}">
+                    <section:section type="outline">
+                        <section:header
+                            icon="file"
+                            title="#{msgs.prozessTitel}" />
+                        <section:body padding="true">
+                            <h:outputText value="#{NavigationForm.workflowPlugin.batchProcessTitle}" />
+                        </section:body>
+                    </section:section>
+                </ui:fragment>
+                <!-- // TITLE OF THE BATCH PROCESS -->
+
                 <ui:repeat
                     var="item"
                     value="#{NavigationForm.workflowPlugin.recordList}">
@@ -46,14 +60,18 @@
                                 </section:header-actions>
                             </section:header>
                             <section:body>
-                                <!-- future process title -->
                                 <dl:list>
-                                    <dl:term>
-                                        <h:outputText value="#{msgs.prozessTitel}" />
-                                    </dl:term>
-                                    <dl:description>
-                                        <h:outputText value="#{item.processTitle}" />
-                                    </dl:description>
+                                    <!-- future process title. Only when a process is created for each record: a batch carries one title for all
+                                         of them, shown above the list, and the titles of the child processes it is later split into are decided
+                                         by the split processes plugin, not here. -->
+                                    <ui:fragment rendered="#{NavigationForm.workflowPlugin.creationMode != 'single'}">
+                                        <dl:term>
+                                            <h:outputText value="#{msgs.prozessTitel}" />
+                                        </dl:term>
+                                        <dl:description>
+                                            <h:outputText value="#{NavigationForm.workflowPlugin.processTitleFor(item)}" />
+                                        </dl:description>
+                                    </ui:fragment>
                                     <ui:repeat
                                         value="#{item.properties}"
                                         var="property">
