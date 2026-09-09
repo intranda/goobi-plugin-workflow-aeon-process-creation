@@ -99,7 +99,6 @@ Die Konfiguration des Plugins erfolgt über die Konfigurationsdatei `plugin_intr
     <processCreation>
         <workflowName>digitisation on demand</workflowName>
         <opacName>metadata cloud</opacName>
-        <materialTypeField>customFieldValues/MaterialType</materialTypeField>
         <homeSiteField>customFieldValues/HomeSite</homeSiteField>
     </processCreation>
 
@@ -250,7 +249,7 @@ Im Block `<processCreation>` kann definiert werden, welche OPAC-Konfiguration zu
 
 Parameter           |  Erläuterung
 ------------------- | -----------------------------------------------------
-`materialTypeField` | Name des AEON-Feldes, das den Materialtyp enthält. Sein Wert wird mit dem Attribut `type` der Felder in `<properties>` verglichen und entscheidet damit, welche Eigenschaften angezeigt und validiert werden. Enthält der AEON-Record keinen Materialtyp, wird ein Hinweis angezeigt und die Anfrage fortgesetzt: es gilt dann kein auf einen Materialtyp beschränktes Feld, sodass die erzeugten Vorgänge allein die unbeschränkten Eigenschaften tragen. Standardwert: `customFieldValues/MaterialType`.
+`materialTypeField` | Name des AEON-Feldes, das den Materialtyp enthält. Sein Wert wird mit dem Attribut `type` der Felder in `<properties>` verglichen und entscheidet damit, welche Eigenschaften angezeigt und validiert werden. Standardmäßig leer, da AEON keinen Materialtyp mehr liefert: es gilt dann kein auf einen Materialtyp beschränktes Feld, sodass die erzeugten Vorgänge allein die unbeschränkten Eigenschaften tragen, und es wird nichts gemeldet - das ist das beabsichtigte Verhalten und kein Fehler. Der Parameter ist nur dort zu setzen, wo AEON einen Materialtyp liefert; ein hier benanntes, von AEON aber leer gelassenes Feld wird als Hinweis gemeldet und die Anfrage fortgesetzt.
 `homeSiteField`     | Name des AEON-Feldes, das den Home Site enthält. Sein Wert bildet den Repository-Teil des erzeugten Vorgangstitels. Standardwert: `customFieldValues/HomeSite`.
 `transactionNumberField` | Name des AEON-Feldes, das die Transaktionsnummer enthält. Sein Wert bildet den Anfang des erzeugten Vorgangstitels. Enthält der AEON-Record keine Transaktionsnummer, wird die Anfrage mit einer Fehlermeldung abgewiesen, da kein brauchbarer Vorgangstitel gebildet werden kann. Standardwert: `transactionNumber`.
 `usernameField`     | Name des AEON-Feldes, das den Benutzernamen des Patrons enthält. Damit werden Nachname und Mailadresse am AEON-Endpunkt `Users` nachgeschlagen. Standardwert: `username`.

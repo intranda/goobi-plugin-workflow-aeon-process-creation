@@ -187,6 +187,18 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         return property.appliesTo(materialType);
     }
 
+    /**
+     * Whether a material type AEON did not deliver is worth reporting.
+     *
+     * An installation says through materialTypeField whether it works with material types at all. AEON no longer
+     * delivers one, so an unconfigured field is a supported setup rather than a fault: no property restricted to a
+     * material type applies, which is the intended result and nothing to report. A field the configuration does name
+     * and AEON leaves blank is the opposite - a value was expected and did not arrive.
+     */
+    static boolean shouldReportMissingMaterialType(String materialTypeField, String materialType) {
+        return StringUtils.isNotBlank(materialTypeField) && StringUtils.isBlank(materialType);
+    }
+
     @Override
     public PluginType getType() {
         return PluginType.Workflow;
@@ -322,11 +334,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
                 // the material type decides which property fields apply. Without one, no field restricted to a material
                 // type applies, and the request goes on carrying the unrestricted properties alone - a reduced result
-                // rather than a broken one, hence a notice rather than a rejection. What makes that safe is that
-                // display, validation, cloning and export all read the restriction through appliesToMaterialType, so a
-                // field left out is left out everywhere instead of turning invisible while staying mandatory
+                // rather than a broken one, hence a notice rather than a rejection, and no notice at all where an
+                // unconfigured materialTypeField says AEON delivers none. What makes that safe is that display,
+                // validation, cloning and export all read the restriction through appliesToMaterialType, so a field
+                // left out is left out everywhere instead of turning invisible while staying mandatory
                 materialType = AeonFieldResolver.resolveString(map, materialTypeField);
-                if (StringUtils.isBlank(materialType)) {
+                if (shouldReportMissingMaterialType(materialTypeField, materialType)) {
                     Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_materialTypeMissing", materialTypeField));
                 }
 
@@ -971,7 +984,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
         childKeyMetadataType = config.getString("/processCreation/childKeyMetadata");
         resourceIDMetadataType = config.getString("/processCreation/resourceIDMetadata", null);
-        materialTypeField = config.getString("/processCreation/materialTypeField", "customFieldValues/MaterialType");
+        // no default: an absent element says AEON delivers no material type, which switches the restrictions off
+        // rather than silently reinstating a field name AEON has since dropped
+        materialTypeField = config.getString("/processCreation/materialTypeField", "");
         homeSiteField = config.getString("/processCreation/homeSiteField", "customFieldValues/HomeSite");
         usernameField = config.getString("/processCreation/usernameField", "username");
         referenceNumberField = config.getString("/processCreation/referenceNumberField", "referenceNumber");

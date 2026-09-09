@@ -1,7 +1,9 @@
 package de.intranda.goobi.plugins;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -82,6 +84,40 @@ public class AeonProcessCreationPluginTest {
     @Test
     public void recordTitleIsShownUnchangedAfterCreation() {
         assertEquals("txn123_music_001", AeonProcessCreationWorkflowPlugin.composeRecordTitle("txn123_music_001", true));
+    }
+
+    // ----- reporting a material type AEON did not deliver -----
+
+    /*
+     * An installation states through <materialTypeField> whether it works with material types at all. AEON stopped
+     * delivering one, so an empty field is the supported setup rather than a fault: no property restricted to a
+     * material type applies, which is the intended result and nothing to report. A field the configuration does name
+     * and AEON leaves blank is the opposite - a value was expected and did not arrive.
+     */
+
+    @Test
+    public void reportsAConfiguredMaterialTypeAeonDoesNotDeliver() {
+        assertTrue(AeonProcessCreationWorkflowPlugin.shouldReportMissingMaterialType("customFieldValues/MaterialType", null));
+    }
+
+    @Test
+    public void reportsAConfiguredMaterialTypeAeonDeliversEmpty() {
+        assertTrue(AeonProcessCreationWorkflowPlugin.shouldReportMissingMaterialType("customFieldValues/MaterialType", "   "));
+    }
+
+    @Test
+    public void staysSilentWhenTheMaterialTypeArrives() {
+        assertFalse(AeonProcessCreationWorkflowPlugin.shouldReportMissingMaterialType("customFieldValues/MaterialType", "Film (DRMS)"));
+    }
+
+    @Test
+    public void staysSilentWhenNoMaterialTypeFieldIsConfigured() {
+        assertFalse(AeonProcessCreationWorkflowPlugin.shouldReportMissingMaterialType(null, null));
+    }
+
+    @Test
+    public void staysSilentWhenTheConfiguredMaterialTypeFieldIsBlank() {
+        assertFalse(AeonProcessCreationWorkflowPlugin.shouldReportMissingMaterialType("   ", null));
     }
 
     private static AeonRecord recordTitled(String processTitle) {
