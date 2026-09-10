@@ -11,6 +11,8 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.junit.Test;
 
+import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
+
 /**
  * Both checks here exist because the failure they prevent is silent. A misspelled place attribute stores a value where
  * nothing reads it back from; a transaction field name that does not match the field carrying the transaction number
@@ -80,5 +82,64 @@ public class AeonConfigValidatorTest {
         AeonProperty other = field("<field aeon=\"itemTitle\"><title>Item title</title>"
                 + "<variable place=\"metadata\">TitleDocMain</variable><value></value></field>");
         assertNull(AeonConfigValidator.transactionNumberField(List.of(other), "transactionNumber"));
+    }
+
+    // ----- catalogueByName -----
+
+    private ConfigOpacCatalogue catalogue(String title) {
+        return new ConfigOpacCatalogue(title, null, null, null, null, 80, null, "intranda_opac_json", null);
+    }
+
+    @Test
+    public void testCatalogueByNameFindsTheConfiguredCatalogue() {
+        List<ConfigOpacCatalogue> catalogues = List.of(catalogue("K10Plus"), catalogue("Metadata cloud"));
+        assertEquals("Metadata cloud", AeonConfigValidator.catalogueByName(catalogues, "Metadata cloud").getTitle());
+    }
+
+    /**
+     * The name no catalogue carries is what produced the NullPointerException this check replaces: the lookup found
+     * nothing, and the request went on to call the catalogue that was never found.
+     */
+    @Test
+    public void testCatalogueByNameIsNullWhenNoCatalogueCarriesTheName() {
+        List<ConfigOpacCatalogue> catalogues = List.of(catalogue("Opac Name"), catalogue("K10Plus"));
+        assertNull(AeonConfigValidator.catalogueByName(catalogues, "Metadata cloud"));
+    }
+
+    /**
+     * Goobi matches catalogue titles exactly, and the plugin documentation and its sample configuration spell this
+     * one differently, so a case difference is a mistake someone will actually make.
+     */
+    @Test
+    public void testCatalogueByNameIsCaseSensitive() {
+        assertNull(AeonConfigValidator.catalogueByName(List.of(catalogue("Metadata cloud")), "metadata cloud"));
+    }
+
+    /**
+     * An absent opacName element leaves the name blank. Reported as the same misconfiguration rather than matched
+     * against a catalogue that happens to carry no title.
+     */
+    @Test
+    public void testCatalogueByNameIsNullWhenNoNameIsConfigured() {
+        List<ConfigOpacCatalogue> catalogues = List.of(catalogue(""), catalogue("K10Plus"));
+        assertNull(AeonConfigValidator.catalogueByName(catalogues, ""));
+        assertNull(AeonConfigValidator.catalogueByName(catalogues, null));
+    }
+
+    // ----- catalogueTitles -----
+
+    /**
+     * The titles go into the error message, because the catalogues a workflow is offered come from three files at
+     * once and naming the ones that exist is what makes the message actionable.
+     */
+    @Test
+    public void testCatalogueTitlesNamesEveryOfferedCatalogue() {
+        List<ConfigOpacCatalogue> catalogues = List.of(catalogue("Opac Name"), catalogue("K10Plus"));
+        assertEquals("Opac Name, K10Plus", AeonConfigValidator.catalogueTitles(catalogues));
+    }
+
+    @Test
+    public void testCatalogueTitlesOfNoCatalogueAtAll() {
+        assertEquals("", AeonConfigValidator.catalogueTitles(List.of()));
     }
 }

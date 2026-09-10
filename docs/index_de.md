@@ -98,7 +98,7 @@ Die Konfiguration des Plugins erfolgt über die Konfigurationsdatei `plugin_intr
 
     <processCreation>
         <workflowName>digitisation on demand</workflowName>
-        <opacName>metadata cloud</opacName>
+        <opacName>Metadata cloud</opacName>
         <homeSiteField>customFieldValues/HomeSite</homeSiteField>
     </processCreation>
 
@@ -245,7 +245,11 @@ Die Konfiguration des Plugins erfolgt über die Konfigurationsdatei `plugin_intr
 
 Innerhalb des Bereiches `<aeon>` werden die Zugangsdaten verwaltet. Hier müssen die URL zur RESTful API von AEON sowie Nutzername und Passwort hinterlegt werden. Soll alternativ ein Key für die Verwendung der API genutzt werden muss dieser angegeben werden.
 
-Im Block `<processCreation>` kann definiert werden, welche OPAC-Konfiguration zur Anfrage von Katalogdaten genutzt werden soll und auf Basis welcher Produktionsvorlage die einzelnen Vorgänge erzeugt werden sollen. Zwei seiner Parameter benennen AEON-Felder und keine Goobi-Einstellungen:
+Im Block `<processCreation>` kann definiert werden, welche OPAC-Konfiguration zur Anfrage von Katalogdaten genutzt werden soll und auf Basis welcher Produktionsvorlage die einzelnen Vorgänge erzeugt werden sollen.
+
+`opacName` muss einen Katalog genau so benennen, wie Goobi ihn dem in `defaultWorkflowName` genannten Workflow anbietet; der Vergleich unterscheidet Groß- und Kleinschreibung. Welche Namen das sind, entscheidet nicht eine einzelne Datei: `goobi_opac.xml` benennt die Kataloge, ein vom JSON-OPAC-Plugin bereitgestellter Katalog erscheint jedoch unter dem `name`-Attribut des jeweiligen `<config>` in `plugin_intranda_opac_json.xml`, und dieses Plugin kann je Workflow andere anbieten. Ein Name, der zu keinem davon passt, wird als Fehler gemeldet, der die tatsächlich vorhandenen Kataloge nennt, und die Anfrage bricht ab. Der Katalog muss zudem vom JSON-OPAC-Plugin bereitgestellt werden, da die Datensätze als JSON gelesen werden; ein von einem anderen OPAC-Plugin bereitgestellter Katalog wird ebenfalls gemeldet und bricht die Anfrage ab.
+
+Zwei seiner Parameter benennen AEON-Felder und keine Goobi-Einstellungen:
 
 Parameter           |  Erläuterung
 ------------------- | -----------------------------------------------------

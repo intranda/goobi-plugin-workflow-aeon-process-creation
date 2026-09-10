@@ -24,7 +24,6 @@ import org.goobi.interfaces.ISearchField;
 import org.goobi.production.cli.helper.StringPair;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.flow.statistics.hibernate.FilterHelper;
-import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 
 import de.intranda.goobi.plugins.aeon.AeonConfigValidator;
@@ -400,16 +399,25 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
                 String catalogueIdentifier = AeonFieldResolver.resolveString(map, referenceNumberField);
 
-                IOpacPlugin myImportOpac = null;
-
-                for (ConfigOpacCatalogue configOpacCatalogue : ConfigOpac.getInstance().getAllCatalogues(defaultWorkflowName)) {
-                    if (configOpacCatalogue.getTitle().equals(opacName)) {
-                        myImportOpac = configOpacCatalogue.getOpacPlugin();
-                        coc = configOpacCatalogue;
-                    }
+                // three files decide which catalogue names a workflow is offered, so a configured name matching none
+                // of them is only a spelling difference away. The lookup is therefore checked before use and reports
+                // the names that do exist, rather than leaving the plugin null for the next line to dereference
+                List<ConfigOpacCatalogue> catalogues = ConfigOpac.getInstance().getAllCatalogues(defaultWorkflowName);
+                ConfigOpacCatalogue catalogue = AeonConfigValidator.catalogueByName(catalogues, opacName);
+                if (catalogue == null) {
+                    Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_opacNotFound", opacName,
+                            AeonConfigValidator.catalogueTitles(catalogues)));
+                    return;
+                }
+                // records arrive as json and are read through the json opac interface, so a catalogue served by any
+                // other opac plugin cannot be used. Checked here because the cast below would name nothing
+                if (!(catalogue.getOpacPlugin() instanceof IJsonPlugin)) {
+                    Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_opacNotJson", opacName));
+                    return;
                 }
 
-                opacPlugin = (IJsonPlugin) myImportOpac;
+                coc = catalogue;
+                opacPlugin = (IJsonPlugin) catalogue.getOpacPlugin();
                 if ("1234567890".equals(this.input)) { //(JUST FOR TESTING: checks if input is 1234567890)
                     opacPlugin.setTestMode(true);
                 } else {

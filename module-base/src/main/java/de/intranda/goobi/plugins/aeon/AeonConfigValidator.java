@@ -2,12 +2,17 @@ package de.intranda.goobi.plugins.aeon;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
+import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 
 /**
  * Configuration checks that have to pass before the plugin may create anything.
  *
- * Both of them guard against a configuration that produces no error at all while doing the wrong thing, which is the
- * hardest kind to notice from the outside.
+ * They guard against a configuration that produces no error of its own while doing the wrong thing, or none that
+ * names the setting responsible - the hardest kind to notice from the outside.
  */
 public class AeonConfigValidator {
 
@@ -43,5 +48,33 @@ public class AeonConfigValidator {
             }
         }
         return null;
+    }
+
+    /**
+     * The catalogue the configured opacName names, or null when none of the catalogues offered carries that name.
+     *
+     * Which catalogues a workflow is offered is decided by three files at once: goobi_opac.xml names them, the opac
+     * plugin that serves one may rename it per workflow, and this plugin's opacName picks one of the results. A name
+     * matching none of them is therefore an easy mistake to make and impossible to see from any single file, which is
+     * why the caller reports the names that do exist alongside the one that does not.
+     */
+    public static ConfigOpacCatalogue catalogueByName(List<ConfigOpacCatalogue> catalogues, String opacName) {
+        // an absent opacName element leaves the name blank, which would otherwise match a catalogue carrying no title
+        if (StringUtils.isBlank(opacName)) {
+            return null;
+        }
+        for (ConfigOpacCatalogue catalogue : catalogues) {
+            if (opacName.equals(catalogue.getTitle())) {
+                return catalogue;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The names of the catalogues offered, for the error message that reports a configured name matching none of them.
+     */
+    public static String catalogueTitles(List<ConfigOpacCatalogue> catalogues) {
+        return catalogues.stream().map(ConfigOpacCatalogue::getTitle).collect(Collectors.joining(", "));
     }
 }

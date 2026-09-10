@@ -98,7 +98,7 @@ The plugin is configured via the configuration file `plugin_intranda_workflow_ae
 
     <processCreation>
         <workflowName>digitisation on demand</workflowName>
-        <opacName>metadata cloud</opacName>
+        <opacName>Metadata cloud</opacName>
         <homeSiteField>customFieldValues/HomeSite</homeSiteField>
     </processCreation>
 
@@ -245,7 +245,11 @@ The plugin is configured via the configuration file `plugin_intranda_workflow_ae
 
 The access data is managed within the `<aeon>` area. The URL to the RESTful API of AEON as well as the user name and password must be stored here. If, alternatively, a key is to be used for the use of the API, this must be specified.
 
-In the block `<processCreation>` it can be defined which OPAC configuration is to be used to request catalogue data and on the basis of which production template the individual processes are to be created. Two of its parameters name AEON fields rather than Goobi settings:
+In the block `<processCreation>` it can be defined which OPAC configuration is to be used to request catalogue data and on the basis of which production template the individual processes are to be created.
+
+`opacName` has to name a catalogue exactly as Goobi offers it to the workflow named in `defaultWorkflowName`, and the comparison is case sensitive. Which names those are is not decided by a single file: `goobi_opac.xml` names the catalogues, but one served by the JSON OPAC plugin appears under the `name` attribute of each `<config>` in `plugin_intranda_opac_json.xml` instead, and that plugin may offer different ones per workflow. A name matching none of them is reported as an error naming the catalogues that do exist, and the request stops. The catalogue also has to be served by the JSON OPAC plugin, because the records are read as JSON; one served by any other OPAC plugin is reported and stops the request as well.
+
+Two of its parameters name AEON fields rather than Goobi settings:
 
 Parameter           |  Explanation
 ------------------- | -----------------------------------------------------
