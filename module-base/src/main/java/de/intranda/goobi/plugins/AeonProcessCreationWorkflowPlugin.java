@@ -1110,7 +1110,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         // no default: an absent element says AEON delivers no material type, which switches the restrictions off
         // rather than silently reinstating a field name AEON has since dropped
         materialTypeField = config.getString("/processCreation/materialTypeField", "");
-        homeSiteField = config.getString("/processCreation/homeSiteField", "customFieldValues/HomeSite");
+        homeSiteField = config.getString("/processCreation/homeSiteField", "site");
         usernameField = config.getString("/processCreation/usernameField", "username");
         referenceNumberField = config.getString("/processCreation/referenceNumberField", "referenceNumber");
         transactionNumberField = config.getString("/processCreation/transactionNumberField", "transactionNumber");
