@@ -221,8 +221,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private String operationType = "creation";
 
     @Getter
-    @Setter
     private String creationMode = "single";
+
+    // creating one process per record is a legacy mode, hidden and refused unless the configuration switches it on
+    @Getter
+    private boolean allowMultiProcessCreation;
 
     private String transactionFieldName;
 
@@ -975,6 +978,25 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         return composeRecordTitle(record.getProcessTitle(), "saved".equals(overviewMode));
     }
 
+    public void setCreationMode(String creationMode) {
+        this.creationMode = effectiveCreationMode(creationMode, allowMultiProcessCreation);
+    }
+
+    /**
+     * The creation mode the plugin actually uses. Anything but an allowed 'multi' falls back to the batch mode, so neither a hidden radio nor an
+     * unknown value can reach the legacy per record creation.
+     *
+     * @param requested the mode the request asked for
+     * @param allowMulti whether the configuration allows the legacy per record creation
+     * @return 'multi' if requested and allowed, 'single' otherwise
+     */
+    static String effectiveCreationMode(String requested, boolean allowMulti) {
+        if (allowMulti && "multi".equals(requested)) {
+            return "multi";
+        }
+        return "single";
+    }
+
     public String getOrderAsString(int nextFreeId) {
         String orderNumber;
         if (nextFreeId > 999) {
@@ -1104,6 +1126,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         opacName = config.getString("/processCreation/opacName");
         batchDocstruct = config.getString("/processCreation/batchDocstruct");
         batchTitleSuffix = config.getString("/processCreation/batchTitleSuffix", "");
+        allowMultiProcessCreation = config.getBoolean("/processCreation/allowMultiProcessCreation", false);
+        // a mode chosen before the switch was turned off must not outlive it
+        creationMode = effectiveCreationMode(creationMode, allowMultiProcessCreation);
 
         childKeyMetadataType = config.getString("/processCreation/childKeyMetadata");
         resourceIDMetadataType = config.getString("/processCreation/resourceIDMetadata", null);

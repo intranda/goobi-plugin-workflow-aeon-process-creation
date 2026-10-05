@@ -17,6 +17,9 @@
          must agree.
          Absent or empty leaves the batch title unchanged. -->
     <batchTitleSuffix>_group</batchTitleSuffix>
+    <!-- Legacy option: true offers a choice between the batch creation above and the creation of one
+         process per record. Absent or false hides that choice and always creates a batch process.
+    <allowMultiProcessCreation>false</allowMultiProcessCreation> -->
     <!-- Metadata field on each child structure element that receives the order number. It is the key
          the split processes plugin matches this child's properties on, and it must name the same
          field as that plugin's childKeyMetadata. The metadata type must exist in the ruleset and be

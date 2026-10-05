@@ -120,6 +120,44 @@ public class AeonProcessCreationPluginTest {
         assertFalse(AeonProcessCreationWorkflowPlugin.shouldReportMissingMaterialType("   ", null));
     }
 
+    // ----- the legacy per record creation mode -----
+
+    /*
+     * Creating one process per record is a legacy mode, off unless <allowMultiProcessCreation> switches it on. Hiding
+     * the radio alone would still let a stale or crafted request post 'multi', so the bean itself falls back to the
+     * batch mode whenever the legacy one is not allowed.
+     */
+
+    @Test
+    public void fallsBackToBatchModeWhenMultiIsNotAllowed() {
+        assertEquals("single", AeonProcessCreationWorkflowPlugin.effectiveCreationMode("multi", false));
+    }
+
+    @Test
+    public void keepsMultiModeWhenAllowed() {
+        assertEquals("multi", AeonProcessCreationWorkflowPlugin.effectiveCreationMode("multi", true));
+    }
+
+    @Test
+    public void keepsBatchModeWhenMultiIsNotAllowed() {
+        assertEquals("single", AeonProcessCreationWorkflowPlugin.effectiveCreationMode("single", false));
+    }
+
+    @Test
+    public void keepsBatchModeWhenMultiIsAllowed() {
+        assertEquals("single", AeonProcessCreationWorkflowPlugin.effectiveCreationMode("single", true));
+    }
+
+    @Test
+    public void fallsBackToBatchModeWithoutARequestedMode() {
+        assertEquals("single", AeonProcessCreationWorkflowPlugin.effectiveCreationMode(null, true));
+    }
+
+    @Test
+    public void fallsBackToBatchModeForAnUnknownMode() {
+        assertEquals("single", AeonProcessCreationWorkflowPlugin.effectiveCreationMode("bogus", true));
+    }
+
     private static AeonRecord recordTitled(String processTitle) {
         AeonRecord record = new AeonRecord();
         record.setProcessTitle(processTitle);

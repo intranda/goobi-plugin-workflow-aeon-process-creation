@@ -191,8 +191,8 @@ input[type="radio"] {
                                         </h:selectOneMenu>
                                     </form:field>
                                     <!-- // PROCESS TEMPLATE ROW -->
-                                    <!-- for creation: single process creation of process for each box -->
-                                    <c:if test="#{NavigationForm.workflowPlugin.operationType=='creation'}">
+                                    <!-- for creation: choice between a batch process and the legacy creation of one process per record, offered only where the configuration allows the legacy mode -->
+                                    <c:if test="#{NavigationForm.workflowPlugin.operationType=='creation' and NavigationForm.workflowPlugin.allowMultiProcessCreation}">
                                         <form:field
                                             label="#{msgs.plugin_workflow_aeon_creationMode}"
                                             required="true"
