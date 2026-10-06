@@ -130,4 +130,52 @@ public class AeonMetadataWriterTest {
         assertEquals("CallNumber", thrown.getMetadataType());
     }
 
+    // ----- add: a value the docstruct already holds -----
+
+    private DocStruct boundBook() throws Exception {
+        DigitalDocument document = new DigitalDocument();
+        return document.createDocStruct(prefs.getDocStrctTypeByName("BoundBook"));
+    }
+
+    /**
+     * The catalogue import and a record field can both map the same catalogue value, e.g. the title, to one type. The
+     * second write carries nothing new, so it must not fail on a type that allows a single value.
+     */
+    @Test
+    public void testAddSkipsAValueTheDocstructAlreadyHoldsOnASingleValuedType() throws Exception {
+        DocStruct docStruct = boundBook();
+        AeonMetadataWriter.add(docStruct, prefs, "pathimagefiles", "file:///images");
+        AeonMetadataWriter.add(docStruct, prefs, "pathimagefiles", "file:///images");
+        assertEquals(List.of("file:///images"), valuesOf(docStruct, "pathimagefiles"));
+    }
+
+    @Test
+    public void testAddStoresAnIdenticalValueOnlyOnceOnARepeatableType() throws Exception {
+        DocStruct docStruct = monograph();
+        AeonMetadataWriter.add(docStruct, prefs, "TitleDocMain", "A title");
+        AeonMetadataWriter.add(docStruct, prefs, "TitleDocMain", "A title");
+        assertEquals(List.of("A title"), valuesOf(docStruct, "TitleDocMain"));
+    }
+
+    /**
+     * Two sources disagreeing about a single valued type is a conflict, not a duplicate. It must still be reported.
+     */
+    @Test
+    public void testAddStillRejectsADifferentValueOnASingleValuedType() throws Exception {
+        DocStruct docStruct = boundBook();
+        AeonMetadataWriter.add(docStruct, prefs, "pathimagefiles", "file:///images");
+        AeonMetadataException thrown = assertThrows(AeonMetadataException.class,
+                () -> AeonMetadataWriter.add(docStruct, prefs, "pathimagefiles", "file:///other"));
+        assertEquals("pathimagefiles", thrown.getMetadataType());
+        assertEquals(List.of("file:///images"), valuesOf(docStruct, "pathimagefiles"));
+    }
+
+    @Test
+    public void testAddKeepsDifferentValuesOnARepeatableType() throws Exception {
+        DocStruct docStruct = monograph();
+        AeonMetadataWriter.add(docStruct, prefs, "TitleDocMain", "A title");
+        AeonMetadataWriter.add(docStruct, prefs, "TitleDocMain", "Another title");
+        assertEquals(List.of("A title", "Another title"), valuesOf(docStruct, "TitleDocMain"));
+    }
+
 }

@@ -45,11 +45,17 @@ public class AeonMetadataWriter {
      * Both failures are configuration defects rather than data problems, so both are reported to the caller instead of
      * being logged and skipped: an unknown type means the ruleset is missing an entry, a rejected one means the entry
      * exists but is not permitted where the field was configured to go.
+     *
+     * A value the docstruct already holds under the same type is skipped: the catalogue import and a record field can
+     * map the same catalogue value to one type, and the second write carries nothing new.
      */
     public static void add(DocStruct docStruct, Prefs prefs, String typeName, String value) throws AeonMetadataException {
         MetadataType type = prefs.getMetadataTypeByName(typeName);
         if (type == null) {
             throw new AeonMetadataException(typeName, "the ruleset defines no such metadata type");
+        }
+        if (holds(docStruct, type, value)) {
+            return;
         }
         try {
             Metadata metadata = new Metadata(type);
@@ -58,5 +64,18 @@ public class AeonMetadataWriter {
         } catch (MetadataTypeNotAllowedException e) {
             throw new AeonMetadataException(typeName, "not allowed on docstruct " + docStruct.getType().getName());
         }
+    }
+
+    private static boolean holds(DocStruct docStruct, MetadataType type, String value) {
+        List<? extends Metadata> existing = docStruct.getAllMetadataByType(type);
+        if (existing == null) {
+            return false;
+        }
+        for (Metadata metadata : existing) {
+            if (value != null && value.equals(metadata.getValue())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
