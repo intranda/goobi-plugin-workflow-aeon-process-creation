@@ -18,8 +18,6 @@
          values; the fixed text is kept as written.
          If a referenced field is empty, nothing is created and the empty fields are named. A property
          field that does not apply to the material type of the request counts as empty.
-         The fixed '_group' at the end marks the process as one that will be split into child
-         processes; the stripParentSuffix of the split processes plugin must remove exactly that.
          Required. Replaces the earlier <batchTitleSuffix>, which is now rejected. -->
     <processTitle>{Transaction Identifier}_{Home site}_group</processTitle>
     <!-- Legacy option: true offers a choice between the batch creation above and the creation of one
@@ -30,10 +28,9 @@
     <allowMultiProcessCreation>false</allowMultiProcessCreation> -->
     <!-- Metadata field on each child structure element that receives the record key: the transaction
          identifier followed by the position of the record among the selected ones, e.g. 286670_0001.
-         The properties of that record are named with the same key, e.g. 286670_0001_Bib ID. It is the
-         key the split processes plugin matches this child's properties on, so it must name the field of
-         that plugin's <copyProperties prefix="metadata">. The metadata type must exist in the ruleset
-         and be allowed on the child docstruct types. -->
+         The properties of that record are named with the same key, e.g. 286670_0001_Bib ID, so the
+         key tells which properties of the batch belong to which child. The metadata type must exist in
+         the ruleset and be allowed on the child docstruct types. -->
     <childKeyMetadata>_OrderNumber</childKeyMetadata>
     <defaultWorkflowName>Paper workflow</defaultWorkflowName>
     <workflowName type="Audio Recording (DRMS)">Audio files</workflowName>

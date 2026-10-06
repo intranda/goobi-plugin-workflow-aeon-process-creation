@@ -61,31 +61,25 @@ Provided at least one record has been selected and there are no unfulfilled stri
 
 The left-hand pane lists the records for which processes have been created in Goobi. The right-hand pane offers the option of generating and downloading a docket for all created processes, where the associated processes are all listed together within a common batch.
 
-The left-hand pane also names the process titles. Before the processes are created it shows, in batch creation mode, the single title of the batch process as configured in `<processTitle>`, and no title per record: the child processes the batch is later split into are not named here, because their titles are only composed at split time. Where a process is created for each record, each title ends in `_…` until the process exists, standing for the four-digit position of its record among the selected ones (`_0001`, `_0002`, …). Once the processes exist, the actual titles are shown.
+The left-hand pane also names the process titles. Before the processes are created it shows, in batch creation mode, the single title of the batch process as configured in `<processTitle>`, and no title per record, because the records of a batch are structure elements of that one process rather than processes of their own. Where a process is created for each record, each title ends in `_…` until the process exists, standing for the four-digit position of its record among the selected ones (`_0001`, `_0002`, …). Once the processes exist, the actual titles are shown.
 
 
-## Handover to the split processes plugin
+## Batch creation
 
-In batch creation mode this plugin creates one process containing a child structure element per selected record, which the step plugin `intranda_step_split_processes` later splits into one process per child.
+In batch creation mode this plugin creates a single process for the request. Its METS file holds the transaction fields on the root structure element and one child structure element per selected record, carrying the catalogue data of that record and those of its fields that are stored as metadata.
 
-The child process titles are **not** decided here. They are composed at split time from the batch title, with the split plugin's `stripParentSuffix` removed, followed by a counter or a metadata value, because the metadata they are based on is only fetched into the batch's METS file and is not available when the batch is created.
+Every record of the batch is identified by a record key: the transaction identifier followed by the four-digit position of the record among the selected ones, so the second record of transaction `286670` has the key `286670_0002`. The transaction makes the key unique across all processes. The key is written in two places:
 
-What this plugin does provide is the link between them: every child structure element receives its record key in the metadata field named by `<childKeyMetadata>`, and the properties of the batch process are named `<recordKey>_<propertyName>`. The record key is the transaction identifier followed by the four-digit position of the record among the selected ones, so the second record of transaction `286670` has the key `286670_0002` and properties such as `286670_0002_Bib ID`. The transaction makes the key unique across all processes. The split plugin reads that key off each child and uses it to decide which properties belong to which child process.
+* onto the child structure element of the record, in the metadata field named by `<childKeyMetadata>`,
+* in front of the name of every process property that belongs to the record, as `<recordKey>_<propertyName>`, for example `286670_0002_Bib ID`.
 
-Both plugins must therefore be configured consistently:
+Further steps of the workflow can use the key to tell which properties of the batch process belong to which of its records.
 
-| AEON | split processes |
-|------|-----------------|
-| `<childKeyMetadata>_OrderNumber</childKeyMetadata>` | `<copyProperties prefix="metadata">_OrderNumber</copyProperties>` |
-| `<processTitle>{Transaction Identifier}_group</processTitle>` | `<stripParentSuffix>_group</stripParentSuffix>` |
-
-Neither plugin can validate the other's configuration.
-
-> **Upgrade note:** the record keys used to come from a counter shared by all processes in Goobi, so that the records of one batch were numbered `0473`, `0474`, and so on, continuing from the previous request. They are now numbered per request as described above, and processes no longer receive an `OrderNumber` property. A batch created earlier and still waiting to be split carries its old keys in its own metadata and property names, where the split plugin reads them from, so it splits as before.
+> **Upgrade note:** the record keys used to come from a counter shared by all processes in Goobi, so that the records of one batch were numbered `0473`, `0474`, and so on, continuing from the previous request. They are now numbered per request as described above, and processes no longer receive an `OrderNumber` property. Batches created earlier keep their old keys in their metadata and property names.
 
 > **Upgrade note:** `<batchTitleSuffix>` and `<homeSiteField>` are replaced by `<processTitle>`. The former default title corresponds to `<processTitle>{Transaction Identifier}_{Home site}_group</processTitle>` together with a `<transaction>` field titled `Home site` reading `customFieldValues/HomeSite` - except that an empty home site now stops the request rather than becoming `unknown`. A configuration still carrying `<batchTitleSuffix>`, or lacking `<processTitle>`, is reported as an error and no process is created until it is corrected. `<homeSiteField>` is simply ignored.
 
-> **Upgrade note:** this version replaces the earlier `<processTitleMetadata>`, which wrote a predicted child process title. The two plugins must be deployed together, at a moment when no batch is waiting to be split. A batch created by the earlier version carries property names prefixed with the predicted title, which the new split plugin does not look for, and its properties would silently fail to copy.
+> **Upgrade note:** `<processTitleMetadata>` is no longer read. The properties of a batch used to be prefixed with a title predicted for each record; they are now prefixed with the record key. Batches created earlier keep their old property names.
 
 
 ## Configuration
@@ -263,9 +257,9 @@ Parameter           |  Explanation
 `referenceNumberField` | Name of the AEON field holding the barcode that the configured catalogue is queried with. Default: `referenceNumber`.
 `defaultWorkflowName` | Title of the process template preselected on the request page, both before a request is loaded and after it. If no template has this title, the first template by title is preselected instead. The operator can choose another template before creating the processes.
 `workflowName` | Optional and repeatable. A process template for one material type, named in the `type` attribute, for example `<workflowName type="Audio Recording (DRMS)">Audio files</workflowName>`. Once a request with that material type is loaded, this template replaces the default in the preselection. An entry naming a template that does not exist is ignored. Without a material type, no entry applies, including one without a `type` attribute.
-`processTitle` | Required. Title of the created process: fixed text with placeholders in braces, each naming a field of `<transaction>` or `<properties>` by its `<title>`, for example `{Transaction Identifier}_{Home site}_group`. A placeholder stands for the value the field holds when the processes are created, so it includes what the operator entered. In values, characters Goobi does not allow in a process title are replaced by an underscore; the fixed text is kept as written. If a referenced field is empty, nothing is created and the empty fields are named; a property field that does not apply to the material type of the request counts as empty. Each empty field the title needs is marked on the request screen with *Needed for the process title* until it is filled in. A batch title already used by another process is refused as well. A placeholder naming no field, or unmatched braces, is reported as a configuration error. In batch creation, a fixed suffix such as `_group` marks the process for splitting and must match the split plugin's `stripParentSuffix`. Processes created one per record append the four-digit position of their record among the selected ones, `_0001`, `_0002`, and so on. As these numbers repeat in every request, such titles are only unique if the template contains something unique to the request, such as the transaction identifier; each of them is checked against the existing processes before anything is created.
+`processTitle` | Required. Title of the created process: fixed text with placeholders in braces, each naming a field of `<transaction>` or `<properties>` by its `<title>`, for example `{Transaction Identifier}_{Home site}_group`. A placeholder stands for the value the field holds when the processes are created, so it includes what the operator entered. In values, characters Goobi does not allow in a process title are replaced by an underscore; the fixed text is kept as written. If a referenced field is empty, nothing is created and the empty fields are named; a property field that does not apply to the material type of the request counts as empty. Each empty field the title needs is marked on the request screen with *Needed for the process title* until it is filled in. A batch title already used by another process is refused as well. A placeholder naming no field, or unmatched braces, is reported as a configuration error. Processes created one per record append the four-digit position of their record among the selected ones, `_0001`, `_0002`, and so on. As these numbers repeat in every request, such titles are only unique if the template contains something unique to the request, such as the transaction identifier; each of them is checked against the existing processes before anything is created.
 `allowMultiProcessCreation` | Legacy option. `true` offers a choice on the request page between the batch creation and the creation of one process per record. Default `false`: the choice is hidden and the plugin always creates a batch process.
-`childKeyMetadata` | Name of the metadata field written onto every child structure element of a batch, receiving that child's record key, for example `286670_0001`. It is the correlation key that the split processes plugin matches the child's properties on, and it must name the field read by that plugin's `<copyProperties prefix="metadata">`. The metadata type must exist in the ruleset and be allowed on the child docstruct types.
+`childKeyMetadata` | Name of the metadata field written onto every child structure element of a batch, receiving the record key of that child, for example `286670_0001`, as described under *Batch creation*. The metadata type must exist in the ruleset and be allowed on the child docstruct types.
 
 All of them accept a slash separated path to address a field inside a nested map. Older AEON versions kept the material type in the flat field `shippingOption`, which would be configured as `<materialTypeField>shippingOption</materialTypeField>`.
 
@@ -332,8 +326,8 @@ Two limitations are worth knowing before switching an existing installation over
 * **Records are recognised as duplicates by their identifier, not by the process title.** A record is
   reported as already digitised when a process carries its `uri` (ArchivesSpace) or its `bibId` and
   `volume` (ILS), in whichever store those `<processes>` fields are configured for. This covers every
-  transaction, not only the current one. A batch that has not been split yet is not found, for the
-  reason given in the next point; the processes split off it are.
+  transaction, not only the current one. A record inside a batch process is not found, for the
+  reason given in the next point.
 * **In batch mode, per-record metadata is not searchable.** Each record's values are written to the
   docstruct of that record, which is a child of the batch object. Goobi indexes only the top level
   docstruct, and `$(meta....)` resolves only against the top level and the first child. The record
