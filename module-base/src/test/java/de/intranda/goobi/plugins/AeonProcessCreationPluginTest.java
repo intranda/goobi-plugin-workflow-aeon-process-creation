@@ -3,12 +3,15 @@ package de.intranda.goobi.plugins;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -155,5 +158,52 @@ public class AeonProcessCreationPluginTest {
     @Test
     public void perRecordTitlesAreEmptyWithoutRecords() {
         assertEquals(List.of(), AeonProcessCreationWorkflowPlugin.perRecordTitles("286670_MUS", 0));
+    }
+
+    // ----- choosing the process template -----
+
+    /*
+     * The templates arrive sorted by title, so a template whose name is a prefix of the configured default sorts before
+     * it. The default has to win regardless of that order; the first template is only the fallback where the default
+     * does not exist.
+     */
+
+    private static final List<String> TEMPLATES = List.of("AEON", "AEON_Group_Process", "AEON_Manuscript");
+
+    @Test
+    public void chooseWorkflowPrefersTheDefaultOverAnEarlierTemplate() {
+        assertEquals("AEON_Group_Process",
+                AeonProcessCreationWorkflowPlugin.chooseWorkflow(TEMPLATES, Map.of(), null, "AEON_Group_Process"));
+    }
+
+    @Test
+    public void chooseWorkflowPrefersTheTemplateOfTheMaterialType() {
+        assertEquals("AEON_Manuscript", AeonProcessCreationWorkflowPlugin.chooseWorkflow(TEMPLATES,
+                Map.of("Manuscript", "AEON_Manuscript"), "Manuscript", "AEON_Group_Process"));
+    }
+
+    @Test
+    public void chooseWorkflowIgnoresAMaterialTypeTemplateThatDoesNotExist() {
+        assertEquals("AEON_Group_Process", AeonProcessCreationWorkflowPlugin.chooseWorkflow(TEMPLATES,
+                Map.of("Manuscript", "Missing"), "Manuscript", "AEON_Group_Process"));
+    }
+
+    @Test
+    public void chooseWorkflowDoesNotApplyAnUntypedMappingToAMissingMaterialType() {
+        // a <workflowName> without type is read with a null key, which a missing material type would otherwise match
+        Map<String, String> special = new HashMap<>();
+        special.put(null, "AEON");
+        assertEquals("AEON_Group_Process",
+                AeonProcessCreationWorkflowPlugin.chooseWorkflow(TEMPLATES, special, null, "AEON_Group_Process"));
+    }
+
+    @Test
+    public void chooseWorkflowFallsBackToTheFirstTemplateWithoutAnExistingDefault() {
+        assertEquals("AEON", AeonProcessCreationWorkflowPlugin.chooseWorkflow(TEMPLATES, Map.of(), null, "Missing"));
+    }
+
+    @Test
+    public void chooseWorkflowIsNullWithoutTemplates() {
+        assertNull(AeonProcessCreationWorkflowPlugin.chooseWorkflow(List.of(), Map.of(), null, "AEON_Group_Process"));
     }
 }

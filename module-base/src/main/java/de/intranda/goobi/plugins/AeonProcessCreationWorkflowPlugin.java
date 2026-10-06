@@ -380,24 +380,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                     }
                 }
 
-                // use configured default template name
-                selectedWorkflow = null;
-                // first, check if a special workflow name was configured for the current type
-                if (specialWorkflowNames.containsKey(materialType)) {
-                    String workflowName = specialWorkflowNames.get(materialType);
-                    if (possibleWorkflows.contains(workflowName)) {
-                        selectedWorkflow = workflowName;
-                    }
-                }
-                // otherwise try to use the default workflow
-                if (selectedWorkflow == null && possibleWorkflows.contains(defaultWorkflowName)) {
-                    selectedWorkflow = defaultWorkflowName;
-                }
-
-                // if it doesn't exist, use first existing template
-                if (selectedWorkflow == null) {
-                    selectedWorkflow = possibleWorkflows.get(0);
-                }
+                // the material type is known now and may call for a template of its own
+                selectedWorkflow = chooseWorkflow(possibleWorkflows, specialWorkflowNames, materialType, defaultWorkflowName);
 
                 String catalogueIdentifier = AeonFieldResolver.resolveString(map, referenceNumberField);
 
@@ -1038,6 +1022,30 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         return titles;
     }
 
+    /**
+     * The process template to preselect: the one configured for the material type, otherwise the configured default, otherwise the first one. A
+     * configured template that does not exist is passed over. The templates arrive sorted by title, so the order alone must never decide while the
+     * default exists.
+     *
+     * A missing material type matches no material type mapping, not even one configured without a type, which is read with a null key.
+     *
+     * @param possibleWorkflows the titles of all process templates
+     * @param specialWorkflowNames the template per material type
+     * @param materialType the material type of the request, null before a request is loaded
+     * @param defaultWorkflowName the configured default template
+     * @return the template to preselect, or null without any template
+     */
+    static String chooseWorkflow(List<String> possibleWorkflows, Map<String, String> specialWorkflowNames, String materialType,
+            String defaultWorkflowName) {
+        if (StringUtils.isNotBlank(materialType) && possibleWorkflows.contains(specialWorkflowNames.get(materialType))) {
+            return specialWorkflowNames.get(materialType);
+        }
+        if (possibleWorkflows.contains(defaultWorkflowName)) {
+            return defaultWorkflowName;
+        }
+        return possibleWorkflows.isEmpty() ? null : possibleWorkflows.get(0);
+    }
+
     // four digits, as the counter of the split processes plugin
     private static String formatPosition(int position) {
         return String.format("%04d", position);
@@ -1149,6 +1157,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
         defaultWorkflowName = config.getString("/processCreation/defaultWorkflowName");
 
+        specialWorkflowNames.clear();
         for (HierarchicalConfiguration hc : config.configurationsAt("/processCreation/workflowName")) {
             String doctype = hc.getString("@type");
             String workflowName = hc.getString(".");
@@ -1212,9 +1221,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         String sql = FilterHelper.criteriaBuilder("", true, null, null, null, true, false);
         // load all process templates
         List<Process> templates = ProcessManager.getProcesses("prozesse.titel", sql, null);
+        possibleWorkflows.clear();
         for (Process p : templates) {
             possibleWorkflows.add(p.getTitel());
         }
+        // preselect the default before any request is loaded; otherwise the dropdown shows the first template by title
+        selectedWorkflow = chooseWorkflow(possibleWorkflows, specialWorkflowNames, null, defaultWorkflowName);
 
         validateConfiguration();
     }
