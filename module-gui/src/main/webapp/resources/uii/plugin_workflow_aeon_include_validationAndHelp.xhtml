@@ -29,6 +29,16 @@
         </h:panelGroup>
         <!-- // VALIDATION MESSAGE -->
 
+        <!-- PROCESS TITLE MESSAGE -->
+        <h:panelGroup
+            layout="block"
+            rendered="#{NavigationForm.workflowPlugin.isMissingForTitle(property)}"
+            styleClass="w-100 font-danger validation-message">
+            <util:icon name="exclamation-circle" class="warning-icon error" />
+            <h:outputText value="#{msgs.plugin_workflow_aeon_processTitleFieldRequired}"/>
+        </h:panelGroup>
+        <!-- // PROCESS TITLE MESSAGE -->
+
         <!-- HELP MESSAGE -->
         <intranda:formHelp content="#{property.helpMessage}" msgFor="input" />
         <!-- // HELP MESSAGE -->
