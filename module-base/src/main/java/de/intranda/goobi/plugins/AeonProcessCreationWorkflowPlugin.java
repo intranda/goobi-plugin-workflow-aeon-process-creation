@@ -1036,6 +1036,40 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         return "single";
     }
 
+    /**
+     * The key of a selected record: the transaction followed by the position of the record among the selected ones. On a batch it prefixes the
+     * properties of the record and is written as its child key metadata, which is how the split processes plugin assigns them to the child
+     * process. The transaction makes it unique across all processes, the position keeps it short and readable within one request.
+     *
+     * @param transaction the transaction identifier of the request
+     * @param position the position among the selected records, starting at 1
+     * @return the key, e.g. 286670_0001
+     */
+    static String recordKey(String transaction, int position) {
+        return transaction.trim() + "_" + formatPosition(position);
+    }
+
+    /**
+     * The titles of the processes created one per record: the process title followed by the position of each record among the selected ones. Unique
+     * only if the process title is, which is why each of them is checked before anything is created.
+     *
+     * @param processTitle the rendered process title
+     * @param count the number of selected records
+     * @return one title per selected record, in their order
+     */
+    static List<String> perRecordTitles(String processTitle, int count) {
+        List<String> titles = new ArrayList<>();
+        for (int position = 1; position <= count; position++) {
+            titles.add(processTitle + "_" + formatPosition(position));
+        }
+        return titles;
+    }
+
+    // four digits, as the counter of the split processes plugin
+    private static String formatPosition(int position) {
+        return String.format("%04d", position);
+    }
+
     public String getOrderAsString(int nextFreeId) {
         String orderNumber;
         if (nextFreeId > 999) {

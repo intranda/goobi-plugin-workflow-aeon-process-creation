@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -115,5 +116,44 @@ public class AeonProcessCreationPluginTest {
     @Test
     public void fallsBackToBatchModeForAnUnknownMode() {
         assertEquals("single", AeonProcessCreationWorkflowPlugin.effectiveCreationMode("bogus", true));
+    }
+
+    // ----- record keys, numbered per request -----
+
+    /*
+     * Each selected record is keyed by the transaction and its position among the selected records. The key prefixes
+     * the record's properties on a batch and is written as its child key metadata, so it has to be unique across all
+     * processes - which the transaction provides - while staying readable within the batch.
+     */
+
+    @Test
+    public void recordKeyJoinsTransactionAndPaddedPosition() {
+        assertEquals("286670_0001", AeonProcessCreationWorkflowPlugin.recordKey("286670", 1));
+    }
+
+    @Test
+    public void recordKeyPadsTwoDigitPositions() {
+        assertEquals("286670_0012", AeonProcessCreationWorkflowPlugin.recordKey("286670", 12));
+    }
+
+    @Test
+    public void recordKeyKeepsPositionsBeyondFourDigits() {
+        assertEquals("286670_10000", AeonProcessCreationWorkflowPlugin.recordKey("286670", 10000));
+    }
+
+    @Test
+    public void recordKeyTrimsTheTransaction() {
+        assertEquals("286670_0001", AeonProcessCreationWorkflowPlugin.recordKey(" 286670 ", 1));
+    }
+
+    @Test
+    public void perRecordTitlesNumberTheProcessesOfOneRequest() {
+        assertEquals(List.of("286670_MUS_0001", "286670_MUS_0002", "286670_MUS_0003"),
+                AeonProcessCreationWorkflowPlugin.perRecordTitles("286670_MUS", 3));
+    }
+
+    @Test
+    public void perRecordTitlesAreEmptyWithoutRecords() {
+        assertEquals(List.of(), AeonProcessCreationWorkflowPlugin.perRecordTitles("286670_MUS", 0));
     }
 }
