@@ -23,13 +23,17 @@
          Required. Replaces the earlier <batchTitleSuffix>, which is now rejected. -->
     <processTitle>{Transaction Identifier}_{Home site}_group</processTitle>
     <!-- Legacy option: true offers a choice between the batch creation above and the creation of one
-         process per record, titled <processTitle>_<orderNumber>. Absent or false hides that choice
-         and always creates a batch process.
+         process per record, titled <processTitle>_0001, <processTitle>_0002, ... in the order of the
+         selected records. These numbers repeat in every request, so the titles are only unique if
+         <processTitle> contains the transaction identifier; a title already in use stops the request
+         before anything is created. Absent or false hides that choice and always creates a batch process.
     <allowMultiProcessCreation>false</allowMultiProcessCreation> -->
-    <!-- Metadata field on each child structure element that receives the order number. It is the key
-         the split processes plugin matches this child's properties on, and it must name the same
-         field as that plugin's childKeyMetadata. The metadata type must exist in the ruleset and be
-         allowed on the child docstruct types. -->
+    <!-- Metadata field on each child structure element that receives the record key: the transaction
+         identifier followed by the position of the record among the selected ones, e.g. 286670_0001.
+         The properties of that record are named with the same key, e.g. 286670_0001_Bib ID. It is the
+         key the split processes plugin matches this child's properties on, so it must name the field of
+         that plugin's <copyProperties prefix="metadata">. The metadata type must exist in the ruleset
+         and be allowed on the child docstruct types. -->
     <childKeyMetadata>_OrderNumber</childKeyMetadata>
     <defaultWorkflowName>Paper workflow</defaultWorkflowName>
     <workflowName type="Audio Recording (DRMS)">Audio files</workflowName>

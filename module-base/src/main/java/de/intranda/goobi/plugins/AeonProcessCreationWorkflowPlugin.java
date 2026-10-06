@@ -3,15 +3,12 @@ package de.intranda.goobi.plugins;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
-import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.lang3.StringUtils;
 import org.goobi.aeon.LoginResponse;
 import org.goobi.aeon.User;
@@ -46,7 +43,6 @@ import de.sub.goobi.helper.enums.StepStatus;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.persistence.managers.MetadataManager;
-import de.sub.goobi.persistence.managers.MySQLHelper;
 import de.sub.goobi.persistence.managers.ProcessManager;
 import de.sub.goobi.persistence.managers.ProjectManager;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
@@ -600,32 +596,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         return processes;
     }
 
-    private int getNextId() {
-        int value = 0;
-
-        String sql = "SELECT max(property_value) FROM properties where property_name = 'OrderNumber' and object_type = 'process'";
-        Connection connection = null;
-        try {
-            connection = MySQLHelper.getInstance().getConnection();
-            String s = new QueryRunner().query(connection, sql, MySQLHelper.resultSetToStringHandler);
-            if (StringUtils.isNotBlank(s)) {
-                value = Integer.parseInt(s);
-            }
-        } catch (SQLException e) {
-            log.error(e);
-        } finally {
-            if (connection != null) {
-                try {
-                    MySQLHelper.closeConnection(connection);
-                } catch (SQLException e) {
-                    // do nothing
-                }
-            }
-        }
-
-        return value + 1;
-    }
-
     /**
      * Copies the value the existing process carries into the field used to display it.
      */
@@ -702,10 +672,14 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_processTitleFieldsEmpty", String.join(", ", title.emptyFields())));
             return false;
         }
-        // one process per record appends the order number, which makes each of those titles unique by itself
-        if ("single".equals(creationMode) && ProcessManager.countProcessTitle(title.title(), null) > 0) {
-            Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_processTitleInUse", title.title()));
-            return false;
+        // one process per record appends the position of the record, which repeats in every request; those titles are only unique if the
+        // configured title is, so each of them is checked before the first process is created
+        List<String> titles = "single".equals(creationMode) ? List.of(title.title()) : perRecordTitles(title.title(), numberOfRecordsToCreate);
+        for (String processTitle : titles) {
+            if (ProcessManager.countProcessTitle(processTitle, null) > 0) {
+                Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_processTitleInUse", processTitle));
+                return false;
+            }
         }
 
         return true;
@@ -816,16 +790,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                 return;
             }
 
-            int nextFreeId = getNextId();
+            int position = 0;
             // create batch mets file
             // root data: id/title = input
             for (AeonRecord r : recordList) {
                 if (r.isAccepted()) {
-                    // The order number is the correlation key: it links a property of the batch to the child process it belongs to. It is
+                    // The record key is the correlation key: it links a property of the batch to the child process it belongs to. It is
                     // deliberately not a predicted child title - the split processes plugin composes the titles itself, from metadata that is not
                     // available here.
-                    String orderNumber = getOrderAsString(nextFreeId);
-                    nextFreeId++;
+                    position++;
+                    String key = recordKey(input, position);
                     // for each selected record: create child docstruct, assign data
                     String recordIdentifier = r.getRecordData().get("uri"); // get uri from properties
                     try {
@@ -837,11 +811,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         // the record fields belong to this record, so they go onto its own docstruct. The fields that
                         // stay process properties keep the per-record prefix - the correlation key - which is the only
                         // way a property can say which record of the batch it came from.
-                        assignRecordFields(r, process, fileformat.getDigitalDocument().getLogicalDocStruct(), prefs, orderNumber + "_");
+                        assignRecordFields(r, process, fileformat.getDigitalDocument().getLogicalDocStruct(), prefs, key + "_");
 
                         //  save the correlation key as metadata, so the split processes plugin can match this child's properties
                         Metadata childKeyMetadata = new Metadata(prefs.getMetadataTypeByName(childKeyMetadataType));
-                        childKeyMetadata.setValue(orderNumber);
+                        childKeyMetadata.setValue(key);
                         fileformat.getDigitalDocument().getLogicalDocStruct().addMetadata(childKeyMetadata);
 
                         if (resourceIDMetadataType != null) {
@@ -865,7 +839,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                 }
             }
 
-            bhelp.EigenschaftHinzufuegen(process, "OrderNumber", getOrderAsString(--nextFreeId));
             try {
                 // save process and fileformat
                 finalizeProcess(process, masterFileformat);
@@ -876,8 +849,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         } else {
             // create a process for each record
 
+            // the same titles validateSelection checked, one per accepted record in list order
+            List<String> titles = perRecordTitles(getProcessTitle(), (int) recordList.stream().filter(AeonRecord::isAccepted).count());
+            int position = 0;
             for (AeonRecord rec : recordList) {
                 if (rec.isAccepted()) {
+                    position++;
                     // create process
 
                     Process process = new Process();
@@ -911,12 +888,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         assignTransactionFields(process, recordStruct, prefs);
                         assignRecordFields(rec, process, recordStruct, prefs, "");
 
-                        int nextFreeId = getNextId();
-                        String orderNumber = getOrderAsString(nextFreeId);
-
-                        process.setTitel(getProcessTitle() + "_" + orderNumber);
+                        process.setTitel(titles.get(position - 1));
                         rec.setProcessTitle(process.getTitel());
-                        bhelp.EigenschaftHinzufuegen(process, "OrderNumber", orderNumber);
 
                         // save process and fileformat
                         finalizeProcess(process, fileformat);
@@ -1068,20 +1041,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     // four digits, as the counter of the split processes plugin
     private static String formatPosition(int position) {
         return String.format("%04d", position);
-    }
-
-    public String getOrderAsString(int nextFreeId) {
-        String orderNumber;
-        if (nextFreeId > 999) {
-            orderNumber = String.valueOf(nextFreeId);
-        } else if (nextFreeId > 99) {
-            orderNumber = "0" + nextFreeId;
-        } else if (nextFreeId > 9) {
-            orderNumber = "00" + nextFreeId;
-        } else {
-            orderNumber = "000" + nextFreeId;
-        }
-        return orderNumber;
     }
 
     /**
