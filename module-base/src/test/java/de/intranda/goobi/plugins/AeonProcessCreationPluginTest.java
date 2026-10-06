@@ -8,13 +8,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import de.intranda.goobi.plugins.aeon.AeonRecord;
 
 public class AeonProcessCreationPluginTest {
 
@@ -37,43 +33,6 @@ public class AeonProcessCreationPluginTest {
     public void testVersion() throws IOException {
         String s = "xyz";
         assertNotNull(s);
-    }
-
-    @Test
-    public void appendsTheConfiguredBatchTitleSuffix() {
-        assertEquals("txn123_music_group", AeonProcessCreationWorkflowPlugin.composeBatchTitle("txn123_music", "_group"));
-    }
-
-    @Test
-    public void leavesTheBatchTitleAloneWithoutASuffix() {
-        assertEquals("txn123_music", AeonProcessCreationWorkflowPlugin.composeBatchTitle("txn123_music", null));
-    }
-
-    @Test
-    public void leavesTheBatchTitleAloneWithABlankSuffix() {
-        assertEquals("txn123_music", AeonProcessCreationWorkflowPlugin.composeBatchTitle("txn123_music", "   "));
-    }
-
-    @Test
-    public void trimsWhitespaceAroundTheSuffix() {
-        assertEquals("txn123_music_group", AeonProcessCreationWorkflowPlugin.composeBatchTitle("txn123_music", "  _group  "));
-    }
-
-    @Test
-    public void batchTitlePreviewCarriesTheConfiguredSuffix() {
-        assertEquals("txn123_music_group",
-                AeonProcessCreationWorkflowPlugin.composeBatchTitle(List.of(recordTitled("txn123_music")), "_group"));
-    }
-
-    @Test
-    public void batchTitlePreviewTakesTheTitleOfTheFirstRecord() {
-        assertEquals("txn123_music_group", AeonProcessCreationWorkflowPlugin
-                .composeBatchTitle(List.of(recordTitled("txn123_music"), recordTitled("txn123_music")), "_group"));
-    }
-
-    @Test
-    public void batchTitlePreviewIsBlankWithoutRecords() {
-        assertEquals("", AeonProcessCreationWorkflowPlugin.composeBatchTitle(Collections.<AeonRecord> emptyList(), "_group"));
     }
 
     @Test
@@ -156,11 +115,5 @@ public class AeonProcessCreationPluginTest {
     @Test
     public void fallsBackToBatchModeForAnUnknownMode() {
         assertEquals("single", AeonProcessCreationWorkflowPlugin.effectiveCreationMode("bogus", true));
-    }
-
-    private static AeonRecord recordTitled(String processTitle) {
-        AeonRecord record = new AeonRecord();
-        record.setProcessTitle(processTitle);
-        return record;
     }
 }

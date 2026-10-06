@@ -11,14 +11,20 @@
 
   <processCreation>
     <batchDocstruct>BatchObject</batchDocstruct>
-    <!-- Optional suffix appended to the title of a batch process, marking it as one that will be
-         split into child processes. The split processes plugin strips it again when it derives
-         the child titles, so the strip attribute of its {parent} title part and this value
-         must agree.
-         Absent or empty leaves the batch title unchanged. -->
-    <batchTitleSuffix>_group</batchTitleSuffix>
+    <!-- Title of the created process. Fixed text, with placeholders in braces naming a <transaction>
+         or <properties> field below by its <title>. A placeholder stands for the value the field holds
+         when the processes are created, so it also picks up what the operator typed into the field.
+         Characters Goobi does not allow in a process title are replaced by an underscore in these
+         values; the fixed text is kept as written.
+         If a referenced field is empty, nothing is created and the empty fields are named. A property
+         field that does not apply to the material type of the request counts as empty.
+         The fixed '_group' at the end marks the process as one that will be split into child
+         processes; the stripParentSuffix of the split processes plugin must remove exactly that.
+         Required. Replaces the earlier <batchTitleSuffix>, which is now rejected. -->
+    <processTitle>{Transaction Identifier}_{Home site}_group</processTitle>
     <!-- Legacy option: true offers a choice between the batch creation above and the creation of one
-         process per record. Absent or false hides that choice and always creates a batch process.
+         process per record, titled <processTitle>_<orderNumber>. Absent or false hides that choice
+         and always creates a batch process.
     <allowMultiProcessCreation>false</allowMultiProcessCreation> -->
     <!-- Metadata field on each child structure element that receives the order number. It is the key
          the split processes plugin matches this child's properties on, and it must name the same
@@ -39,13 +45,8 @@
     in the flat field shippingOption, which would be configured as:
     <materialTypeField>shippingOption</materialTypeField> -->
 
-    <!-- Name of the aeon field holding the home site. Its value becomes the repository part of the
-    generated process title. Default: customFieldValues/HomeSite
-    Older aeon versions kept it in the flat field itemInfo2:
-    <homeSiteField>itemInfo2</homeSiteField> -->
-
-    <!-- Name of the aeon field holding the transaction number. Its value opens the generated process
-    title. Default: transactionNumber
+    <!-- Name of the aeon field holding the transaction number. A request without one is rejected, as
+    it could not be recognised when it is sent a second time. Default: transactionNumber
     <transactionNumberField>transactionNumber</transactionNumberField> -->
 
     <!-- Name of the aeon field holding the patron user name, used to look up last name and mail
@@ -108,6 +109,15 @@
       <help>This is my description for the field so that everyone gets some help.</help>
       <validation strict="true">\d+</validation>
       <message>Your content does not follow our validation guidelines</message>
+    </field>
+    <!-- Part of the process title above. Editable, because aeon does not always deliver a home site,
+    and an empty one stops the request until the operator fills it in. -->
+    <field aeon="customFieldValues/HomeSite">
+      <title>Home site</title>
+      <type>input</type>
+      <variable place="process">Home site</variable>
+      <value></value>
+      <help>Repository the request belongs to. Part of the process title.</help>
     </field>
     <field aeon="lastName">
       <title>Lastname (non-Yale only)</title>

@@ -34,6 +34,7 @@ import de.intranda.goobi.plugins.aeon.AeonMetadataWriter;
 import de.intranda.goobi.plugins.aeon.AeonProcessValues;
 import de.intranda.goobi.plugins.aeon.AeonProperty;
 import de.intranda.goobi.plugins.aeon.AeonRecord;
+import de.intranda.goobi.plugins.aeon.AeonTitleTemplate;
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.forms.HelperForm;
@@ -140,7 +141,11 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private Map<String, String> specialWorkflowNames = new HashMap<>();
     private String opacName;
     private String batchDocstruct;
-    private String batchTitleSuffix;
+    // the configured process title, e.g. {Transaction Identifier}_{Home site}_group. Null when the configuration does
+    // not parse, which validateConfiguration reports
+    private String processTitleConfiguration;
+    private AeonTitleTemplate processTitleTemplate;
+    private boolean hasLegacyBatchTitleSuffix;
 
     // stands in for the part of a process title that is only decided when the process is created
     private static final String UNKNOWN_TITLE_PART = "\u2026";
@@ -149,11 +154,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private String resourceIDMetadataType;
 
     // names of the AEON response fields this plugin needs to know by itself, as opposed to the ones the configured
-    // <field> elements point at. All are configurable because AEON renames and relocates them: the material type and
-    // the home site were once the flat fields shippingOption and itemInfo2 and now live inside the nested
-    // customFieldValues map. A slash separated path addresses a field inside a nested map.
+    // <field> elements point at. All are configurable because AEON renames and relocates them: the material type was
+    // once the flat field shippingOption and now lives inside the nested customFieldValues map. A slash separated path
+    // addresses a field inside a nested map.
     private String materialTypeField;
-    private String homeSiteField;
     private String usernameField;
     private String referenceNumberField;
     private String transactionNumberField;
@@ -360,9 +364,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                     Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_materialTypeMissing", materialTypeField));
                 }
 
-                // the transaction number opens every generated process title, so an empty one would produce unusable
-                // titles and break the duplicate detection that matches on them. It is the one field the request
-                // cannot go on without
+                // the transaction number is what a later request is checked against, so a request without one could
+                // be created twice. It is the one field the request cannot go on without
                 String transactionNumber = AeonFieldResolver.resolveString(map, transactionNumberField);
                 if (StringUtils.isBlank(transactionNumber)) {
                     Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_transactionNumberMissing", transactionNumberField));
@@ -466,16 +469,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                             prop.setOverwriteMainField(false);
                         }
 
-                        // Process title: Job#-repository-AeonTN e.g 999-music-12345. The job# is an auto generated one-up number.
-                        // Repository pulled from Aeon field - Site
-                        // AeonTN pulled from Aeon field - transactionNumber
-
-                        // get next free id
-                        String repository = Optional.ofNullable(AeonFieldResolver.resolveString(map, homeSiteField)).orElse("unknown");
-
-                        String generatedTitle = transactionNumber + "_" + repository;
-                        aeonRecord.setProcessTitle(generatedTitle);
-
                         // copy properties
                         for (AeonProperty p : propertyFields) {
                             if (appliesToMaterialType(p)) {
@@ -487,10 +480,12 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                             }
                         }
 
-                        //  check for duplicates in active projects, load the processes with the same transaction number
-                        List<Process> processes =
-                                ProcessManager.getProcesses("prozesse.erstellungsdatum desc", "prozesse.titel like \"%" + generatedTitle + "%\"",
-                                        null);
+                        // check for duplicates: the processes carrying the identifier of this record. Found by the
+                        // identifier itself rather than by the process title, which is configurable and need not
+                        // contain anything that identifies a record
+                        boolean isIls = "ils".matches(overview.get("recordType"));
+                        List<Process> processes = isIls ? processesCarrying(ilsBibIdField, overview.get("bibId"))
+                                : processesCarrying(aspaceResourceIDField, overview.get("uri"));
 
                         for (Process other : processes) {
                             // check if properties matches
@@ -502,7 +497,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                             AeonProcessValues values =
                                     new AeonProcessValues(MetadataManager.getMetadata(other.getId()), other.getProperties());
 
-                            if ("ils".matches(overview.get("recordType"))) {
+                            if (isIls) {
                                 isDuplicate = ilsBibIdField != null && ilsVolumeNumberField != null
                                         && values.first(ilsBibIdField).equals(overview.get("bibId"))
                                         && values.first(ilsVolumeNumberField).equals(overview.get("volume"));
@@ -575,6 +570,34 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             }
         }
         return false;
+    }
+
+    /**
+     * The processes that may carry the given value in the given field, newest first, read from whichever store the field is configured for.
+     *
+     * Only a candidate list: the metadata index matches the value as a substring, so the caller compares exactly. A field written as metadata
+     * onto a child docstruct of a batch is not indexed, so a batch that has not been split yet is not found, only the processes split off it.
+     */
+    private List<Process> processesCarrying(AeonProperty field, String value) {
+        if (field == null || StringUtils.isBlank(value)) {
+            return Collections.emptyList();
+        }
+        List<Integer> ids;
+        if (field.isMetadata()) {
+            ids = MetadataManager.getProcessesWithMetadata(field.getVariableName(), value);
+        } else {
+            ids = ProcessManager.getIdsForFilter("WHERE prozesse.ProzesseID IN (SELECT object_id FROM properties WHERE object_type = 'process'"
+                    + " AND property_name = ? AND property_value = ?)", field.getVariableName(), value);
+        }
+        List<Process> processes = new ArrayList<>();
+        for (Integer id : new LinkedHashSet<>(ids)) {
+            Process process = ProcessManager.getProcessById(id);
+            if (process != null) {
+                processes.add(process);
+            }
+        }
+        processes.sort(Comparator.comparing(Process::getErstellungsdatum, Comparator.nullsLast(Comparator.reverseOrder())));
+        return processes;
     }
 
     private int getNextId() {
@@ -672,6 +695,19 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             }
         }
 
+        // the title is built from fields the operator can still edit, so it is only checked now. Checked here rather
+        // than in createProcesses alone, so that the summary screen never announces a title that cannot be created
+        AeonTitleTemplate.Result title = renderProcessTitle();
+        if (!title.isComplete()) {
+            Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_processTitleFieldsEmpty", String.join(", ", title.emptyFields())));
+            return false;
+        }
+        // one process per record appends the order number, which makes each of those titles unique by itself
+        if ("single".equals(creationMode) && ProcessManager.countProcessTitle(title.title(), null) > 0) {
+            Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_processTitleInUse", title.title()));
+            return false;
+        }
+
         return true;
     }
 
@@ -736,7 +772,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             bhelp.EigenschaftHinzufuegen(process, "Template", processTemplate.getTitel());
             bhelp.EigenschaftHinzufuegen(process, "TemplateID", "" + processTemplate.getId());
 
-            process.setTitel(getBatchProcessTitle());
+            process.setTitel(getProcessTitle());
 
             Fileformat masterFileformat = null;
             try {
@@ -878,7 +914,7 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         int nextFreeId = getNextId();
                         String orderNumber = getOrderAsString(nextFreeId);
 
-                        process.setTitel(rec.getProcessTitle() + "_" + orderNumber);
+                        process.setTitel(getProcessTitle() + "_" + orderNumber);
                         rec.setProcessTitle(process.getTitel());
                         bhelp.EigenschaftHinzufuegen(process, "OrderNumber", orderNumber);
 
@@ -918,34 +954,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     }
 
     /**
-     * Appends the configured suffix to the title of a batch process. The suffix marks a process that is meant to be split into child processes; the
-     * split plugin strips it again when it derives the child titles.
-     *
-     * @param recordTitle the composed title of the first record of the batch
-     * @param suffix the configured suffix, may be null or blank
-     */
-    static String composeBatchTitle(String recordTitle, String suffix) {
-        if (StringUtils.isBlank(suffix)) {
-            return recordTitle;
-        }
-        return recordTitle + suffix.trim();
-    }
-
-    /**
-     * Appends the configured suffix to the title of the batch process the given records will be combined into. All records of a transaction carry
-     * the same title, so the first one decides.
-     *
-     * @param records the records of the current transaction, may be empty
-     * @param suffix the configured suffix, may be null or blank
-     */
-    static String composeBatchTitle(List<AeonRecord> records, String suffix) {
-        if (records.isEmpty()) {
-            return "";
-        }
-        return composeBatchTitle(records.get(0).getProcessTitle(), suffix);
-    }
-
-    /**
      * The title of a process created for a single record. Its order number is drawn from the database when the process is created, so beforehand
      * the title can only be shown with that part marked as still open. Passing the incomplete title off as the final one would be a claim this
      * plugin cannot keep.
@@ -961,11 +969,41 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     }
 
     /**
-     * The title of the batch process the accepted records are combined into, suffix included. Creation reads it from here as well, so what the
-     * summary screen announces and what is created cannot drift apart.
+     * The configured process title, rendered from the current values of the fields it refers to. Creation reads it from here as well, so what the
+     * summary screen announces and what is created cannot drift apart. In per record creation mode each process appends its order number.
+     *
+     * Incomplete while a referenced field is empty; validateSelection keeps such a title from reaching the summary screen or a process.
+     *
+     * @return the process title, without the order number appended in per record creation mode
      */
-    public String getBatchProcessTitle() {
-        return composeBatchTitle(recordList, batchTitleSuffix);
+    public String getProcessTitle() {
+        return renderProcessTitle().title();
+    }
+
+    private AeonTitleTemplate.Result renderProcessTitle() {
+        if (processTitleTemplate == null) {
+            // a configuration error, reported by validateConfiguration and blocking every request
+            return new AeonTitleTemplate.Result("", Collections.emptyList());
+        }
+        return processTitleTemplate.render(this::titleFieldValue, ConfigurationHelper.getInstance().getProcessTitleReplacementRegex());
+    }
+
+    /**
+     * The value a title placeholder stands for: the transaction or property field with that title, as it would be stored. A property field that
+     * does not apply to the current material type has no value, as it is left out everywhere else as well.
+     */
+    private String titleFieldValue(String fieldTitle) {
+        for (AeonProperty field : transactionFields) {
+            if (fieldTitle.equals(field.getTitle())) {
+                return field.getExportValue();
+            }
+        }
+        for (AeonProperty field : propertyFields) {
+            if (fieldTitle.equals(field.getTitle())) {
+                return appliesToMaterialType(field) ? field.getExportValue() : null;
+            }
+        }
+        return null;
     }
 
     /**
@@ -975,7 +1013,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
      * The decision needs the creation state of the request, which the xhtml has no other way to pass.
      */
     public String processTitleFor(AeonRecord record) {
-        return composeRecordTitle(record.getProcessTitle(), "saved".equals(overviewMode));
+        boolean processCreated = "saved".equals(overviewMode);
+        return composeRecordTitle(processCreated ? record.getProcessTitle() : getProcessTitle(), processCreated);
     }
 
     public void setCreationMode(String creationMode) {
@@ -1125,7 +1164,10 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
         opacName = config.getString("/processCreation/opacName");
         batchDocstruct = config.getString("/processCreation/batchDocstruct");
-        batchTitleSuffix = config.getString("/processCreation/batchTitleSuffix", "");
+        processTitleConfiguration = config.getString("/processCreation/processTitle", null);
+        // replaced by fixed text at the end of processTitle. Read only to report it, as ignoring it would silently
+        // drop the suffix the split processes plugin strips again
+        hasLegacyBatchTitleSuffix = !config.configurationsAt("/processCreation/batchTitleSuffix").isEmpty();
         allowMultiProcessCreation = config.getBoolean("/processCreation/allowMultiProcessCreation", false);
         // a mode chosen before the switch was turned off must not outlive it
         creationMode = effectiveCreationMode(creationMode, allowMultiProcessCreation);
@@ -1135,7 +1177,6 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         // no default: an absent element says AEON delivers no material type, which switches the restrictions off
         // rather than silently reinstating a field name AEON has since dropped
         materialTypeField = config.getString("/processCreation/materialTypeField", "");
-        homeSiteField = config.getString("/processCreation/homeSiteField", "site");
         usernameField = config.getString("/processCreation/usernameField", "username");
         referenceNumberField = config.getString("/processCreation/referenceNumberField", "referenceNumber");
         transactionNumberField = config.getString("/processCreation/transactionNumberField", "transactionNumber");
@@ -1229,6 +1270,33 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         // and read as "no existing process" for every request
         if (StringUtils.isBlank(transactionFieldName)) {
             configurationErrors.add(Helper.getTranslation("plugin_workflow_aeon_transactionFieldMissing"));
+        }
+
+        validateProcessTitle();
+    }
+
+    /**
+     * The process title template must parse, and each of its placeholders must name a transaction or property field. A placeholder naming no field
+     * would otherwise read as permanently empty and block every request with a message about a field the operator cannot find.
+     */
+    private void validateProcessTitle() {
+        processTitleTemplate = null;
+        if (hasLegacyBatchTitleSuffix) {
+            configurationErrors.add(Helper.getTranslation("plugin_workflow_aeon_batchTitleSuffixReplaced"));
+        }
+        try {
+            processTitleTemplate = AeonTitleTemplate.parse(processTitleConfiguration);
+        } catch (IllegalArgumentException e) {
+            configurationErrors.add(Helper.getTranslation("plugin_workflow_aeon_processTitleInvalid", e.getMessage()));
+            return;
+        }
+        Set<String> fieldTitles = new HashSet<>();
+        transactionFields.forEach(field -> fieldTitles.add(field.getTitle()));
+        propertyFields.forEach(field -> fieldTitles.add(field.getTitle()));
+        for (String reference : processTitleTemplate.references()) {
+            if (!fieldTitles.contains(reference)) {
+                configurationErrors.add(Helper.getTranslation("plugin_workflow_aeon_processTitleUnknownField", reference));
+            }
         }
     }
 

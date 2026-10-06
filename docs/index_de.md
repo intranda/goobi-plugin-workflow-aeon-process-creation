@@ -61,14 +61,14 @@ Sofern mindestens ein Datensatz ausgewählt wurde und keine unerfüllten strikte
 
 Hier werden im linken Bereich noch einmal diejenigen Datensätze aufgeführt, für die Vorgänge in Goobi angelegt wurden. Im rechten Bereich steht die Möglichkeit zur Verfügung einen Laufzettel für alle erzeugten Vorgänge zu generieren und herunterzuladen, wo die zugehörigen Vorgänge alle innerhalb eines gemeinsamen Batches zusammengefasst aufgeführt werden.
 
-Im linken Bereich werden außerdem die Vorgangstitel benannt. Vor dem Anlegen der Vorgänge wird im Modus für Batch-Vorgänge der einzelne Titel des Batch-Vorgangs einschließlich `<batchTitleSuffix>` angezeigt und kein Titel pro Datensatz: die Kindvorgänge, in die der Batch später aufgeteilt wird, werden hier nicht benannt, da ihre Titel erst beim Aufteilen zusammengesetzt werden. Wird für jeden Datensatz ein eigener Vorgang angelegt, endet jeder Titel auf `_…` als Platzhalter für die Ordnungsnummer, die erst beim Anlegen des Vorgangs vergeben wird. Sobald die Vorgänge existieren, werden die tatsächlichen Titel angezeigt.
+Im linken Bereich werden außerdem die Vorgangstitel benannt. Vor dem Anlegen der Vorgänge wird im Modus für Batch-Vorgänge der einzelne Titel des Batch-Vorgangs gemäß `<processTitle>` angezeigt und kein Titel pro Datensatz: die Kindvorgänge, in die der Batch später aufgeteilt wird, werden hier nicht benannt, da ihre Titel erst beim Aufteilen zusammengesetzt werden. Wird für jeden Datensatz ein eigener Vorgang angelegt, endet jeder Titel auf `_…` als Platzhalter für die Ordnungsnummer, die erst beim Anlegen des Vorgangs vergeben wird. Sobald die Vorgänge existieren, werden die tatsächlichen Titel angezeigt.
 
 
 ## Übergabe an das Plugin zum Aufteilen von Vorgängen
 
 Im Batch-Modus erzeugt dieses Plugin einen Vorgang, der pro ausgewähltem Datensatz ein Kind-Strukturelement enthält. Das Step-Plugin `intranda_step_split_processes` teilt diesen später in einen Vorgang pro Kindelement auf.
 
-Die Titel der Teilvorgänge werden **nicht** hier festgelegt. Sie werden beim Aufteilen aus konfigurierten Titelbestandteilen zusammengesetzt, da die zugrunde liegenden Metadaten erst in die METS-Datei des Batches geladen werden und bei dessen Erstellung noch nicht vorliegen.
+Die Titel der Teilvorgänge werden **nicht** hier festgelegt. Sie werden beim Aufteilen aus dem Batch-Titel gebildet, von dem das `stripParentSuffix` des Aufteilungs-Plugins entfernt wird, gefolgt von einem Zähler oder einem Metadatenwert, da die zugrunde liegenden Metadaten erst in die METS-Datei des Batches geladen werden und bei dessen Erstellung noch nicht vorliegen.
 
 Dieses Plugin liefert die Verknüpfung: Jedes Kind-Strukturelement erhält seine Ordnungsnummer in dem unter `<childKeyMetadata>` genannten Metadatenfeld, und die Eigenschaften des Batch-Vorgangs werden als `<Ordnungsnummer>_<Eigenschaftsname>` benannt. Das aufteilende Plugin liest diesen Schlüssel aus jedem Kindelement und entscheidet damit, welche Eigenschaften zu welchem Teilvorgang gehören.
 
@@ -77,9 +77,11 @@ Beide Plugins müssen daher übereinstimmend konfiguriert werden:
 | AEON | Vorgänge aufteilen |
 |------|--------------------|
 | `<childKeyMetadata>_OrderNumber</childKeyMetadata>` | `<childKeyMetadata>_OrderNumber</childKeyMetadata>` |
-| `<batchTitleSuffix>_group</batchTitleSuffix>` | `<title name="{parent}" strip="_group"/>` |
+| `<processTitle>{Transaction Identifier}_group</processTitle>` | `<stripParentSuffix>_group</stripParentSuffix>` |
 
 Keines der beiden Plugins kann die Konfiguration des anderen prüfen.
+
+> **Hinweis zur Aktualisierung:** `<batchTitleSuffix>` und `<homeSiteField>` werden durch `<processTitle>` ersetzt. Der bisherige Standardtitel entspricht `<processTitle>{Transaction Identifier}_{Home site}_group</processTitle>` zusammen mit einem `<transaction>`-Feld mit dem Titel `Home site`, das `customFieldValues/HomeSite` liest - mit dem Unterschied, dass ein leerer Home Site die Anfrage jetzt anhält, statt zu `unknown` zu werden. Eine Konfiguration, die noch `<batchTitleSuffix>` enthält oder in der `<processTitle>` fehlt, wird als Fehler gemeldet, und es wird kein Vorgang angelegt, bis sie korrigiert ist. `<homeSiteField>` wird einfach ignoriert.
 
 > **Hinweis zur Aktualisierung:** Diese Version ersetzt das frühere `<processTitleMetadata>`, das einen vorab berechneten Titel des Teilvorgangs geschrieben hat. Die beiden Plugins müssen gemeinsam ausgeliefert werden, zu einem Zeitpunkt, an dem kein Batch auf das Aufteilen wartet. Ein von der früheren Version erzeugter Batch trägt Eigenschaftsnamen mit dem vorab berechneten Titel als Präfix, nach dem das neue Plugin nicht sucht; seine Eigenschaften würden stillschweigend nicht kopiert.
 
@@ -99,7 +101,7 @@ Die Konfiguration des Plugins erfolgt über die Konfigurationsdatei `plugin_intr
     <processCreation>
         <workflowName>digitisation on demand</workflowName>
         <opacName>Metadata cloud</opacName>
-        <homeSiteField>customFieldValues/HomeSite</homeSiteField>
+        <processTitle>{Transaction Identifier}_group</processTitle>
     </processCreation>
 
     <transaction>
@@ -254,15 +256,14 @@ Zwei seiner Parameter benennen AEON-Felder und keine Goobi-Einstellungen:
 Parameter           |  Erläuterung
 ------------------- | -----------------------------------------------------
 `materialTypeField` | Name des AEON-Feldes, das den Materialtyp enthält. Sein Wert wird mit dem Attribut `type` der Felder in `<properties>` verglichen und entscheidet damit, welche Eigenschaften angezeigt und validiert werden. Standardmäßig leer, da AEON keinen Materialtyp mehr liefert: es gilt dann kein auf einen Materialtyp beschränktes Feld, sodass die erzeugten Vorgänge allein die unbeschränkten Eigenschaften tragen, und es wird nichts gemeldet - das ist das beabsichtigte Verhalten und kein Fehler. Der Parameter ist nur dort zu setzen, wo AEON einen Materialtyp liefert; ein hier benanntes, von AEON aber leer gelassenes Feld wird als Hinweis gemeldet und die Anfrage fortgesetzt.
-`homeSiteField`     | Name des AEON-Feldes, das den Home Site enthält. Sein Wert bildet den Repository-Teil des erzeugten Vorgangstitels. Standardwert: `customFieldValues/HomeSite`.
-`transactionNumberField` | Name des AEON-Feldes, das die Transaktionsnummer enthält. Sein Wert bildet den Anfang des erzeugten Vorgangstitels. Enthält der AEON-Record keine Transaktionsnummer, wird die Anfrage mit einer Fehlermeldung abgewiesen, da kein brauchbarer Vorgangstitel gebildet werden kann. Standardwert: `transactionNumber`.
+`transactionNumberField` | Name des AEON-Feldes, das die Transaktionsnummer enthält. Enthält der AEON-Record keine Transaktionsnummer, wird die Anfrage mit einer Fehlermeldung abgewiesen, da eine Anfrage ohne sie bei erneutem Senden nicht wiedererkannt werden könnte. Standardwert: `transactionNumber`.
 `usernameField`     | Name des AEON-Feldes, das den Benutzernamen des Patrons enthält. Damit werden Nachname und Mailadresse am AEON-Endpunkt `Users` nachgeschlagen. Standardwert: `username`.
 `referenceNumberField` | Name des AEON-Feldes, das den Barcode enthält, mit dem der konfigurierte Katalog abgefragt wird. Standardwert: `referenceNumber`.
-`batchTitleSuffix`  | Optionales Suffix, das an den Titel eines Batch-Vorgangs angehängt wird, zum Beispiel `_group`, um ihn als Vorgang zu kennzeichnen, der in Teilvorgänge aufgeteilt werden soll. Das Plugin zum Aufteilen von Vorgängen entfernt es beim Ableiten der Titel der Teilvorgänge wieder, daher müssen dieser Wert und das `strip`-Attribut jenes Plugins übereinstimmen. Fehlt der Wert oder ist er leer, bleibt der Batch-Titel unverändert. Gilt nur für die Batch-Erstellung; Vorgänge, die einzeln pro Datensatz erzeugt werden, werden nie aufgeteilt und sind davon nicht betroffen.
+`processTitle`      | Pflichtangabe. Titel des erzeugten Vorgangs: fester Text mit Platzhaltern in geschweiften Klammern, die jeweils ein Feld aus `<transaction>` oder `<properties>` über seinen `<title>` benennen, zum Beispiel `{Transaction Identifier}_{Home site}_group`. Ein Platzhalter steht für den Wert, den das Feld beim Anlegen der Vorgänge hat, also einschließlich der Eingaben des Bearbeiters. In den Werten werden Zeichen, die Goobi in Vorgangstiteln nicht erlaubt, durch einen Unterstrich ersetzt; der feste Text bleibt wie angegeben. Ist ein referenziertes Feld leer, wird nichts angelegt und die leeren Felder werden genannt; ein Eigenschaftsfeld, das für den Materialtyp der Anfrage nicht gilt, zählt als leer. Ein Batch-Titel, den bereits ein anderer Vorgang trägt, wird ebenfalls abgewiesen. Ein Platzhalter, der kein Feld benennt, oder unvollständige Klammern werden als Konfigurationsfehler gemeldet. Bei der Batch-Erstellung kennzeichnet ein festes Suffix wie `_group` den Vorgang zum Aufteilen und muss zum `stripParentSuffix` des Aufteilungs-Plugins passen. Vorgänge, die einzeln pro Datensatz angelegt werden, erhalten zusätzlich `_<Ordnungsnummer>`.
 `allowMultiProcessCreation` | Veraltete Option. Mit `true` wird auf der Anfrageseite die Wahl zwischen der Batch-Erstellung und dem Anlegen eines Vorgangs pro Datensatz angeboten. Standardwert `false`: die Auswahl ist ausgeblendet und das Plugin legt immer einen Batch-Vorgang an.
 `childKeyMetadata`  | Name des Metadatenfeldes, das auf jedes Kind-Strukturelement eines Batches geschrieben wird und dessen Ordnungsnummer erhält. Es ist der Korrelationsschlüssel, anhand dessen das Plugin zum Aufteilen von Vorgängen die Eigenschaften den Kindelementen zuordnet, und es muss dasselbe Feld benennen wie das `childKeyMetadata` jenes Plugins. Der Metadatentyp muss im Regelsatz vorhanden und für die Kind-Docstruct-Typen zugelassen sein.
 
-Alle akzeptieren einen mit Schrägstrichen getrennten Pfad, um ein Feld innerhalb einer verschachtelten Map anzusprechen. Ältere AEON-Versionen hielten den Materialtyp und den Home Site in den flachen Feldern `shippingOption` und `itemInfo2`, was als `<materialTypeField>shippingOption</materialTypeField>` und `<homeSiteField>itemInfo2</homeSiteField>` zu konfigurieren wäre.
+Alle akzeptieren einen mit Schrägstrichen getrennten Pfad, um ein Feld innerhalb einer verschachtelten Map anzusprechen. Ältere AEON-Versionen hielten den Materialtyp im flachen Feld `shippingOption`, was als `<materialTypeField>shippingOption</materialTypeField>` zu konfigurieren wäre.
 
 Anschließend erfolgt die Konfiguration der angezeigten und importierbaren Felder. Dies ist in 3 Bereiche aufgeteilt. Der Bereich `<transaction>` enthält diejenigen Felder, die aus dem AEON-Record gelesen werden. Der Bereich `<properties>` enthält frei definierbare Eigenschaften, die zu den zu erzeugenden Vorgängen gehören. Und der Bereich `<processes>` enthält die Felder, die bei der Abfrage der Daten aus der Metadata Cloud bezogen wurden.
 
@@ -328,6 +329,12 @@ Zwei Einschränkungen sollte man kennen, bevor eine bestehende Installation umge
 * **Vorgänge, die vor der Umstellung angelegt wurden, tragen Eigenschaften und keine Metadaten.** Die
   Dublettenprüfung und die Prozesssuche finden sie nicht, sodass eine erneut angefragte alte Transaktion
   nicht als Dublette gemeldet wird und ein alter Vorgang nicht über das Plugin storniert werden kann.
+* **Datensätze werden über ihren Identifier als Duplikat erkannt, nicht über den Vorgangstitel.** Ein
+  Datensatz gilt als bereits digitalisiert, wenn ein Vorgang seine `uri` (ArchivesSpace) bzw. seine
+  `bibId` und `volume` (ILS) trägt, in dem Speicher, für den diese `<processes>`-Felder konfiguriert
+  sind. Das gilt über alle Transaktionen hinweg, nicht nur für die aktuelle. Ein noch nicht
+  aufgeteilter Batch wird aus dem im nächsten Punkt genannten Grund nicht gefunden, die daraus
+  aufgeteilten Vorgänge schon.
 * **Im Batch-Modus sind Metadaten je Datensatz nicht durchsuchbar.** Die Werte jedes Datensatzes werden
   auf den Dokumentstruktur-Knoten dieses Datensatzes geschrieben, der ein Kind des Batch-Objekts ist.
   Goobi indiziert nur den obersten Dokumentstruktur-Knoten, und `$(meta....)` löst nur gegen die oberste
