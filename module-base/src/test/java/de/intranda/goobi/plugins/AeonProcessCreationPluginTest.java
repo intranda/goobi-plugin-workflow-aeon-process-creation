@@ -7,14 +7,20 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import de.intranda.goobi.plugins.aeon.AeonProperty;
+import de.intranda.goobi.plugins.aeon.AeonTitleTemplate;
 
 public class AeonProcessCreationPluginTest {
 
@@ -205,5 +211,76 @@ public class AeonProcessCreationPluginTest {
     @Test
     public void chooseWorkflowIsNullWithoutTemplates() {
         assertNull(AeonProcessCreationWorkflowPlugin.chooseWorkflow(List.of(), Map.of(), null, "AEON_Group_Process"));
+    }
+
+    // ----- marking the empty fields the process title needs -----
+
+    /*
+     * An empty field the title template refers to blocks process creation. The operator sees that at the field itself
+     * rather than only when moving on, so the marker has to name exactly the field a placeholder resolves to: a
+     * transaction field before a property field, a property field only where it applies to the material type, and never
+     * a per record property that merely shares the title.
+     */
+
+    private static final AeonTitleTemplate TITLE = AeonTitleTemplate.parse("{Transaction Identifier}_{Home site}_{Format}");
+
+    private static AeonProperty field(String title, String value, String materialType) throws Exception {
+        XMLConfiguration config = new XMLConfiguration();
+        config.setExpressionEngine(new XPathExpressionEngine());
+        String restriction = materialType == null ? "" : " type=\"" + materialType + "\"";
+        config.load(new StringReader("<config_plugin><field" + restriction + "><title>" + title + "</title><value>" + value
+                + "</value></field></config_plugin>"));
+        return new AeonProperty(config.configurationsAt("/field").get(0), null);
+    }
+
+    @Test
+    public void marksAnEmptyTransactionFieldTheTitleNeeds() throws Exception {
+        AeonProperty homeSite = field("Home site", "", null);
+        assertTrue(AeonProcessCreationWorkflowPlugin.missingForTitle(homeSite, TITLE, List.of(homeSite), List.of(), null));
+    }
+
+    @Test
+    public void marksAnEmptyPropertyFieldTheTitleNeeds() throws Exception {
+        AeonProperty format = field("Format", "", null);
+        assertTrue(AeonProcessCreationWorkflowPlugin.missingForTitle(format, TITLE, List.of(), List.of(format), null));
+    }
+
+    @Test
+    public void doesNotMarkAFilledField() throws Exception {
+        AeonProperty homeSite = field("Home site", "music", null);
+        assertFalse(AeonProcessCreationWorkflowPlugin.missingForTitle(homeSite, TITLE, List.of(homeSite), List.of(), null));
+    }
+
+    @Test
+    public void doesNotMarkAFieldTheTitleDoesNotReference() throws Exception {
+        AeonProperty notes = field("Notes", "", null);
+        assertFalse(AeonProcessCreationWorkflowPlugin.missingForTitle(notes, TITLE, List.of(notes), List.of(), null));
+    }
+
+    @Test
+    public void doesNotMarkARecordPropertySharingTheTitle() throws Exception {
+        AeonProperty format = field("Format", "", null);
+        AeonProperty recordFormat = field("Format", "", null);
+        assertFalse(AeonProcessCreationWorkflowPlugin.missingForTitle(recordFormat, TITLE, List.of(), List.of(format), null));
+    }
+
+    @Test
+    public void doesNotMarkAPropertyFieldShadowedByATransactionField() throws Exception {
+        AeonProperty transactionFormat = field("Format", "", null);
+        AeonProperty propertyFormat = field("Format", "", null);
+        assertFalse(AeonProcessCreationWorkflowPlugin.missingForTitle(propertyFormat, TITLE, List.of(transactionFormat),
+                List.of(propertyFormat), null));
+    }
+
+    @Test
+    public void doesNotMarkAPropertyFieldThatDoesNotApplyToTheMaterialType() throws Exception {
+        AeonProperty format = field("Format", "", "Video (DRMS)");
+        assertFalse(AeonProcessCreationWorkflowPlugin.missingForTitle(format, TITLE, List.of(), List.of(format), "Film (DRMS)"));
+    }
+
+    @Test
+    public void doesNotMarkAnythingWithoutATitleTemplate() throws Exception {
+        AeonProperty homeSite = field("Home site", "", null);
+        assertFalse(AeonProcessCreationWorkflowPlugin.missingForTitle(homeSite, null, List.of(homeSite), List.of(), null));
     }
 }

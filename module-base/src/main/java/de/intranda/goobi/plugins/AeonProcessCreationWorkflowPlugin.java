@@ -950,17 +950,58 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
      * does not apply to the current material type has no value, as it is left out everywhere else as well.
      */
     private String titleFieldValue(String fieldTitle) {
+        AeonProperty field = titleField(fieldTitle, transactionFields, propertyFields, materialType);
+        return field == null ? null : field.getExportValue();
+    }
+
+    /**
+     * The field a title placeholder resolves to: the transaction field with that title, else the property field with that title. A property
+     * field that does not apply to the material type resolves to nothing, as it is left out everywhere else as well.
+     */
+    static AeonProperty titleField(String fieldTitle, List<AeonProperty> transactionFields, List<AeonProperty> propertyFields,
+            String materialType) {
         for (AeonProperty field : transactionFields) {
             if (fieldTitle.equals(field.getTitle())) {
-                return field.getExportValue();
+                return field;
             }
         }
         for (AeonProperty field : propertyFields) {
             if (fieldTitle.equals(field.getTitle())) {
-                return appliesToMaterialType(field) ? field.getExportValue() : null;
+                return field.appliesTo(materialType) ? field : null;
             }
         }
         return null;
+    }
+
+    /**
+     * Whether the field is empty although the process title needs it, so that it can be marked where the operator fills it in.
+     *
+     * The xhtml has no other way to pass the title template and the fields of the request.
+     *
+     * @param field a field shown on the request screen
+     * @return true if the title cannot be built until this field is filled in
+     */
+    public boolean isMissingForTitle(AeonProperty field) {
+        return missingForTitle(field, processTitleTemplate, transactionFields, propertyFields, materialType);
+    }
+
+    /**
+     * Whether a placeholder of the title resolves to exactly this field while the field is empty. Matched by identity rather than by title: a per
+     * record property may share the title of a field the placeholder resolves to, but it is never part of the title.
+     *
+     * @param field the field to check
+     * @param template the process title template, null if the configuration has none that parses
+     * @param transactionFields the transaction fields of the request
+     * @param propertyFields the properties for all processes of the request
+     * @param materialType the material type of the request, may be null
+     * @return true if the title cannot be built until this field is filled in
+     */
+    static boolean missingForTitle(AeonProperty field, AeonTitleTemplate template, List<AeonProperty> transactionFields,
+            List<AeonProperty> propertyFields, String materialType) {
+        if (template == null || !template.references().contains(field.getTitle())) {
+            return false;
+        }
+        return titleField(field.getTitle(), transactionFields, propertyFields, materialType) == field && StringUtils.isBlank(field.getExportValue());
     }
 
     /**
