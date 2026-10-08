@@ -317,24 +317,26 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         .get(Map.class);
             }
             if (map != null) {
-                try {
-                    // get data from user table
-                    String username = AeonFieldResolver.resolveString(map, usernameField);
-                    if (StringUtils.isNotBlank(username) && !username.contains("\\")) {
-                        Map<String, Object> userDataMap = client.target(apiUrl)
-                                .path("Users")
-                                .path(username)
-                                .request(MediaType.APPLICATION_JSON)
-                                .header("X-AEON-API-KEY", apiKey)
-                                .get(Map.class);
-                        // these two names serve double duty: they read from the Users response and they are the keys
-                        // that a configured aeon="lastName" / aeon="eMailAddress" field resolves against, so they
-                        // cannot be made configurable without also renaming what the configuration refers to
-                        map.put("lastName", userDataMap.get("lastName"));
-                        map.put("eMailAddress", userDataMap.get("eMailAddress"));
+                // get data from user table, only where a user name field is configured
+                if (StringUtils.isNotBlank(usernameField)) {
+                    try {
+                        String username = AeonFieldResolver.resolveString(map, usernameField);
+                        if (StringUtils.isNotBlank(username) && !username.contains("\\")) {
+                            Map<String, Object> userDataMap = client.target(apiUrl)
+                                    .path("Users")
+                                    .path(username)
+                                    .request(MediaType.APPLICATION_JSON)
+                                    .header("X-AEON-API-KEY", apiKey)
+                                    .get(Map.class);
+                            // these two names serve double duty: they read from the Users response and they are the
+                            // keys that a configured aeon="lastName" / aeon="eMailAddress" field resolves against, so
+                            // they cannot be made configurable without also renaming what the configuration refers to
+                            map.put("lastName", userDataMap.get("lastName"));
+                            map.put("eMailAddress", userDataMap.get("eMailAddress"));
+                        }
+                    } catch (Exception e) {
+                        log.error(e);
                     }
-                } catch (Exception e) {
-                    log.error(e);
                 }
 
                 // report the required fields AEON does not deliver; a field that is missing entirely is reported apart
@@ -1220,7 +1222,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
         // no default: an absent element says AEON delivers no material type, which switches the restrictions off
         // rather than silently reinstating a field name AEON has since dropped
         materialTypeField = config.getString("/processCreation/materialTypeField", "");
-        usernameField = config.getString("/processCreation/usernameField", "username");
+        // no default: the patron lookup at the Users endpoint is optional and only runs where it is configured
+        usernameField = config.getString("/processCreation/usernameField", "");
         referenceNumberField = config.getString("/processCreation/referenceNumberField", "referenceNumber");
         transactionNumberField = config.getString("/processCreation/transactionNumberField", "transactionNumber");
         // process cancellation

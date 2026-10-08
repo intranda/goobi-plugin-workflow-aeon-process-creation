@@ -50,8 +50,9 @@
     it could not be recognised when it is sent a second time. Default: transactionNumber
     <transactionNumberField>transactionNumber</transactionNumberField> -->
 
-    <!-- Name of the aeon field holding the patron user name, used to look up last name and mail
-    address at the aeon Users endpoint. Default: username
+    <!-- Optional name of the aeon field holding the patron user name, used to look up last name and mail
+    address at the aeon Users endpoint. They can then be read by fields with aeon="lastName" or
+    aeon="eMailAddress". Not set by default, so no lookup takes place.
     <usernameField>username</usernameField> -->
 
     <!-- Name of the aeon field holding the barcode that the catalogue is queried with.
@@ -119,13 +120,6 @@
       <variable place="process">Home site</variable>
       <value></value>
       <help>Repository the request belongs to. Part of the process title.</help>
-    </field>
-    <field aeon="lastName">
-      <title>Lastname (non-Yale only)</title>
-      <type readonly="true">input</type>
-      <variable place="process">Lastname</variable>
-      <value></value>
-      <help>This is my description for the field so that everyone gets some help.</help>
     </field>
     <field aeon="username">
       <title>User Name</title>
