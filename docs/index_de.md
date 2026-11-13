@@ -263,6 +263,8 @@ Parameter           |  Erläuterung
 
 Alle akzeptieren einen mit Schrägstrichen getrennten Pfad, um ein Feld innerhalb einer verschachtelten Map anzusprechen. Ältere AEON-Versionen hielten den Materialtyp im flachen Feld `shippingOption`, was als `<materialTypeField>shippingOption</materialTypeField>` zu konfigurieren wäre.
 
+Zusätzlich zur Anfrage selbst werden ihre Notizen am AEON-Endpunkt `Requests/[transactionNumber]/notes` abgefragt. Die Notizen vom Typ `User` und `Staff` stehen danach unter `aeon="notes"` zur Verfügung, eine Zeile pro Notiz in der Form `noteDate username: noteText`, die älteste zuerst, zum Beispiel `2025-08-07T22:32:35.327Z Researcher: Please digitize years 1888-1890`. Notizen vom Typ `System` und `ItemDetail` werden nicht übernommen. Schlägt die Abfrage fehl, wird dies als Hinweis gemeldet und die Anfrage ohne Notizen fortgesetzt.
+
 Anschließend erfolgt die Konfiguration der angezeigten und importierbaren Felder. Dies ist in 3 Bereiche aufgeteilt. Der Bereich `<transaction>` enthält diejenigen Felder, die aus dem AEON-Record gelesen werden. Der Bereich `<properties>` enthält frei definierbare Eigenschaften, die zu den zu erzeugenden Vorgängen gehören. Und der Bereich `<processes>` enthält die Felder, die bei der Abfrage der Daten aus der Metadata Cloud bezogen wurden.
 
 Die Konfiguration innerhalb der drei Bereiche ist annähernd identisch. Jedes Feld wird jeweils durch ein  Element `<field>` definiert. Innerhalb davon sind anschließend folgende Möglichkeiten vorgesehen:
@@ -270,7 +272,7 @@ Die Konfiguration innerhalb der drei Bereiche ist annähernd identisch. Jedes Fe
 Parameter           |  Erläuterung
 ------------------- | -----------------------------------------------------
 `title`             | Anzeigename des Feldes
-`type`              | Typ des Feldes, mögliche Werte sind `input` (Textfeld), `select` (Auswahlfeld), `vocabulary` (Auswahlfeld aus einem Vokabular), `checkbox` (Checkbox), `input-dont-overwrite` (Textfeld, das im linken Bereich editierbar ist, aber nicht im rechten Bereich), `radio-dont-overwrite` (Radio-Buttons, die im linken Bereich editierbar sind, aber nicht im rechten Bereich)
+`type`              | Typ des Feldes, mögliche Werte sind `input` (Textfeld), `textarea` (mehrzeiliges Textfeld, etwa für `aeon="notes"`), `select` (Auswahlfeld), `vocabulary` (Auswahlfeld aus einem Vokabular), `checkbox` (Checkbox), `input-dont-overwrite` (Textfeld, das im linken Bereich editierbar ist, aber nicht im rechten Bereich), `radio-dont-overwrite` (Radio-Buttons, die im linken Bereich editierbar sind, aber nicht im rechten Bereich)
 `readonly`          | Die Werte `true` oder `false` definieren, ob der Inhalt des Feldes bearbeitet werden darf.
 `aeon`              | Name des json Elements, aus dem das Feld befüllt wird. Ein mit Schrägstrichen getrennter Pfad spricht ein Element innerhalb einer verschachtelten Map an, zum Beispiel `customFieldValues/MaterialType`. Dieser Parameter wird für die frei definierbare Eigenschaften nicht ausgewertet.
 `displayAlways`     | Die Werte `true` oder `false` definieren, ob das Feld angezeigt wird, wenn nur ein minimierter Datensatz angezeigt wird. Dieser Parameter wird ausschließlich für die Felder aus der Metadata Cloud ausgewertet.

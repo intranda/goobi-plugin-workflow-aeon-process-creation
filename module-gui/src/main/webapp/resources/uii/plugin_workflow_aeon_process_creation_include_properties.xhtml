@@ -59,6 +59,11 @@
                                         <ui:include src="plugin_workflow_aeon_include_input.xhtml"/>
                                     </ui:fragment>
                                     <!-- // IF INPUT FIELD -->
+                                    <!-- IF TEXTAREA FIELD -->
+                                    <ui:fragment rendered="#{property.type == 'textarea'}">
+                                        <ui:include src="plugin_workflow_aeon_include_textarea.xhtml"/>
+                                    </ui:fragment>
+                                    <!-- // IF TEXTAREA FIELD -->
 
                                     <!-- IF SELECT FIELD -->
                                     <ui:fragment rendered="#{property.type == 'select' or property.type == 'vocabulary' or property.type == 'select-dont-overwrite'}">

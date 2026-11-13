@@ -121,6 +121,16 @@
       <value></value>
       <help>Repository the request belongs to. Part of the process title.</help>
     </field>
+    <!-- The notes of the request are read from the aeon endpoint Requests/[transactionNumber]/notes.
+    The User and Staff notes among them are available as aeon="notes", one line per note in the form
+    "noteDate username: noteText", oldest first. -->
+    <field aeon="notes">
+      <title>Notes</title>
+      <type readonly="true">textarea</type>
+      <variable place="metadata">AeonNotes</variable>
+      <value></value>
+      <help>Notes of the researcher and of the staff on this request.</help>
+    </field>
     <field aeon="username">
       <title>User Name</title>
       <type readonly="true">input</type>

@@ -3,7 +3,16 @@ package de.intranda.goobi.plugins;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -28,6 +37,7 @@ import de.intranda.goobi.plugins.aeon.AeonExistingProcess;
 import de.intranda.goobi.plugins.aeon.AeonFieldResolver;
 import de.intranda.goobi.plugins.aeon.AeonMetadataException;
 import de.intranda.goobi.plugins.aeon.AeonMetadataWriter;
+import de.intranda.goobi.plugins.aeon.AeonNotes;
 import de.intranda.goobi.plugins.aeon.AeonProcessValues;
 import de.intranda.goobi.plugins.aeon.AeonProperty;
 import de.intranda.goobi.plugins.aeon.AeonRecord;
@@ -180,14 +190,14 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     private String materialType;
 
     /**
-     * A property field applies to the current transaction when it is not restricted to a material type, or when its
-     * restriction matches the material type of this transaction.
+     * A property field applies to the current transaction when it is not restricted to a material type, or when its restriction matches the material
+     * type of this transaction.
      *
-     * Display, validation, cloning and export all have to ask this same question. When they disagree, a field can end
-     * up hidden and mandatory at the same time, which makes process creation impossible with nothing to correct.
+     * Display, validation, cloning and export all have to ask this same question. When they disagree, a field can end up hidden and mandatory at the
+     * same time, which makes process creation impossible with nothing to correct.
      *
-     * The decision itself belongs to the property; this method exists because the xhtml has no other way to pass the
-     * material type of the transaction.
+     * The decision itself belongs to the property; this method exists because the xhtml has no other way to pass the material type of the
+     * transaction.
      */
     public boolean appliesToMaterialType(AeonProperty property) {
         return property.appliesTo(materialType);
@@ -196,10 +206,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     /**
      * Whether a material type AEON did not deliver is worth reporting.
      *
-     * An installation says through materialTypeField whether it works with material types at all. AEON no longer
-     * delivers one, so an unconfigured field is a supported setup rather than a fault: no property restricted to a
-     * material type applies, which is the intended result and nothing to report. A field the configuration does name
-     * and AEON leaves blank is the opposite - a value was expected and did not arrive.
+     * An installation says through materialTypeField whether it works with material types at all. AEON no longer delivers one, so an unconfigured
+     * field is a supported setup rather than a fault: no property restricted to a material type applies, which is the intended result and nothing to
+     * report. A field the configuration does name and AEON leaves blank is the opposite - a value was expected and did not arrive.
      */
     static boolean shouldReportMissingMaterialType(String materialTypeField, String materialType) {
         return StringUtils.isNotBlank(materialTypeField) && StringUtils.isBlank(materialType);
@@ -268,6 +277,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
             }
 
             Map<String, Object> map = null;
+            // the authentication the request was sent with, reused for the follow-up lookups of the same request
+            String authHeaderName = null;
+            String authHeaderValue = null;
 
             if ("1234567890".equals(this.input)) { //(JUST FOR TESTING: checks if input is 1234567890)
                 try {
@@ -300,6 +312,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                     }
                     map = response.readEntity(new GenericType<Map<String, Object>>() {
                     });
+                    authHeaderName = "X-AEON-API-KEY";
+                    authHeaderValue = apiKey;
                 } catch (Exception e) {
                     Helper.setFehlerMeldung(Helper.getTranslation("plugin_workflow_aeon_identifier_not_found") + ": " + e.getMessage());
                     return;
@@ -315,8 +329,16 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
                         .request(MediaType.APPLICATION_JSON)
                         .header("Authorization", "BEARER " + res.getAccessToken())
                         .get(Map.class);
+                authHeaderName = "Authorization";
+                authHeaderValue = "BEARER " + res.getAccessToken();
             }
             if (map != null) {
+                // the notes of the request live at an endpoint of their own; they are added to the response so a
+                // field can read them with aeon="notes"
+                if (authHeaderName != null) {
+                    map.put("notes", readNotes(authHeaderName, authHeaderValue));
+                }
+
                 // get data from user table, only where a user name field is configured
                 if (StringUtils.isNotBlank(usernameField)) {
                     try {
@@ -526,14 +548,44 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     }
 
     /**
+     * Reads the notes AEON keeps for the requested transaction and formats the User and Staff notes among them.
+     *
+     * The notes are an addition to the request, not part of it, so a failed lookup is reported as a notice and the request goes on without them.
+     */
+    private String readNotes(String authHeaderName, String authHeaderValue) {
+        try (Response response = client.target(apiUrl)
+                .path("Requests")
+                .path(input)
+                .path("notes")
+                .request(MediaType.APPLICATION_JSON)
+                .header(authHeaderName, authHeaderValue)
+                .get()) {
+            MediaType contentType = response.getMediaType();
+            if (response.getStatus() != Response.Status.OK.getStatusCode() || contentType == null
+                    || !contentType.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
+                String body = response.readEntity(String.class);
+                log.error("AEON API request to {}/Requests/{}/notes failed: HTTP {}, Content-Type {}, body: {}", apiUrl, input,
+                        response.getStatus(), contentType, StringUtils.abbreviate(body, 2000));
+                Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_notesNotRead", "HTTP " + response.getStatus()));
+                return null;
+            }
+            return AeonNotes.format(response.readEntity(new GenericType<List<Map<String, Object>>>() {
+            }));
+        } catch (Exception e) {
+            log.error("AEON API request to {}/Requests/{}/notes failed", apiUrl, input, e);
+            Helper.setMeldung(Helper.getTranslation("plugin_workflow_aeon_notesNotRead", e.getMessage()));
+            return null;
+        }
+    }
+
+    /**
      * True when no process carries this transaction number yet.
      *
-     * The lookup goes through the metadata index, which Goobi fills from the top level docstruct whenever a process
-     * writes its mets file. validateConfiguration makes sure the transaction number is configured as metadata, so
-     * there is no second store to consult here.
+     * The lookup goes through the metadata index, which Goobi fills from the top level docstruct whenever a process writes its mets file.
+     * validateConfiguration makes sure the transaction number is configured as metadata, so there is no second store to consult here.
      *
-     * MetadataManager.getProcessesWithMetadata matches the value as a substring, so its result is only a candidate
-     * list: transaction number 1234 also matches 12345. Each candidate is therefore compared exactly before it counts.
+     * MetadataManager.getProcessesWithMetadata matches the value as a substring, so its result is only a candidate list: transaction number 1234 also
+     * matches 12345. Each candidate is therefore compared exactly before it counts.
      */
     private boolean checkTransactionNumber() {
         for (Integer processId : MetadataManager.getProcessesWithMetadata(transactionFieldName, input)) {
@@ -557,8 +609,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     /**
      * The processes that may carry the given value in the given field, newest first, read from whichever store the field is configured for.
      *
-     * Only a candidate list: the metadata index matches the value as a substring, so the caller compares exactly. A field written as metadata
-     * onto a child docstruct of a batch is not indexed, so a batch that has not been split yet is not found, only the processes split off it.
+     * Only a candidate list: the metadata index matches the value as a substring, so the caller compares exactly. A field written as metadata onto a
+     * child docstruct of a batch is not indexed, so a batch that has not been split yet is not found, only the processes split off it.
      */
     private List<Process> processesCarrying(AeonProperty field, String value) {
         if (field == null || StringUtils.isBlank(value)) {
@@ -678,9 +730,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     /**
      * Reports any configuration defect found at load time and tells the caller to stop.
      *
-     * Both entry points ask: creating processes and searching for ones to cancel. A broken configuration otherwise
-     * produces an empty screen on the cancellation path rather than saying what is wrong, which is the silent failure
-     * this validation exists to remove.
+     * Both entry points ask: creating processes and searching for ones to cancel. A broken configuration otherwise produces an empty screen on the
+     * cancellation path rather than saying what is wrong, which is the silent failure this validation exists to remove.
      */
     private boolean hasConfigurationErrors() {
         for (String error : configurationErrors) {
@@ -913,9 +964,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     }
 
     /**
-     * The title of a process created for a single record. Its order number is drawn from the database when the process is created, so beforehand
-     * the title can only be shown with that part marked as still open. Passing the incomplete title off as the final one would be a claim this
-     * plugin cannot keep.
+     * The title of a process created for a single record. Its order number is drawn from the database when the process is created, so beforehand the
+     * title can only be shown with that part marked as still open. Passing the incomplete title off as the final one would be a claim this plugin
+     * cannot keep.
      *
      * @param recordTitle the title of the record, which after creation is the title of its process
      * @param processCreated whether the process exists already
@@ -948,8 +999,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     }
 
     /**
-     * The value a title placeholder stands for: the transaction or property field with that title, as it would be stored. A property field that
-     * does not apply to the current material type has no value, as it is left out everywhere else as well.
+     * The value a title placeholder stands for: the transaction or property field with that title, as it would be stored. A property field that does
+     * not apply to the current material type has no value, as it is left out everywhere else as well.
      */
     private String titleFieldValue(String fieldTitle) {
         AeonProperty field = titleField(fieldTitle, transactionFields, propertyFields, materialType);
@@ -957,8 +1008,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     }
 
     /**
-     * The field a title placeholder resolves to: the transaction field with that title, else the property field with that title. A property
-     * field that does not apply to the material type resolves to nothing, as it is left out everywhere else as well.
+     * The field a title placeholder resolves to: the transaction field with that title, else the property field with that title. A property field
+     * that does not apply to the material type resolves to nothing, as it is left out everywhere else as well.
      */
     static AeonProperty titleField(String fieldTitle, List<AeonProperty> transactionFields, List<AeonProperty> propertyFields,
             String materialType) {
@@ -1007,8 +1058,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     }
 
     /**
-     * The process title to show for a single record. Only used in per record creation mode: a batch has one title for all records, and the titles
-     * of the child processes it is split into are not decided here.
+     * The process title to show for a single record. Only used in per record creation mode: a batch has one title for all records, and the titles of
+     * the child processes it is split into are not decided here.
      *
      * The decision needs the creation state of the request, which the xhtml has no other way to pass.
      */
@@ -1038,8 +1089,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
 
     /**
      * The key of a selected record: the transaction followed by the position of the record among the selected ones. On a batch it prefixes the
-     * properties of the record and is written as its child key metadata, which is how the split processes plugin assigns them to the child
-     * process. The transaction makes it unique across all processes, the position keeps it short and readable within one request.
+     * properties of the record and is written as its child key metadata, which is how the split processes plugin assigns them to the child process.
+     * The transaction makes it unique across all processes, the position keeps it short and readable within one request.
      *
      * @param transaction the transaction identifier of the request
      * @param position the position among the selected records, starting at 1
@@ -1095,9 +1146,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     }
 
     /**
-     * Writes the fields of one record. The value resolution is unchanged: a record field takes its value from the
-     * matching per-record property when the operator edited one. Only where the value ends up is new - a field goes to
-     * the METS file or to a process property according to the place it declares.
+     * Writes the fields of one record. The value resolution is unchanged: a record field takes its value from the matching per-record property when
+     * the operator edited one. Only where the value ends up is new - a field goes to the METS file or to a process property according to the place it
+     * declares.
      */
     public void assignRecordFields(AeonRecord rec, Process process, DocStruct docStruct, Prefs prefs, String prefix)
             throws AeonMetadataException {
@@ -1152,9 +1203,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     }
 
     /**
-     * Writes the transaction fields. They are the same for every record of a request, so they are written once per
-     * process rather than once per record - in batch mode the old code wrote each of them once per record under a
-     * different prefix, which stored the same value as many times as the batch had records.
+     * Writes the transaction fields. They are the same for every record of a request, so they are written once per process rather than once per
+     * record - in batch mode the old code wrote each of them once per record under a different prefix, which stored the same value as many times as
+     * the batch had records.
      */
     private void assignTransactionFields(Process process, DocStruct docStruct, Prefs prefs) throws AeonMetadataException {
         for (AeonProperty prop : transactionFields) {
@@ -1167,9 +1218,8 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     /**
      * Routes one value to the store its field declares.
      *
-     * A blank value is skipped for metadata but still written as a property: an empty metadatum has no meaning in a
-     * METS file, while an empty property is what the plugin has always written and something downstream may rely on
-     * the row existing.
+     * A blank value is skipped for metadata but still written as a property: an empty metadatum has no meaning in a METS file, while an empty
+     * property is what the plugin has always written and something downstream may rely on the row existing.
      */
     private void write(AeonProperty field, String value, Process process, DocStruct docStruct, Prefs prefs, String prefix)
             throws AeonMetadataException {
@@ -1276,9 +1326,9 @@ public class AeonProcessCreationWorkflowPlugin implements IWorkflowPlugin {
     }
 
     /**
-     * Checks the parts of the configuration whose mistakes produce no error of their own: a place attribute naming a
-     * store that does not exist, and a transaction field name that does not match the field carrying the transaction
-     * number. Both are collected rather than thrown, so that the request screen can name all of them at once.
+     * Checks the parts of the configuration whose mistakes produce no error of their own: a place attribute naming a store that does not exist, and a
+     * transaction field name that does not match the field carrying the transaction number. Both are collected rather than thrown, so that the
+     * request screen can name all of them at once.
      */
     private void validateConfiguration() {
         configurationErrors.clear();

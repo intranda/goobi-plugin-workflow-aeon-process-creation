@@ -263,6 +263,8 @@ Parameter           |  Explanation
 
 All of them accept a slash separated path to address a field inside a nested map. Older AEON versions kept the material type in the flat field `shippingOption`, which would be configured as `<materialTypeField>shippingOption</materialTypeField>`.
 
+Besides the request itself, its notes are read from the AEON endpoint `Requests/[transactionNumber]/notes`. The notes of type `User` and `Staff` are then available as `aeon="notes"`, one line per note in the form `noteDate username: noteText`, oldest first, for example `2025-08-07T22:32:35.327Z Researcher: Please digitize years 1888-1890`. Notes of type `System` and `ItemDetail` are left out. If the lookup fails, this is reported as a notice and the request goes on without notes.
+
 This is followed by the configuration of the fields that are displayed and can be imported. This is divided into 3 areas. The area `<transaction>` contains those fields that are read from the AEON record. The area `<properties>` contains freely definable properties that belong to the transactions to be created. And the area `<processes>` contains the fields that were obtained from the Metadata Cloud when querying the data.
 
 The configuration within the three areas is almost identical. Each field is defined by a `<field>` element. Within this, the following options are subsequently provided:
@@ -270,7 +272,7 @@ The configuration within the three areas is almost identical. Each field is defi
 Parameter           |  Explanation
 ------------------- | -----------------------------------------------------
 `title` | display name of the field
-`type` | Type of field, possible values are `input` (text field), `select` (selection field), `vocabulary` (selection field from a vocabulary), `checkbox` (checkbox), `input-dont-overwrite` (text field editable on the left but not on the right),`radio-dont-overwrite` (radio buttons editable in the left area but not in the right area).
+`type` | Type of field, possible values are `input` (text field), `textarea` (multi-line text field, for example for `aeon="notes"`), `select` (selection field), `vocabulary` (selection field from a vocabulary), `checkbox` (checkbox), `input-dont-overwrite` (text field editable on the left but not on the right),`radio-dont-overwrite` (radio buttons editable in the left area but not in the right area).
 `readonly` | The values `true` or `false` define whether the content of the field may be edited.
 `aeon` | Name of the json element from which the field is filled. A slash separated path addresses an element inside a nested map, for example `customFieldValues/MaterialType`. This parameter is not evaluated for the freely definable properties.
 `displayAlways` | The values `true` or `false` define whether the field is displayed when only a minimised record is displayed. This parameter is only evaluated for the fields from the Metadata Cloud.
