@@ -32,12 +32,13 @@ public final class AeonNotes {
         StringBuilder answer = new StringBuilder();
         for (Map<String, Object> note : notes) {
             // exclude all notes besides user and staff
-            String type = asString(note.get("noteType"));
-            if (NOTE_TYPES.contains(type)) {
-                if (!answer.isEmpty()) {
-                    answer.append("\n");
+            if (note != null && NOTE_TYPES.contains(asString(note.get("noteType")))) {
+                if (StringUtils.isNotBlank(asString(note.get("noteText")))) {
+                    if (!answer.isEmpty()) {
+                        answer.append("\n");
+                    }
+                    answer.append(formatNote(note));
                 }
-                answer.append(formatNote(note));
             }
         }
         return answer.toString();

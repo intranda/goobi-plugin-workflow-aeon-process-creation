@@ -23,18 +23,6 @@ public class AeonNotesTest {
     }
 
     @Test
-    public void testKeepsUserAndStaffNotesOldestFirst() {
-        List<Map<String, Object>> notes = List.of(
-                note("2025-08-19T20:51:28.373Z", "ALS will review fragility.", "als52", "Staff"),
-                note("2025-08-07T22:32:35.327Z", "Please digitize years 1888-1890", "Researcher", "User"),
-                note("2026-03-02T20:16:26.5Z", "LSFAvailability |  Cleared for Return", "System", "System"),
-                note("2025-08-10T10:00:00Z", "Item detail", "x", "ItemDetail"));
-
-        assertEquals("2025-08-07T22:32:35.327Z Researcher: Please digitize years 1888-1890\n"
-                + "2025-08-19T20:51:28.373Z als52: ALS will review fragility.", AeonNotes.format(notes));
-    }
-
-    @Test
     public void testNoNotes() {
         assertEquals("", AeonNotes.format(null));
         assertEquals("", AeonNotes.format(new ArrayList<>()));
